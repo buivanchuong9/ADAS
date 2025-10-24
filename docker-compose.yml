@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:5000
+    stdin_open: true
+    tty: true
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      - MODEL_WORKER_URL=${MODEL_WORKER_URL}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - mssql
+      - model-worker
+    volumes:
+      - ./backend:/app
+
+  model-worker:
+    build:
+      context: ./model-worker
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    volumes:
+      - ./model-worker:/app
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  mssql_data:
