@@ -2,183 +2,308 @@
 
 Hệ thống hỗ trợ lái xe tiên tiến với phát hiện vật thể thời gian thực, giám sát tài xế, và trợ lý AI.
 
-## 🏗️ Kiến trúc hệ thống
+---
 
-- **Frontend**: React + TailwindCSS + WebSocket
-- **Backend**: ASP.NET Core 8 + Entity Framework Core
-- **Model Worker**: Python FastAPI + YOLOv8
-- **Database**: SQL Server 2022
-- **AI**: Perplexity API
+## 🚀 QUICK START (3 Bước)
 
-## 📋 Yêu cầu
+### Step 1: Cài đặt tự động
+```bash
+# Windows
+setup.bat
 
-- Docker & Docker Compose
-- Perplexity API Key (https://www.perplexity.ai/api)
+# macOS/Linux
+bash setup.sh
+```
+Chờ 2-5 phút để cài đặt tất cả dependencies.
 
-## 🚀 Cài đặt & Chạy
+### Step 2: Thêm Firebase (QUAN TRỌNG!)
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Project Settings → Service Accounts → Generate new private key
+3. Save JSON file as: `backend/firebase-service-account.json`
 
-### 1. Clone repository
-\`\`\`bash
-git clone <repo-url>
-cd adas-platform
-\`\`\`
+### Step 3: Chạy hệ thống
+```bash
+# Windows
+PowerShell -ExecutionPolicy Bypass -File run.ps1
 
-### 2. Cấu hình .env
-\`\`\`bash
-cp .env.example .env
-# Chỉnh sửa .env với Perplexity API key của bạn
-\`\`\`
+# macOS/Linux
+bash run.sh
+```
 
-### 3. Khởi động hệ thống
-\`\`\`bash
-docker-compose up --build
-\`\`\`
-
-### 4. Truy cập ứng dụng
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Model Worker: http://localhost:8000
-
-## 📱 Sử dụng
-
-1. Mở http://localhost:3000
-2. Nhấn "Nhận diện trực tiếp" để bắt đầu camera
-3. Cho phép truy cập camera
-4. Xem phát hiện vật thể thời gian thực
-5. Kiểm tra "Giám sát tài xế" để phát hiện mệt mỏi
-6. Hỏi "Trợ lý AI" về lái xe an toàn
-
-## 🔧 Cấu trúc thư mục
-
-\`\`\`
-adas-platform/
-├── frontend/          # React app
-├── backend/           # ASP.NET Core API
-├── model-worker/      # Python YOLOv8 service
-├── docker-compose.yml
-├── .env.example
-└── README.md
-\`\`\`
-
-## 📝 Ghi chú
-
-- Tất cả dữ liệu được lưu vào SQL Server
-- Sự kiện va chạm được ghi lại tự động
-- Cảnh báo mệt mỏi kích hoạt khi mắt đóng > 2 giây
-- Perplexity API cung cấp lời khuyên lái xe an toàn
-
-## 🐛 Troubleshooting
-
-**Lỗi kết nối camera**: Cho phép quyền truy cập camera trong trình duyệt
-**Lỗi WebSocket**: Kiểm tra backend đang chạy trên port 5000
-**Lỗi Model Worker**: Đảm bảo Docker có đủ bộ nhớ (4GB)
+Mở browser: **http://localhost:3000/dashboard**
 
 ---
 
-**English Version**
+## 📱 Truy cập ứng dụng
 
-# ADAS - Advanced Driver Assistance System
+| Tính năng | URL |
+|----------|-----|
+| **Dashboard** | http://localhost:3000/dashboard |
+| **Live Detection** | http://localhost:3000/live |
+| **AI Assistant** | http://localhost:3000/ai-assistant |
+| **Driver Monitor** | http://localhost:3000/driver-monitor |
+| **Analytics** | http://localhost:3000/analytics |
 
-Real-time object detection, driver monitoring, and AI assistant for safe driving.
+---
 
-## 🏗️ Architecture
+## 🏗️ Kiến trúc hệ thống
 
-- **Frontend**: React + TailwindCSS + WebSocket
-- **Backend**: ASP.NET Core 8 + Entity Framework Core
-- **Model Worker**: Python FastAPI + YOLOv8
-- **Database**: SQL Server 2022
-- **AI**: Perplexity API
+```
+Frontend (Next.js)           Backend (.NET)           Model Worker (FastAPI)
+http://localhost:3000        http://localhost:5000    http://localhost:8000
+                                    ↓
+                              Firebase Firestore
+                        (Real-time Data Storage)
+```
 
-## 📋 Requirements
+**Thành phần:**
+- **Frontend**: Next.js + React 19 + TailwindCSS
+- **Backend**: ASP.NET Core 8 + Entity Framework + WebSocket
+- **Model**: Python FastAPI + YOLOv8/YOLOv5
+- **Database**: Firebase Firestore (real-time)
 
-- Docker & Docker Compose
-- Perplexity API Key
+---
 
-## 🚀 Installation & Run
+## 📋 Yêu cầu hệ thống
 
-\`\`\`bash
-cp .env.example .env
-# Edit .env with your Perplexity API key
-docker-compose up --build
-\`\`\`
+- **Node.js 18+**: https://nodejs.org/
+- **.NET SDK 8**: https://dotnet.microsoft.com/
+- **Python 3.11+**: https://www.python.org/
+- **Ports**: 3000, 5000, 8000 (phải rảnh)
+- **Disk**: ~5GB free space
 
-\`\`\`
+---
 
-## 🛠️ Lệnh cài đặt (cài hết thư viện)
+## 🔧 Cài đặt thủ công (nếu auto install thất bại)
 
-Phần này liệt kê các lệnh cần thiết để cài đặt tất cả phụ thuộc cho frontend (Node), backend (.NET) và model worker (Python). Chạy từng phần riêng tùy theo môi trường phát triển của bạn.
+### 1. Install dependencies
+```bash
+npm install --legacy-peer-deps
+cd model-worker && pip install -r requirements.txt && cd ..
+cd backend && dotnet restore && cd ..
+```
 
-1) Cài Node (frontend)
+### 2. Chạy từng service riêng
 
-Trong thư mục gốc của repository, nếu bạn dùng pnpm:
-
-\`\`\`bash
-# cài dependencies (dùng pnpm nếu có)
-pnpm install
-
-# hoặc nếu dùng npm
-npm install
-\`\`\`
-
-Lưu ý: nếu cài một số gói native có build scripts (ví dụ sharp), pnpm có thể yêu cầu xác nhận; chạy `pnpm approve-builds` nếu cần.
-
-2) Cài Python (model-worker)
-
-\`\`\`bash
-# chuyển vào thư mục model-worker
+**Terminal 1 - Model Worker:**
+```bash
 cd model-worker
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
 
-# tạo virtualenv (macOS / Linux)
-python3 -m venv .venv
-
-# kích hoạt virtualenv
-. .venv/bin/activate
-
-# cập nhật pip và cài tất cả packages
-pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt
-
-# để chạy service inference (dev)
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-\`\`\`
-
-Lưu ý: package `ultralytics` sẽ cài torch/torchvision và các wheel lớn — thời gian và băng thông có thể mất nhiều phút.
-
-3) Backend (.NET)
-
-Hiện trong thư mục `backend` chưa có file dự án `.csproj` trong repository. Nếu bạn đã có `.csproj` hoặc solution, chạy trong thư mục chứa file `.csproj`:
-
-\`\`\`bash
-# restore packages
-dotnet restore
-
-# build và chạy
-dotnet build
+**Terminal 2 - Backend:**
+```bash
+cd backend
 dotnet run
-\`\`\`
+```
 
-Nếu bạn muốn tôi tạo một `backend.csproj` tối giản để có thể build/run local, báo tôi sẽ scaffold nhanh.
+**Terminal 3 - Frontend:**
+```bash
+npm run dev
+```
 
-4) Tùy chọn: chạy bằng Docker Compose (recommended)
+---
 
-\`\`\`bash
-# từ thư mục gốc
-docker-compose up --build
-\`\`\`
+## 🆘 Khắc phục sự cố
 
-5) Kiểm tra sức khỏe (smoke checks)
+| Lỗi | Giải pháp |
+|-----|----------|
+| **Port already in use** | `lsof -i :3000` → `kill -9 [PID]` |
+| **npm install fails** | `npm install --legacy-peer-deps --force` |
+| **Python errors** | `pip install -r requirements.txt --force-reinstall` |
+| **Firebase not found** | Add `backend/firebase-service-account.json` |
+| **.NET build fails** | `cd backend && dotnet clean && dotnet build` |
+| **Permission denied** (Linux/Mac) | `chmod +x setup.sh run.sh` |
 
-\`\`\`bash
-# model worker
-curl http://localhost:8000/health
+---
 
-# backend (nếu chạy)
-curl http://localhost:5000/  # hoặc endpoint health nếu có
+## 📁 Project Structure
 
-# frontend
-open http://localhost:3000
-\`\`\`
+```
+adas-platform/
+├── README.md                    ← You are here
+├── setup.sh / setup.bat         ← Auto installer
+├── run.sh / run.ps1             ← Service launcher
+├── next.config.mjs
+├── tsconfig.json
+├── package.json
+│
+├── app/                         ← Next.js pages
+│   ├── page.tsx
+│   ├── dashboard/page.tsx
+│   ├── live/page.tsx
+│   └── ...
+│
+├── components/                  ← React components
+│   └── ui/                      ← Shadcn UI components
+│
+├── backend/                     ← .NET Core API
+│   ├── ADAS.csproj
+│   ├── Program.cs
+│   ├── Controllers/
+│   ├── Services/
+│   │   ├── FirebaseDataService.cs
+│   │   ├── ModelService.cs
+│   │   └── EventService.cs
+│   └── Models/
+│
+├── model-worker/                ← FastAPI Server
+│   ├── app.py
+│   ├── requirements.txt
+│   └── yolov8n.pt
+│
+└── lib/
+    └── utils.ts
+```
 
-Nếu cần, tôi có thể thêm script tự động `scripts/setup.sh` để thực thi tất cả bước trên (với flag để bỏ qua backend nếu không có .csproj). Hãy cho biết bạn muốn tôi tạo script tự động hay chỉ cần hướng dẫn như trên.
-# ADAS
-# ADAS
+---
+
+## 💡 Tính năng chính
+
+✅ **Phát hiện vật thể real-time** - Sử dụng YOLOv8/v5
+✅ **Giám sát tài xế** - Phát hiện mệt mỏi, chuyên tâm
+✅ **Trợ lý AI** - Chat với Perplexity API
+✅ **Dashboard real-time** - Xem analytics qua Firebase
+✅ **WebSocket streaming** - Dữ liệu real-time
+✅ **Multi-model AI** - Hỗ trợ nhiều model
+
+---
+
+## 🔐 Firebase Setup Chi Tiết
+
+1. **Tạo project** (nếu chưa có):
+   - https://console.firebase.google.com/ → Create Project
+
+2. **Tạo Service Account**:
+   - Project Settings (⚙️) → Service Accounts
+   - Click "Generate New Private Key"
+   - Sẽ download 1 JSON file
+
+3. **Lưu file**:
+   ```bash
+   # Copy JSON file to:
+   backend/firebase-service-account.json
+   ```
+
+4. **Xác nhận**:
+   - File phải có `"type": "service_account"` ở đầu
+   - Backend sẽ tự kết nối khi khởi động
+
+---
+
+## 📊 Luồng dữ liệu
+
+```
+Camera/Sensor
+    ↓
+Frontend (Live Detection)
+    ↓
+WebSocket to Backend
+    ↓
+Model Worker (AI Inference)
+    ↓
+Backend (Process & Log)
+    ↓
+Firebase Firestore ← Lưu dữ liệu thực
+    ↓
+Dashboard (Real-time Display)
+```
+
+---
+
+## ✨ Sử dụng các tính năng
+
+### 1. Live Detection (Phát hiện thời gian thực)
+- Mở: http://localhost:3000/live
+- Cho phép truy cập camera
+- Đặt vật thể trước camera
+- Xem detection boxes realtime
+
+### 2. Dashboard (Analytics)
+- Mở: http://localhost:3000/dashboard
+- Xem recent events
+- Xem inference results
+- Data tự sync từ Firebase
+
+### 3. AI Assistant (Trợ lý AI)
+- Mở: http://localhost:3000/ai-assistant
+- Chat về lái xe an toàn
+- Nhận tư vấn từ AI
+
+### 4. Driver Monitor (Giám sát tài xế)
+- Mở: http://localhost:3000/driver-monitor
+- Phát hiện mệt mỏi
+- Cảnh báo an toàn
+
+---
+
+## 🧪 Kiểm tra setup
+
+Chạy verification script:
+```bash
+# Windows
+check.bat
+
+# macOS/Linux
+bash check.sh
+```
+
+Kết quả mong đợi:
+```
+✓ Node.js: v18.x.x
+✓ .NET SDK: 8.x.x
+✓ Python: 3.11.x
+✓ npm packages installed
+✓ Python packages installed
+✓ Firebase service account found
+```
+
+---
+
+## 🎯 Tips & Tricks
+
+💡 **Monitor logs**: Check terminal output khi services đang chạy
+💡 **Clear cache**: `rm -rf .next && npm install --legacy-peer-deps`
+💡 **Stop service**: Close that terminal window
+💡 **Different port**: Edit uvicorn/dotnet/npm commands
+💡 **Debug mode**: Add `--debug` flag khi chạy services
+
+---
+
+## 📝 Các lệnh hữu ích
+
+```bash
+# Cài lại dependencies
+npm install --legacy-peer-deps --force
+cd model-worker && pip install -r requirements.txt --force-reinstall
+
+# Xóa cache
+rm -rf .next node_modules __pycache__ bin obj
+npm install
+
+# Check ports
+lsof -i :3000
+lsof -i :5000
+lsof -i :8000
+
+# Kill process on port
+kill -9 $(lsof -ti:3000)
+```
+
+---
+
+## 🚀 Next Steps
+
+1. ✅ Run `setup.sh` or `setup.bat`
+2. ✅ Add `backend/firebase-service-account.json`
+3. ✅ Run `run.sh` or `run.ps1`
+4. ✅ Open http://localhost:3000/dashboard
+5. 🎉 Enjoy!
+
+---
+
+**Questions?** Check terminal logs or verify Firebase credentials.
+
+**Ready to deploy?** Project is production-ready with Firebase backend!
+
+Made with ❤️ for ADAS Platform
