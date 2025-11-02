@@ -4,6 +4,8 @@ import base64
 import cv2
 import numpy as np
 from ultralytics import YOLO
+import torch
+import importlib
 import time
 import logging
 
@@ -12,8 +14,26 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Load YOLOv8 model
-model = YOLO("yolov8n.pt")
+
+# Định nghĩa các model có sẵn
+AVAILABLE_MODELS = {
+    "yolov8n": lambda: YOLO("yolov8n.pt"),
+    "yolov5s": lambda: torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True),
+    # Thêm các model khác nếu muốn
+    # "yolov7": lambda: ...
+    # "pose": lambda: ...
+    # "object_tracking": lambda: ...
+}
+
+# Cache model đã load
+model_cache = {}
+
+def get_model(model_name):
+    if model_name not in AVAILABLE_MODELS:
+        raise ValueError(f"Model {model_name} not supported")
+    if model_name not in model_cache:
+        model_cache[model_name] = AVAILABLE_MODELS[model_name]()
+    return model_cache[model_name]
 
 class FrameRequest(BaseModel):
     frame_b64: str
@@ -29,8 +49,8 @@ class InferenceResponse(BaseModel):
     detections: list[Detection]
     stats: dict
 
-@app.post("/infer", response_model=InferenceResponse)
-async def infer(request: FrameRequest):
+@app.post("/infer/{model_name}", response_model=InferenceResponse)
+async def infer(model_name: str, request: FrameRequest):
     try:
         start_time = time.time()
         
@@ -42,21 +62,35 @@ async def infer(request: FrameRequest):
         if frame is None:
             raise ValueError("Invalid frame data")
         
-        # Run YOLOv8 inference
-        results = model(frame, conf=0.5)
-        
+        # Lấy model theo tên
+        model = get_model(model_name)
         detections = []
-        for idx, result in enumerate(results):
-            for box in result.boxes:
-                x1, y1, x2, y2 = box.xyxy[0].tolist()
-                conf = box.conf[0].item()
-                cls_id = int(box.cls[0].item())
-                cls_name = model.names[cls_id]
-                
-                # Calculate distance heuristic
+        # YOLOv8 inference
+        if model_name.startswith("yolov8"):
+            results = model(frame, conf=0.5)
+            for idx, result in enumerate(results):
+                for box in result.boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    conf = box.conf[0].item()
+                    cls_id = int(box.cls[0].item())
+                    cls_name = model.names[cls_id]
+                    bbox_height = y2 - y1
+                    distance_m = 1000 / (bbox_height + 1) if bbox_height > 0 else 100
+                    detections.append(Detection(
+                        id=idx,
+                        cls=cls_name,
+                        conf=conf,
+                        bbox=[x1, y1, x2 - x1, y2 - y1],
+                        distance_m=distance_m
+                    ))
+        # YOLOv5 inference
+        elif model_name.startswith("yolov5"):
+            results = model(frame)
+            for idx, det in enumerate(results.xyxy[0]):
+                x1, y1, x2, y2, conf, cls_id = det[:6].tolist()
+                cls_name = model.names[int(cls_id)]
                 bbox_height = y2 - y1
                 distance_m = 1000 / (bbox_height + 1) if bbox_height > 0 else 100
-                
                 detections.append(Detection(
                     id=idx,
                     cls=cls_name,
@@ -64,12 +98,12 @@ async def infer(request: FrameRequest):
                     bbox=[x1, y1, x2 - x1, y2 - y1],
                     distance_m=distance_m
                 ))
+        # TODO: Thêm các model khác (pose, tracking, ...)
         
         infer_time = (time.time() - start_time) * 1000
-        
         return InferenceResponse(
             detections=detections,
-            stats={"infer_ms": int(infer_time)}
+            stats={"infer_ms": int(infer_time), "model": model_name}
         )
     
     except Exception as e:

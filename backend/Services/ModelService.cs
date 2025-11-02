@@ -1,44 +1,56 @@
 using System.Text;
 using System.Text.Json;
 
-namespace ADAS.Services;
 
-public class ModelService : IModelService
+using backend.Services;
+
+namespace ADAS.Services
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _modelWorkerUrl;
-    private readonly ILogger<ModelService> _logger;
-
-    public ModelService(HttpClient httpClient, IConfiguration config, ILogger<ModelService> logger)
+    public class ModelService : IModelService
     {
-        _httpClient = httpClient;
-        _modelWorkerUrl = config["MODEL_WORKER_URL"] ?? "http://localhost:8000";
-        _logger = logger;
-    }
+        private readonly HttpClient _httpClient;
+        private readonly string _modelWorkerUrl;
+        private readonly ILogger<ModelService> _logger;
+        private readonly IFirebaseDataService _firebaseDataService;
 
-    public async Task<InferenceResult> InferAsync(string frameB64)
-    {
-        try
+        public ModelService(HttpClient httpClient, IConfiguration config, ILogger<ModelService> logger, IFirebaseDataService firebaseDataService)
         {
-            var request = new { frame_b64 = frameB64 };
-            var content = new StringContent(
-                JsonSerializer.Serialize(request),
-                Encoding.UTF8,
-                "application/json"
-            );
-
-            var response = await _httpClient.PostAsync($"{_modelWorkerUrl}/infer", content);
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<InferenceResult>(json);
-
-            return result ?? new InferenceResult { Detections = new(), Stats = new() };
+            _httpClient = httpClient;
+            _modelWorkerUrl = config["MODEL_WORKER_URL"] ?? "http://localhost:8000";
+            _logger = logger;
+            _firebaseDataService = firebaseDataService;
         }
-        catch (Exception ex)
+
+        public async Task<InferenceResult> InferAsync(string frameB64)
         {
-            _logger.LogError(ex, "Model inference failed");
-            return new InferenceResult { Detections = new(), Stats = new() };
+            try
+            {
+                var request = new { frame_b64 = frameB64 };
+                var content = new StringContent(
+                    JsonSerializer.Serialize(request),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _httpClient.PostAsync($"{_modelWorkerUrl}/infer", content);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<InferenceResult>(json);
+
+                // Lưu kết quả inference thực lên Firestore
+                if (result != null)
+                {
+                    await _firebaseDataService.SaveDataAsync("inferences", Guid.NewGuid().ToString(), result);
+                }
+
+                return result ?? new InferenceResult { Detections = new(), Stats = new() };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Model inference failed");
+                return new InferenceResult { Detections = new(), Stats = new() };
+            }
         }
     }
 }

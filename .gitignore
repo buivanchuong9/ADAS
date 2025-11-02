@@ -24,6 +24,9 @@ lerna-debug.log*
 .env.*.local
 .env.local
 
+# Firebase service account
+backend/firebase-service-account.json
+
 # Logs
 logs/
 *.log

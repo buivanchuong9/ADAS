@@ -24,6 +24,9 @@ builder.Services.AddScoped<IPerplexityService, PerplexityService>();
 builder.Services.AddHttpClient<IModelService, ModelService>();
 builder.Services.AddHttpClient<IPerplexityService, PerplexityService>();
 
+// Đăng ký FirebaseDataService
+builder.Services.AddScoped<backend.Services.IFirebaseDataService, backend.Services.FirebaseDataService>();
+
 var app = builder.Build();
 
 // Migrate database
