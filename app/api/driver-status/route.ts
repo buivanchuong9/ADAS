@@ -1,29 +1,31 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Validate driver status data
-    if (typeof data.fatigueLevel !== "number" || typeof data.distractionLevel !== "number") {
-      return NextResponse.json({ error: "Invalid driver status data" }, { status: 400 })
-    }
-
-    const status = {
-      fatigueLevel: data.fatigueLevel,
-      distractionLevel: data.distractionLevel,
-      eyesClosed: data.eyesClosed || false,
-      timestamp: new Date().toISOString(),
-    }
-
-    // TODO: Store driver status in database
-    // TODO: Trigger alerts if thresholds exceeded
-
-    return NextResponse.json({
-      success: true,
-      status,
-      message: "Driver status updated successfully",
+    // Send driver status to backend (stored as event or driver_status)
+    const response = await fetch(`${BACKEND_URL}/api/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'driver_status',
+        severity: data.fatigueLevel > 70 ? 'critical' : data.fatigueLevel > 40 ? 'warning' : 'info',
+        description: `Fatigue: ${data.fatigueLevel}%, Distraction: ${data.distractionLevel}%`,
+        metadata: JSON.stringify(data)
+      }),
     })
+
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.statusText}`)
+    }
+
+    const result = await response.json()
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Driver status API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
@@ -32,15 +34,26 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    // TODO: Fetch current driver status from database
-    const status = {
-      fatigueLevel: 35,
-      distractionLevel: 20,
-      eyesClosed: false,
-      timestamp: new Date().toISOString(),
+    // Fetch recent driver status from backend events
+    const response = await fetch(`${BACKEND_URL}/api/events/list?type=driver_status&limit=1`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.statusText}`)
     }
 
-    return NextResponse.json({ success: true, status })
+    const events = await response.json()
+    const latestStatus = events.length > 0 ? JSON.parse(events[0].metadata || '{}') : {
+      fatigueLevel: 0,
+      distractionLevel: 0,
+      eyesClosed: false,
+      timestamp: new Date().toISOString()
+    }
+
+    return NextResponse.json({ success: true, status: latestStatus })
   } catch (error) {
     console.error("Driver status API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

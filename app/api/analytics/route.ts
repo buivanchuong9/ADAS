@@ -1,36 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const tripId = searchParams.get("tripId")
+    // Fetch analytics from FastAPI backend
+    const response = await fetch(`${BACKEND_URL}/api/analytics/dashboard`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
-    // TODO: Fetch analytics data from database
-    const analytics = {
-      tripId: tripId || "current",
-      distance: 42.5,
-      duration: 8100, // seconds
-      averageSpeed: 54,
-      safetyScore: 85,
-      events: [
-        { type: "collision", count: 1 },
-        { type: "lane-departure", count: 2 },
-        { type: "fatigue", count: 1 },
-      ],
-      speedData: [
-        { time: "0:00", speed: 0 },
-        { time: "0:15", speed: 45 },
-        { time: "0:30", speed: 60 },
-      ],
-      fatigueData: [
-        { time: "0:00", fatigue: 10 },
-        { time: "0:30", fatigue: 15 },
-        { time: "1:00", fatigue: 25 },
-      ],
-      timestamp: new Date().toISOString(),
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.statusText}`)
     }
 
-    return NextResponse.json({ success: true, analytics })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     console.error("Analytics API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

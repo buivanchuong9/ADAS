@@ -1,0 +1,33 @@
+# Python Backend Dependencies for ADAS System
+# Python 3.13 compatible
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database (latest version with Python 3.13 support)
+sqlalchemy>=2.0.36
+# pyodbc - skip for Mac, requires ODBC drivers (can add later for production SQL Server)
+alembic>=1.13.0
+
+# Data Validation (latest with Python 3.13 wheels)
+pydantic>=2.10.0
+pydantic-settings==2.1.0
+
+# HTTP Client
+httpx==0.25.1
+
+# Environment
+python-dotenv==1.0.0
+
+# WebSocket
+websockets==12.0
+
+# JSON
+orjson==3.9.10
+
+# Date/Time
+python-dateutil==2.8.2
+
+# uvloop - skip for now (not compatible with Python 3.13)

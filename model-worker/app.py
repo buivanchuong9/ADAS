@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import base64
 import cv2
@@ -14,15 +15,44 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Định nghĩa các model có sẵn
 AVAILABLE_MODELS = {
+    # YOLOv8 - Object Detection
     "yolov8n": lambda: YOLO("yolov8n.pt"),
+    "yolov8s": lambda: YOLO("yolov8s.pt"),
+    "yolov8m": lambda: YOLO("yolov8m.pt"),
+    "yolov8l": lambda: YOLO("yolov8l.pt"),
+    "yolov8x": lambda: YOLO("yolov8x.pt"),
+    
+    # YOLOv10 - Newer version
+    "yolov10s": lambda: YOLO("yolov10s.pt"),
+    
+    # YOLOv5 - Previous generation
     "yolov5s": lambda: torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True),
-    # Thêm các model khác nếu muốn
-    # "yolov7": lambda: ...
-    # "pose": lambda: ...
-    # "object_tracking": lambda: ...
+    "yolov5m": lambda: torch.hub.load('ultralytics/yolov5', 'yolov5m', pretrained=True),
+    
+    # YOLOv8 - Pose Detection (skeleton detection)
+    "yolov8-pose": lambda: YOLO("yolov8-pose.pt"),
+    
+    # Fallback for models not yet downloaded
+    "custom-adas": lambda: YOLO("yolov8n.pt"),  # Fallback to yolov8n
+    "faster-rcnn": lambda: YOLO("yolov8m.pt"),  # Fallback
+    "retinaface": lambda: YOLO("yolov8n.pt"),   # Fallback
+    "mtcnn": lambda: YOLO("yolov8n.pt"),        # Fallback
+    "traffic-sign-detector": lambda: YOLO("yolov8n.pt"),
+    "license-plate-ocr": lambda: YOLO("yolov8n.pt"),
+    "deeplabv3": lambda: YOLO("yolov8n.pt"),
+    "yolact": lambda: YOLO("yolov8n.pt"),
 }
 
 # Cache model đã load

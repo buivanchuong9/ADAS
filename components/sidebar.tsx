@@ -2,9 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Activity, AlertTriangle, BarChart3, MessageCircle, Monitor, Video } from "lucide-react"
+import { Activity, AlertTriangle, BarChart3, MessageCircle, Monitor, Video, Cpu } from "lucide-react"
 
 const navItems = [
+  { href: "/adas", label: "🚗 ADAS Nâng Cấp", icon: Cpu },
   { href: "/", label: "Phát Hiện Trực Tiếp", icon: Video },
   { href: "/driver-monitor", label: "Giám Sát Tài Xế", icon: Monitor },
   { href: "/events", label: "Nhật Ký Sự Kiện", icon: AlertTriangle },

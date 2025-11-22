@@ -23,9 +23,25 @@ lerna-debug.log*
 .env.*
 .env.*.local
 .env.local
+.env.docker
 
-# Firebase service account
-backend/firebase-service-account.json
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+backend-python/venv/
+backend-python/logs/
+model-worker/__pycache__/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
 
 # Logs
 logs/
@@ -48,6 +64,12 @@ htmlcov/
 # macOS and Windows
 Thumbs.db
 .DS_Store
+
+# Model files (large)
+*.pt
+*.onnx
+*.engine
+!model-worker/yolov8n.pt
 
 # .NET build artifacts
 bin/
