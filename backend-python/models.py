@@ -1,5 +1,5 @@
 # Database Models for ADAS System
-# SQLAlchemy models for SQL Server
+# SQLAlchemy models mapped to SQL Server PascalCase columns
 
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
@@ -9,18 +9,18 @@ from datetime import datetime
 Base = declarative_base()
 
 class Camera(Base):
-    __tablename__ = "cameras"
+    __tablename__ = "Cameras"
     
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    type = Column(String(50), nullable=False)  # webcam, smartphone, ip-camera, stream
-    url = Column(String(500))
-    status = Column(String(50), default="disconnected")  # ready, disconnected, active
-    resolution = Column(String(100))
-    frame_rate = Column(Integer)
-    instructions = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_active_at = Column(DateTime)
+    id = Column("Id", Integer, primary_key=True, index=True)
+    name = Column("Name", String(100), nullable=False)
+    type = Column("Type", String(50), nullable=False)
+    url = Column("Url", String(500))
+    status = Column("Status", String(50), default="disconnected")
+    resolution = Column("Resolution", String(100))
+    frame_rate = Column("FrameRate", Integer)
+    instructions = Column("Instructions", Text)
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+    last_active_at = Column("LastActiveAt", DateTime)
     
     # Relationships
     detections = relationship("Detection", back_populates="camera")
@@ -28,21 +28,21 @@ class Camera(Base):
     trips = relationship("Trip", back_populates="camera")
 
 class Driver(Base):
-    __tablename__ = "drivers"
+    __tablename__ = "Drivers"
     
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    license_number = Column(String(50))
-    email = Column(String(100))
-    phone = Column(String(20))
-    date_of_birth = Column(DateTime)
-    address = Column(String(200))
-    total_trips = Column(Integer, default=0)
-    total_distance_km = Column(Float, default=0.0)
-    safety_score = Column(Integer, default=100)
-    status = Column(String(50), default="active")  # active, inactive, suspended
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_active_at = Column(DateTime)
+    id = Column("Id", Integer, primary_key=True, index=True)
+    name = Column("Name", String(100), nullable=False)
+    license_number = Column("LicenseNumber", String(50))
+    email = Column("Email", String(100))
+    phone = Column("Phone", String(20))
+    date_of_birth = Column("DateOfBirth", DateTime)
+    address = Column("Address", String(200))
+    total_trips = Column("TotalTrips", Integer, default=0)
+    total_distance_km = Column("TotalDistanceKm", Float, default=0.0)
+    safety_score = Column("SafetyScore", Integer, default=100)
+    status = Column("Status", String(50), default="active")
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+    last_active_at = Column("LastActiveAt", DateTime)
     
     # Relationships
     trips = relationship("Trip", back_populates="driver")
@@ -50,24 +50,24 @@ class Driver(Base):
     driver_statuses = relationship("DriverStatus", back_populates="driver")
 
 class Trip(Base):
-    __tablename__ = "trips"
+    __tablename__ = "Trips"
     
-    id = Column(Integer, primary_key=True, index=True)
-    start_time = Column(DateTime, nullable=False, default=datetime.utcnow)
-    end_time = Column(DateTime)
-    distance_km = Column(Float)
-    duration_minutes = Column(Float)
-    start_location = Column(String(200))
-    end_location = Column(String(200))
-    average_speed = Column(Integer)
-    max_speed = Column(Integer)
-    status = Column(String(50), default="active")  # active, completed, cancelled
-    total_events = Column(Integer, default=0)
-    critical_events = Column(Integer, default=0)
-    route_data = Column(Text)  # JSON
+    id = Column("Id", Integer, primary_key=True, index=True)
+    start_time = Column("StartTime", DateTime, nullable=False, default=datetime.utcnow)
+    end_time = Column("EndTime", DateTime)
+    distance_km = Column("DistanceKm", Float)
+    duration_minutes = Column("DurationMinutes", Float)
+    start_location = Column("StartLocation", String(200))
+    end_location = Column("EndLocation", String(200))
+    average_speed = Column("AverageSpeed", Integer)
+    max_speed = Column("MaxSpeed", Integer)
+    status = Column("Status", String(50), default="active")
+    total_events = Column("TotalEvents", Integer, default=0)
+    critical_events = Column("CriticalEvents", Integer, default=0)
+    route_data = Column("RouteData", Text)
     
-    driver_id = Column(Integer, ForeignKey("drivers.id"))
-    camera_id = Column(Integer, ForeignKey("cameras.id"))
+    driver_id = Column("DriverId", Integer, ForeignKey("Drivers.Id"))
+    camera_id = Column("CameraId", Integer, ForeignKey("Cameras.Id"))
     
     # Relationships
     driver = relationship("Driver", back_populates="trips")
@@ -77,19 +77,19 @@ class Trip(Base):
     analytics = relationship("Analytics", back_populates="trip")
 
 class Event(Base):
-    __tablename__ = "events"
+    __tablename__ = "Events"
     
-    id = Column(Integer, primary_key=True, index=True)
-    event_type = Column(String(100), nullable=False, index=True)
-    description = Column(String(500))
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    severity = Column(String(50))  # low, medium, high, critical
-    location = Column(String(200))
-    event_metadata = Column("metadata", Text)  # JSON - renamed to avoid SQLAlchemy conflict
+    id = Column("Id", Integer, primary_key=True, index=True)
+    event_type = Column("EventType", String(100), nullable=False, index=True)
+    description = Column("Description", String(500))
+    timestamp = Column("Timestamp", DateTime, nullable=False, default=datetime.utcnow, index=True)
+    severity = Column("Severity", String(50))
+    location = Column("Location", String(200))
+    event_metadata = Column("Metadata", Text)
     
-    trip_id = Column(Integer, ForeignKey("trips.id"))
-    camera_id = Column(Integer, ForeignKey("cameras.id"))
-    driver_id = Column(Integer, ForeignKey("drivers.id"))
+    trip_id = Column("TripId", Integer, ForeignKey("Trips.Id"))
+    camera_id = Column("CameraId", Integer, ForeignKey("Cameras.Id"))
+    driver_id = Column("DriverId", Integer, ForeignKey("Drivers.Id"))
     
     # Relationships
     trip = relationship("Trip", back_populates="events")
@@ -97,74 +97,75 @@ class Event(Base):
     driver = relationship("Driver", back_populates="events")
 
 class Detection(Base):
-    __tablename__ = "detections"
+    __tablename__ = "Detections"
     
     id = Column("Id", Integer, primary_key=True, index=True)
     class_name = Column("ClassName", String(100), nullable=False, index=True)
     confidence = Column("Confidence", Float, nullable=False)
-    bounding_box = Column("BoundingBox", Text, nullable=False)  # JSON [x1,y1,x2,y2]
+    bounding_box = Column("BoundingBox", Text, nullable=False)
     distance_meters = Column("DistanceMeters", Float)
     relative_speed = Column("RelativeSpeed", Float)
     timestamp = Column("Timestamp", DateTime, nullable=False, default=datetime.utcnow, index=True)
     frame_number = Column("FrameNumber", Integer)
     
-    trip_id = Column("TripId", Integer, ForeignKey("trips.Id"))
-    camera_id = Column("CameraId", Integer, ForeignKey("cameras.Id"))
+    trip_id = Column("TripId", Integer, ForeignKey("Trips.Id"))
+    camera_id = Column("CameraId", Integer, ForeignKey("Cameras.Id"))
     
     # Relationships
     trip = relationship("Trip", back_populates="detections")
     camera = relationship("Camera", back_populates="detections")
 
 class DriverStatus(Base):
-    __tablename__ = "driver_statuses"
+    __tablename__ = "DriverStatuses"
     
-    id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    fatigue_level = Column(String(50))  # alert, drowsy, very-drowsy, asleep
-    distraction_level = Column(String(50))  # focused, distracted, very-distracted
-    eye_closure_duration = Column(Float)
-    head_pose_yaw = Column(Integer)
-    head_pose_pitch = Column(Integer)
-    is_yawning = Column(Boolean)
-    is_using_phone = Column(Boolean)
-    alert_count = Column(Integer, default=0)
+    id = Column("Id", Integer, primary_key=True, index=True)
+    timestamp = Column("Timestamp", DateTime, nullable=False, default=datetime.utcnow, index=True)
+    fatigue_level = Column("FatigueLevel", String(50))
+    distraction_level = Column("DistractionLevel", String(50))
+    eye_closure_duration = Column("EyeClosureDuration", Float)
+    head_pose_yaw = Column("HeadPoseYaw", Integer)
+    head_pose_pitch = Column("HeadPosePitch", Integer)
+    is_yawning = Column("IsYawning", Boolean)
+    is_using_phone = Column("IsUsingPhone", Boolean)
+    alert_count = Column("AlertCount", Integer, default=0)
     
-    driver_id = Column(Integer, ForeignKey("drivers.id"))
-    trip_id = Column(Integer, ForeignKey("trips.id"))
+    driver_id = Column("DriverId", Integer, ForeignKey("Drivers.Id"))
+    trip_id = Column("TripId", Integer, ForeignKey("Trips.Id"))
     
     # Relationships
     driver = relationship("Driver", back_populates="driver_statuses")
 
 class Analytics(Base):
-    __tablename__ = "analytics"
+    __tablename__ = "Analytics"
     
-    id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    metric_type = Column(String(100), nullable=False, index=True)
-    value = Column(Float, nullable=False)
-    unit = Column(String(50))
-    category = Column(String(100))
-    analytics_metadata = Column("metadata", Text)  # JSON - renamed to avoid SQLAlchemy conflict
+    id = Column("Id", Integer, primary_key=True, index=True)
+    timestamp = Column("Timestamp", DateTime, nullable=False, default=datetime.utcnow, index=True)
+    metric_type = Column("MetricType", String(100), nullable=False, index=True)
+    value = Column("Value", Float, nullable=False)
+    unit = Column("Unit", String(50))
+    category = Column("Category", String(100))
+    analytics_metadata = Column("Metadata", Text)
     
-    trip_id = Column(Integer, ForeignKey("trips.id"))
-    driver_id = Column(Integer, ForeignKey("drivers.id"))
+    trip_id = Column("TripId", Integer, ForeignKey("Trips.Id"))
+    driver_id = Column("DriverId", Integer, ForeignKey("Drivers.Id"))
     
     # Relationships
     trip = relationship("Trip", back_populates="analytics")
+    driver = relationship("Driver")
 
 class AIModel(Base):
-    __tablename__ = "ai_models"
+    __tablename__ = "AIModels"
     
-    id = Column(Integer, primary_key=True, index=True)
-    model_id = Column(String(100), unique=True, nullable=False, index=True)
-    name = Column(String(200), nullable=False)
-    size = Column(String(50))
-    downloaded = Column(Boolean, default=False)
-    accuracy = Column(Float)
-    url = Column(String(500))
-    file_path = Column(String(1000))
-    version = Column(String(50))
-    description = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_used_at = Column(DateTime)
-    is_active = Column(Boolean, default=False, index=True)
+    id = Column("Id", Integer, primary_key=True, index=True)
+    model_id = Column("ModelId", String(100), unique=True, nullable=False, index=True)
+    name = Column("Name", String(200), nullable=False)
+    size = Column("Size", String(50))
+    downloaded = Column("Downloaded", Boolean, default=False)
+    accuracy = Column("Accuracy", Float)
+    url = Column("Url", String(500))
+    file_path = Column("FilePath", String(1000))
+    version = Column("Version", String(50))
+    description = Column("Description", String(500))
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+    last_used_at = Column("LastUsedAt", DateTime)
+    is_active = Column("IsActive", Boolean, default=False, index=True)
