@@ -26,28 +26,41 @@ if is_sqlite:
         echo=False,
     )
 else:
-    # SQL Server configuration (legacy code for backward compatibility)
-    SERVER = os.getenv("SQL_SERVER", "localhost")
-    DATABASE = os.getenv("SQL_DATABASE", "ADAS_DB")
-    USERNAME = os.getenv("SQL_USERNAME", "sa")
-    PASSWORD = os.getenv("SQL_PASSWORD", "")
-    DRIVER = os.getenv("SQL_DRIVER", "ODBC Driver 17 for SQL Server")
+    # SQL Server configuration - use DATABASE_URL from .env directly
+    # This supports both the new format (DATABASE_URL with full connection string)
+    # and legacy format (individual SQL_* environment variables)
     
-    # Encode password for URL
-    password_encoded = urllib.parse.quote_plus(PASSWORD) if PASSWORD else ""
-    
-    if PASSWORD:
-        DATABASE_URL = f"mssql+pyodbc://{USERNAME}:{password_encoded}@{SERVER}/{DATABASE}?driver={DRIVER}&TrustServerCertificate=yes"
+    if "mssql" in DATABASE_URL or "pyodbc" in DATABASE_URL:
+        # New format: DATABASE_URL contains full connection string
+        engine = create_engine(
+            DATABASE_URL,
+            poolclass=NullPool,
+            echo=False,
+            connect_args={"timeout": 30}
+        )
     else:
-        # Windows Authentication
-        DATABASE_URL = f"mssql+pyodbc://{SERVER}/{DATABASE}?driver={DRIVER}&trusted_connection=yes&TrustServerCertificate=yes"
-    
-    engine = create_engine(
-        DATABASE_URL,
-        poolclass=NullPool,
-        echo=False,
-        connect_args={"timeout": 30}
-    )
+        # Legacy format: Build from individual environment variables
+        SERVER = os.getenv("SQL_SERVER", "localhost")
+        DATABASE = os.getenv("SQL_DATABASE", "ADAS_DB")
+        USERNAME = os.getenv("SQL_USERNAME", "sa")
+        PASSWORD = os.getenv("SQL_PASSWORD", "")
+        DRIVER = os.getenv("SQL_DRIVER", "ODBC Driver 18 for SQL Server")
+        
+        # Encode password for URL
+        password_encoded = urllib.parse.quote_plus(PASSWORD) if PASSWORD else ""
+        
+        if PASSWORD:
+            DATABASE_URL = f"mssql+pyodbc://{USERNAME}:{password_encoded}@{SERVER}/{DATABASE}?driver={DRIVER}&TrustServerCertificate=yes"
+        else:
+            # Windows Authentication
+            DATABASE_URL = f"mssql+pyodbc://{SERVER}/{DATABASE}?driver={DRIVER}&trusted_connection=yes&TrustServerCertificate=yes"
+        
+        engine = create_engine(
+            DATABASE_URL,
+            poolclass=NullPool,
+            echo=False,
+            connect_args={"timeout": 30}
+        )
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
