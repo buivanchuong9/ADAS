@@ -99,15 +99,17 @@ class Event(Base):
 class Detection(Base):
     __tablename__ = "detections"
     
-    id = Column(Integer, primary_key=True, index=True)
-    class_name = Column(String(100), nullable=False, index=True)
-    confidence = Column(Float, nullable=False)
-    bounding_box = Column(Text, nullable=False)  # JSON [x1,y1,x2,y2]
-    distance_meters = Column(Float)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    id = Column("Id", Integer, primary_key=True, index=True)
+    class_name = Column("ClassName", String(100), nullable=False, index=True)
+    confidence = Column("Confidence", Float, nullable=False)
+    bounding_box = Column("BoundingBox", Text, nullable=False)  # JSON [x1,y1,x2,y2]
+    distance_meters = Column("DistanceMeters", Float)
+    relative_speed = Column("RelativeSpeed", Float)
+    timestamp = Column("Timestamp", DateTime, nullable=False, default=datetime.utcnow, index=True)
+    frame_number = Column("FrameNumber", Integer)
     
-    trip_id = Column(Integer, ForeignKey("trips.id"))
-    camera_id = Column(Integer, ForeignKey("cameras.id"))
+    trip_id = Column("TripId", Integer, ForeignKey("trips.Id"))
+    camera_id = Column("CameraId", Integer, ForeignKey("cameras.Id"))
     
     # Relationships
     trip = relationship("Trip", back_populates="detections")

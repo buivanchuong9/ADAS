@@ -8,7 +8,7 @@ python-multipart==0.0.6
 
 # Database (latest version with Python 3.13 support)
 sqlalchemy>=2.0.36
-# pyodbc - skip for Mac, requires ODBC drivers (can add later for production SQL Server)
+pyodbc>=5.0.0
 alembic>=1.13.0
 
 # Data Validation (latest with Python 3.13 wheels)
