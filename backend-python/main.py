@@ -11,7 +11,7 @@ import base64
 from datetime import datetime
 
 from database import get_db, engine
-from models import Base, Camera, Driver, Trip, Event, Detection, DriverStatus, Analytics, AIModel
+from models import Base, Camera, Driver, Trip, Event, Detection, DriverStatus, Analytics, AIModel, VideoDataset, Label, Alert
 from schemas import (
     CameraCreate, CameraResponse, 
     DriverCreate, DriverResponse,
@@ -23,13 +23,20 @@ from schemas import (
 from services import ModelService, EventService, CameraService, TripService, DriverService, AnalyticsService
 import config
 
+# Import API routers
+from api.upload.router import router as upload_router
+from api.inference.router import router as inference_router
+from api.training.router import router as training_router
+from api.dataset.router import router as dataset_router
+from api.alerts.router import router as alerts_router
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="ADAS Backend API",
-    description="Advanced Driver Assistance System - Backend API",
-    version="2.0.0"
+    description="Advanced Driver Assistance System - Backend API with AI Training",
+    version="3.0.0"
 )
 
 # CORS Configuration
@@ -40,6 +47,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include API routers
+app.include_router(upload_router)
+app.include_router(inference_router)
+app.include_router(training_router)
+app.include_router(dataset_router)
+app.include_router(alerts_router)
 
 # Initialize services
 model_service = ModelService()
@@ -373,6 +387,10 @@ async def root():
         }
     }
 
+# ============ Data Collection Module ============
+from dataset_api import register_dataset_routes
+register_dataset_routes(app)
+
 if __name__ == "__main__":
     print("=" * 50)
     print("🚀 ADAS Backend Server Starting...")
@@ -380,6 +398,7 @@ if __name__ == "__main__":
     print(f"📊 API Docs: http://localhost:8000/docs")
     print(f"🔌 WebSocket: ws://localhost:8000/ws/infer")
     print(f"💚 Health: http://localhost:8000/health")
+    print(f"📦 Dataset: http://localhost:8000/api/dataset")
     print("=" * 50)
     
     uvicorn.run(

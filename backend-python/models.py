@@ -159,6 +159,7 @@ class AIModel(Base):
     id = Column("Id", Integer, primary_key=True, index=True)
     model_id = Column("ModelId", String(100), unique=True, nullable=False, index=True)
     name = Column("Name", String(200), nullable=False)
+    model_type = Column("ModelType", String(50), default="yolov8")  # yolov8, yolop, midas
     size = Column("Size", String(50))
     downloaded = Column("Downloaded", Boolean, default=False)
     accuracy = Column("Accuracy", Float)
@@ -166,6 +167,66 @@ class AIModel(Base):
     file_path = Column("FilePath", String(1000))
     version = Column("Version", String(50))
     description = Column("Description", String(500))
+    config = Column("Config", Text)  # JSON config
     created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
     last_used_at = Column("LastUsedAt", DateTime)
     is_active = Column("IsActive", Boolean, default=False, index=True)
+
+
+class VideoDataset(Base):
+    __tablename__ = "VideoDatasets"
+    
+    id = Column("Id", Integer, primary_key=True, index=True)
+    filename = Column("Filename", String(200), nullable=False)
+    original_filename = Column("OriginalFilename", String(200))
+    file_path = Column("FilePath", String(1000), nullable=False)
+    description = Column("Description", Text)
+    fps = Column("Fps", Float)
+    total_frames = Column("TotalFrames", Integer)
+    labeled_frames = Column("LabeledFrames", Integer, default=0)
+    width = Column("Width", Integer)
+    height = Column("Height", Integer)
+    duration = Column("Duration", Float)
+    status = Column("Status", String(50), default="uploaded")  # uploaded, processing, labeled, error
+    error_message = Column("ErrorMessage", Text)
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+    processed_at = Column("ProcessedAt", DateTime)
+    
+    # Relationships
+    labels = relationship("Label", back_populates="video")
+
+
+class Label(Base):
+    __tablename__ = "Labels"
+    
+    id = Column("Id", Integer, primary_key=True, index=True)
+    video_id = Column("VideoId", Integer, ForeignKey("VideoDatasets.Id"), nullable=False)
+    frame_number = Column("FrameNumber", Integer, nullable=False)
+    label_data = Column("LabelData", Text, nullable=False)  # JSON: [{class_id, bbox, confidence, distance}]
+    has_vehicle = Column("HasVehicle", Boolean, default=False)
+    has_lane = Column("HasLane", Boolean, default=False)
+    auto_labeled = Column("AutoLabeled", Boolean, default=False)
+    verified = Column("Verified", Boolean, default=False)
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    video = relationship("VideoDataset", back_populates="labels")
+
+
+class Alert(Base):
+    __tablename__ = "Alerts"
+    
+    id = Column("Id", Integer, primary_key=True, index=True)
+    event_id = Column("EventId", Integer, ForeignKey("Events.Id"))
+    ttc = Column("TTC", Float)  # Time to collision (seconds)
+    distance = Column("Distance", Float)  # Distance in meters
+    relative_speed = Column("RelativeSpeed", Float)  # m/s
+    severity = Column("Severity", String(50))  # critical, high, medium, low
+    alert_type = Column("AlertType", String(100))  # collision_warning, lane_departure, etc.
+    message = Column("Message", Text)
+    audio_path = Column("AudioPath", String(1000))  # Path to TTS audio file
+    played = Column("Played", Boolean, default=False)
+    created_at = Column("CreatedAt", DateTime, default=datetime.utcnow, index=True)
+    
+    # Relationships
+    event = relationship("Event", backref="alerts")
