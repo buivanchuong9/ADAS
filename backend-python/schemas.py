@@ -172,3 +172,57 @@ class InferenceResponse(BaseModel):
     detections: List[DetectionDto]
     ttc: float
     stats: dict
+
+
+# ============ Dataset & Training Schemas ============
+class DatasetResponse(BaseModel):
+    id: int
+    filename: str
+    original_filename: Optional[str] = None
+    description: Optional[str] = None
+    fps: Optional[float] = None
+    total_frames: Optional[int] = None
+    labeled_frames: Optional[int] = 0
+    width: Optional[int] = None
+    height: Optional[int] = None
+    duration: Optional[float] = None
+    status: str
+    created_at: datetime
+    processed_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class LabelResponse(BaseModel):
+    id: int
+    video_id: int
+    frame_number: int
+    label_data: str  # JSON string
+    has_vehicle: bool
+    has_lane: bool
+    auto_labeled: bool
+    verified: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class TrainingRequest(BaseModel):
+    model_name: str = Field(..., description="Tên model mới")
+    base_model: str = Field(default="yolov8n.pt", description="Base model")
+    epochs: int = Field(default=50, ge=1, le=1000)
+    batch_size: int = Field(default=16, ge=1, le=128)
+    img_size: int = Field(default=640, ge=320, le=1280)
+    dataset_id: Optional[int] = Field(None, description="ID của dataset cụ thể (optional)")
+
+
+class TrainingResponse(BaseModel):
+    training_id: str
+    status: str
+    message: str
+    model_name: str
+    base_model: str = "yolov8n.pt"
+    epochs: int = 50
+
