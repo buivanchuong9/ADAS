@@ -15,7 +15,8 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}"
 echo "=================================================="
-echo "🚀 ADAS Backend Server - Quick Start"
+echo "🚀 ADAS Backend - Auto Setup & Start"
+echo "   Tự động cài thư viện và chạy server"
 echo "=================================================="
 echo -e "${NC}"
 
@@ -33,13 +34,14 @@ PYTHON_VERSION=$(python3 --version)
 echo -e "${GREEN}✅ $PYTHON_VERSION${NC}"
 
 # Check/Install dependencies
-echo -e "${YELLOW}[2/4] Checking dependencies...${NC}"
+echo -e "${YELLOW}[2/4] Installing dependencies (auto)...${NC}"
 if ! python3 -c "import fastapi" 2>/dev/null; then
-    echo -e "${YELLOW}Installing requirements...${NC}"
-    pip3 install -r requirements.txt --quiet
-    echo -e "${GREEN}✅ Dependencies installed${NC}"
+    echo -e "${YELLOW}Installing all requirements (first time may take 2-5 minutes)...${NC}"
+    python3 -m pip install --upgrade pip --quiet || true
+    python3 -m pip install -r requirements.txt
+    echo -e "${GREEN}✅ All dependencies installed${NC}"
 else
-    echo -e "${GREEN}✅ Dependencies OK${NC}"
+    echo -e "${GREEN}✅ Dependencies already installed${NC}"
 fi
 
 # Kill existing server
