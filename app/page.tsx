@@ -125,9 +125,9 @@ export default function LiveDetection() {
                 </div>
               </Card>
 
-              <Card className="bg-card border-border p-4 border-destructive/50 bg-destructive/5">
+              <Card className="p-4 border-destructive/50 bg-destructive/5">
                 <div className="flex gap-3">
-                  <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-foreground mb-1">Cảnh Báo Nguy Hiểm</h4>
                     <p className="text-sm text-foreground/70">Phát hiện xe phía trước quá gần (TTC: 1.2s)</p>

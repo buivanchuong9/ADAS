@@ -6,24 +6,46 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Proxy to backend if needed, or handle WebSocket detections
-    // Most detections come through WebSocket, this is for REST fallback
-    
-    return NextResponse.json({
-      success: true,
-      message: "Detection data received. Use WebSocket for real-time inference.",
-      websocket_url: "ws://localhost:8000/ws/infer"
+    // Forward to backend NEW /api/detections/save endpoint
+    const response = await fetch(`${BACKEND_URL}/api/detections/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
     })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.detail || "Failed to save detection")
+    }
+    
+    const result = await response.json()
+    return NextResponse.json(result)
   } catch (error) {
-    console.error("Detection API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Detection save error:", error)
+    return NextResponse.json({ 
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to save detection" 
+    }, { status: 500 })
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Fetch recent detections from backend
-    const response = await fetch(`${BACKEND_URL}/api/events/list?type=detection&limit=10`, {
+    // Get query params
+    const searchParams = request.nextUrl.searchParams
+    const limit = searchParams.get('limit') || '20'
+    const camera_id = searchParams.get('camera_id') || ''
+    const class_name = searchParams.get('class_name') || ''
+    
+    // Build query string
+    let query = `limit=${limit}`
+    if (camera_id) query += `&camera_id=${camera_id}`
+    if (class_name) query += `&class_name=${class_name}`
+    
+    // Fetch recent detections from backend NEW endpoint
+    const response = await fetch(`${BACKEND_URL}/api/detections/recent?${query}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -33,10 +55,14 @@ export async function GET() {
       throw new Error(`Backend error: ${response.statusText}`)
     }
 
-    const detections = await response.json()
-    return NextResponse.json(detections)
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     console.error("Detection API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ 
+      success: false,
+      error: "Failed to fetch detections",
+      detections: [] 
+    }, { status: 500 })
   }
 }

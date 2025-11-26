@@ -1,702 +1,659 @@
-"use client"
+'use client'
 
-import { useState, useRef, useEffect, useCallback } from "react"
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { AlertTriangle, Play, Square, Wifi, WifiOff, Download, RefreshCw } from "lucide-react"
-import { DetectionConfigPanel } from "@/components/detection-config-panel"
-import { DetectionStats } from "@/components/detection-stats"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-
-interface DetectionConfig {
-  model: string
-  confidence: number
-  cameraSource: string
-  iouThreshold: number
-  maxDetections: number
-}
+import { useEffect, useRef, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { AlertCircle, Video, VideoOff, Activity, Zap, Shield, AlertTriangle, Upload } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Input } from '@/components/ui/input'
 
 interface Detection {
-  id: number
   cls: string
+  class: string
   conf: number
-  bbox: [number, number, number, number] // x, y, width, height
-  distance_m: number
-  color?: string
-  danger?: boolean
+  bbox: number[]
+  distance_m?: number
   ttc?: number
-  timestamp?: string
+  danger?: boolean
+  is_new?: boolean
+  class_id?: number
 }
 
-interface InferenceResponse {
-  detections: Array<{
-    id: number
-    cls: string
-    conf: number
-    bbox: number[]
-    distance_m: number
-  }>
+interface LaneInfo {
+  left_lane: number[][]
+  right_lane: number[][]
+  center_offset: number
+}
+
+interface AlertInfo {
+  level: string
+  message: string
+  distance?: number
+  ttc?: number
+}
+
+interface UnifiedResult {
+  detections: Detection[]
+  lanes?: LaneInfo
+  alerts: AlertInfo[]
   stats: {
-    infer_ms: number
-    model: string
+    fps: number
+    inference_time: number
+    total_objects: number
+    unique_classes?: string[]
+    new_objects_count?: number
   }
+  collection_stats?: {
+    total_collected: number
+    new_objects_learned: number
+    last_collection: string | null
+  }
+  new_objects?: Array<{class: string, reason: string}>
 }
 
-const AVAILABLE_MODELS = [
-  // Object Detection - Vehicles & Objects
-  {
-    id: "yolov8n",
-    name: "YOLOv8 Nano (Fast)",
-    size: "6.3 MB",
-    downloaded: true,
-    accuracy: 80.4,
-  },
-  {
-    id: "yolov8s",
-    name: "YOLOv8 Small",
-    size: "22.5 MB",
-    downloaded: false,
-    accuracy: 86.6,
-  },
-  {
-    id: "yolov8m",
-    name: "YOLOv8 Medium",
-    size: "49.2 MB",
-    downloaded: false,
-    accuracy: 88.3,
-  },
-  {
-    id: "yolov8l",
-    name: "YOLOv8 Large (High Accuracy)",
-    size: "83.6 MB",
-    downloaded: false,
-    accuracy: 90.1,
-  },
-  {
-    id: "yolov10s",
-    name: "YOLOv10 Small (Latest)",
-    size: "20.1 MB",
-    downloaded: false,
-    accuracy: 87.2,
-  },
-  {
-    id: "yolov5s",
-    name: "YOLOv5 Small",
-    size: "27.6 MB",
-    downloaded: false,
-    accuracy: 85.2,
-  },
-  // Specialized Models
-  {
-    id: "custom-adas",
-    name: "Custom ADAS (Vehicles Only)",
-    size: "35.8 MB",
-    downloaded: false,
-    accuracy: 92.1,
-  },
-  {
-    id: "faster-rcnn",
-    name: "Faster RCNN (Accurate)",
-    size: "130 MB",
-    downloaded: false,
-    accuracy: 93.5,
-  },
-  // Pose Detection
-  {
-    id: "yolov8-pose",
-    name: "YOLOv8 Pose (Skeleton)",
-    size: "57.2 MB",
-    downloaded: false,
-    accuracy: 88.7,
-  },
-  // Face Detection & Recognition
-  {
-    id: "retinaface",
-    name: "RetinaFace (Face Detection)",
-    size: "102 MB",
-    downloaded: false,
-    accuracy: 91.2,
-  },
-  {
-    id: "mtcnn",
-    name: "MTCNN (Multi-task Cascade)",
-    size: "18.5 MB",
-    downloaded: false,
-    accuracy: 86.8,
-  },
-  // Traffic-specific
-  {
-    id: "traffic-sign-detector",
-    name: "Traffic Sign Detector",
-    size: "42.3 MB",
-    downloaded: false,
-    accuracy: 89.5,
-  },
-  {
-    id: "license-plate-ocr",
-    name: "License Plate Recognition",
-    size: "55.6 MB",
-    downloaded: false,
-    accuracy: 94.2,
-  },
-  // Semantic Segmentation
-  {
-    id: "deeplabv3",
-    name: "DeepLabv3 (Segmentation)",
-    size: "175 MB",
-    downloaded: false,
-    accuracy: 91.8,
-  },
-  {
-    id: "yolact",
-    name: "YOLACT (Instance Segmentation)",
-    size: "120 MB",
-    downloaded: false,
-    accuracy: 89.3,
-  },
-]
-
-const AVAILABLE_CAMERAS = [
-  {
-    id: "webcam",
-    name: "Web Camera (máy tính)",
-    type: "webcam" as const,
-  },
-  {
-    id: "smartphone-rtmp",
-    name: "Smartphone (RTMP Stream)",
-    type: "smartphone" as const,
-  },
-  {
-    id: "smartphone-webrtc",
-    name: "Smartphone (WebRTC)",
-    type: "smartphone" as const,
-  },
-  {
-    id: "ip-camera",
-    name: "IP Camera",
-    type: "stream" as const,
-  },
-]
-
-// Color mapping for class names
-const CLASS_COLORS: { [key: string]: string } = {
-  car: "#ff6b35",
-  truck: "#ff6b35",
-  bus: "#ff6b35",
-  person: "#ffd166",
-  bicycle: "#06d6a0",
-  motorcycle: "#ff006e",
-  traffic_light: "#06ffa5",
-  stop_sign: "#ff006e",
-  dog: "#8338ec",
-  cat: "#8338ec",
-  default: "#00ff00",
-}
-
-export default function ADASLiveDetection() {
+export default function ADASUnifiedPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameRef = useRef<number | undefined>(undefined)
-
-  const [isRunning, setIsRunning] = useState(false)
-  const [isConnected, setIsConnected] = useState(false)
-  const [detections, setDetections] = useState<Detection[]>([])
+  const wsRef = useRef<WebSocket | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [isVideoMode, setIsVideoMode] = useState(false)
   const [fps, setFps] = useState(0)
-  const [processingTime, setProcessingTime] = useState(0)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadingModel, setDownloadingModel] = useState<string | null>(null)
-  const [modelWorkerStatus, setModelWorkerStatus] = useState(false)
-  const [recentDetections, setRecentDetections] = useState<Detection[]>([])
-
-  const [config, setConfig] = useState<DetectionConfig>({
-    model: "yolov8n",
-    confidence: 0.5,
-    cameraSource: "webcam",
-    iouThreshold: 0.45,
-    maxDetections: 100,
+  const [detectionCount, setDetectionCount] = useState(0)
+  const [alerts, setAlerts] = useState<AlertInfo[]>([])
+  const [stats, setStats] = useState<{fps: number, inference_time: number, total_objects: number, unique_classes: string[], new_objects_count: number}>({ 
+    fps: 0, 
+    inference_time: 0, 
+    total_objects: 0, 
+    unique_classes: [], 
+    new_objects_count: 0 
   })
+  const [collectionStats, setCollectionStats] = useState({ total_collected: 0, new_objects_learned: 0, last_collection: null })
+  const [newObjects, setNewObjects] = useState<Array<{class: string, reason: string}>>([])
+  const [enableAutoCollection, setEnableAutoCollection] = useState(true)
 
-  // Check if model worker is running
-  useEffect(() => {
-    const checkWorker = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/health", { method: "GET" })
-        setModelWorkerStatus(res.ok)
-      } catch {
-        setModelWorkerStatus(false)
-      }
-    }
-
-    checkWorker()
-    const interval = setInterval(checkWorker, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Fetch recent detections from database
-  useEffect(() => {
-    const fetchRecentDetections = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/api/detections/recent?limit=20")
-        if (res.ok) {
-          const data = await res.json()
-          setRecentDetections(data.detections || [])
-        }
-      } catch (err) {
-        console.error("Error fetching recent detections:", err)
-      }
-    }
-
-    fetchRecentDetections()
-    const interval = setInterval(fetchRecentDetections, 3000) // Refresh every 3s
-    return () => clearInterval(interval)
-  }, [])
-
-  const startDetection = async () => {
+  // Start webcam
+  const startWebcam = async () => {
     try {
-      if (config.cameraSource === "webcam") {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { width: 640, height: 480 } 
-        })
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          setIsRunning(true)
-          setIsConnected(true)
-        }
-      } else if (config.cameraSource === "smartphone-webrtc") {
-        alert("💡 WebRTC Mode:\n\n1. Cài app IP Camera trên điện thoại\n2. Nhập URL:\n   ws://localhost:5000/ws/camera\n3. Kết nối từ app")
-        return
-      } else if (config.cameraSource === "ip-camera") {
-        alert("💡 IP Camera Mode:\n\n1. Nhập URL RTMP của camera IP\n2. Ví dụ: rtmp://192.168.1.100:1935/live")
-        return
-      }
-    } catch (err) {
-      console.error("Lỗi truy cập camera:", err)
-      alert("❌ Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.")
-    }
-  }
-
-  const stopDetection = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-      tracks.forEach((track) => track.stop())
-    }
-    setIsRunning(false)
-    setIsConnected(false)
-    setDetections([])
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
-    }
-  }
-
-  const handleModelDownload = async (modelId: string) => {
-    setDownloadingModel(modelId)
-    setIsDownloading(true)
-
-    try {
-      const res = await fetch(`http://localhost:5000/api/models/${modelId}/download`, {
-        method: "POST",
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720, facingMode: 'environment' }
       })
-
-      if (res.ok) {
-        alert(`✓ Model ${modelId} tải về thành công!`)
-      } else {
-        throw new Error("Download failed")
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream
+        setStream(mediaStream)
       }
-    } catch (err) {
-      console.error("Lỗi tải model:", err)
-      alert(`❌ Lỗi tải model: ${modelId}`)
-    } finally {
-      setDownloadingModel(null)
-      setIsDownloading(false)
+    } catch (error) {
+      console.error('Error accessing webcam:', error)
+      alert('Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.')
     }
   }
 
-  // Main inference loop
-  useEffect(() => {
-    if (!isRunning || !videoRef.current || !canvasRef.current) return
+  // Stop webcam
+  const stopWebcam = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+      videoRef.current.src = ''
+    }
+    setIsVideoMode(false)
+    setVideoFile(null)
+  }
 
+  // Handle video file upload
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type.startsWith('video/')) {
+      setVideoFile(file)
+      
+      // Stop any existing stream
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+        setStream(null)
+      }
+
+      // Load video file
+      if (videoRef.current) {
+        const url = URL.createObjectURL(file)
+        videoRef.current.src = url
+        videoRef.current.srcObject = null
+        setIsVideoMode(true)
+      }
+    } else {
+      alert('Vui lòng chọn file video hợp lệ!')
+    }
+  }
+
+  // Connect to WebSocket and start inference
+  const startInference = () => {
+    if (!stream && !videoFile) {
+      alert('Vui lòng bật camera hoặc upload video trước!')
+      return
+    }
+
+    const ws = new WebSocket('ws://localhost:8000/ws/adas-unified')
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      console.log('WebSocket connected to unified ADAS endpoint')
+      setIsStreaming(true)
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const result: UnifiedResult = JSON.parse(event.data)
+        
+        console.log('📦 Received:', result)
+        console.log('🔍 Detections:', result.detections?.length || 0)
+        
+        // Update stats (with fallbacks for undefined values)
+        setStats({
+          fps: result.stats?.fps || 0,
+          inference_time: result.stats?.inference_time || 0,
+          total_objects: result.stats?.total_objects || 0,
+          unique_classes: result.stats?.unique_classes || [],
+          new_objects_count: result.stats?.new_objects_count || 0
+        })
+        setFps(result.stats?.fps || 0)
+        setDetectionCount(result.detections?.length || 0)
+        setAlerts(result.alerts || [])
+        
+        // Update collection stats
+        if (result.collection_stats) {
+          setCollectionStats(result.collection_stats as any)
+        }
+        
+        // Update new objects
+        if (result.new_objects && result.new_objects.length > 0) {
+          setNewObjects(result.new_objects)
+        }
+
+        // Draw on canvas
+        drawDetections(result)
+
+        // Save to database
+        if (result.detections && Array.isArray(result.detections) && result.detections.length > 0) {
+          saveDetections(result.detections)
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected')
+      setIsStreaming(false)
+    }
+
+    // Send frames at 10 FPS
+    const interval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN && videoRef.current) {
+        sendFrame(ws)
+      }
+    }, 100) // 10 FPS
+
+    return () => clearInterval(interval)
+  }
+
+  // Stop inference
+  const stopInference = () => {
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    setIsStreaming(false)
+    setAlerts([])
+    
+    // Clear canvas
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d')
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+      }
+    }
+  }
+
+  // Send video frame to WebSocket
+  const sendFrame = (ws: WebSocket) => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const video = videoRef.current
     const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
+
+    // Set canvas size to match video
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let frameCount = 0
-    let lastFpsTime = performance.now()
-    let processingTimeSum = 0
-    let skipFrames = 0
+    // Draw video frame to canvas
+    ctx.drawImage(video, 0, 0)
 
-    const inferenceLoop = async () => {
-      try {
-        if (videoRef.current && videoRef.current.readyState === HTMLMediaElement.HAVE_ENOUGH_DATA) {
-          // Draw video frame
-          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
+    // Convert to base64
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1]
+          ws.send(JSON.stringify({ frame: base64 }))
+        }
+        reader.readAsDataURL(blob)
+      }
+    }, 'image/jpeg', 0.8)
+  }
 
-          // Skip frames to reduce load (process every 2nd frame)
-          skipFrames++
-          if (skipFrames % 2 !== 0) {
-            frameCount++
-            animationFrameRef.current = requestAnimationFrame(inferenceLoop)
-            return
-          }
+  // Draw detections, lanes, and alerts on canvas
+  const drawDetections = (result: UnifiedResult) => {
+    if (!canvasRef.current) return
 
-          // Capture frame as base64
-          const frameBase64 = canvas.toDataURL("image/jpeg", 0.7).split(",")[1]
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-          // Send to model worker with timeout
-          const controller = new AbortController()
-          const timeoutId = setTimeout(() => controller.abort(), 5000)
+    // Clear previous drawings
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-          const startTime = performance.now()
-          
-          try {
-            const response = await fetch(`http://localhost:8000/infer/${config.model}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ frame_b64: frameBase64 }),
-              signal: controller.signal,
-            })
-
-            clearTimeout(timeoutId)
-
-            if (response.ok) {
-              const result: InferenceResponse = await response.json()
-              const inferTime = performance.now() - startTime
-
-              // Convert detections format
-              const processedDetections: Detection[] = result.detections
-                .filter((d) => d.conf >= config.confidence)
-                .slice(0, config.maxDetections)
-                .map((d, idx) => {
-                  const [x, y, w, h] = d.bbox
-                  const cls_lower = d.cls.toLowerCase()
-                  
-                  // Calculate danger (person closer than 2 meters or other dangerous objects)
-                  const danger = (cls_lower.includes("person") && d.distance_m < 2) || 
-                                cls_lower.includes("obstacle")
-                  const ttc = danger ? Math.max(0.5, d.distance_m * 1.5) : undefined
-
-                  return {
-                    id: idx,
-                    cls: d.cls,
-                    conf: d.conf,
-                    bbox: [x, y, w, h],
-                    distance_m: d.distance_m,
-                    color: CLASS_COLORS[cls_lower] || CLASS_COLORS.default,
-                    danger,
-                    ttc,
-                  }
-                })
-
-              setDetections(processedDetections)
-              processingTimeSum += inferTime
-
-              console.log("🔍 Detections:", processedDetections.length, processedDetections)
-
-              // ✅ LƯU DETECTIONS VÀO DATABASE (BACKEND)
-              if (processedDetections.length > 0) {
-                try {
-                  await fetch("http://localhost:8000/api/detections/save", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      detections: processedDetections,
-                      camera_id: 1,
-                      trip_id: null
-                    })
-                  })
-                  console.log("✅ Saved", processedDetections.length, "detections to database")
-                } catch (saveErr) {
-                  console.error("❌ Error saving to DB:", saveErr)
-                }
-              }
-
-              // Draw detections on canvas
-              processedDetections.forEach((det, idx) => {
-                const [x, y, w, h] = det.bbox
-
-                console.log(`Detection ${idx}:`, { x, y, w, h, cls: det.cls, conf: det.conf })
-
-                // Draw bounding box (thick orange for visibility)
-                ctx.strokeStyle = det.danger ? "#ff0000" : "#ff6b35"
-                ctx.lineWidth = det.danger ? 4 : 3
-                ctx.strokeRect(x, y, w, h)
-
-                // Draw label background
-                const labelHeight = 24
-                ctx.fillStyle = det.danger ? "#ff0000" : "#ff6b35"
-                ctx.globalAlpha = 0.9
-                ctx.fillRect(x, Math.max(0, y - labelHeight), Math.max(w, 250), labelHeight)
-                ctx.globalAlpha = 1.0
-
-                // Draw label text
-                ctx.fillStyle = "#fff"
-                ctx.font = "bold 13px monospace"
-                const label = `${det.cls} ${(det.conf * 100).toFixed(0)}% | ${det.distance_m.toFixed(1)}m`
-                ctx.fillText(label, x + 4, Math.max(15, y - 6))
-
-                // Draw danger indicator
-                if (det.danger) {
-                  ctx.fillStyle = "#ffff00"
-                  ctx.font = "bold 16px Arial"
-                  ctx.fillText("⚠️", x + w - 24, y + 20)
-                }
-              })
-            }
-          } catch (fetchErr) {
-            clearTimeout(timeoutId)
-            if (fetchErr instanceof Error && fetchErr.name !== 'AbortError') {
-              console.warn("Inference request failed:", fetchErr.message)
-            }
-          }
-
-          frameCount++
-          const now = performance.now()
-          if (now - lastFpsTime >= 1000) {
-            setFps(frameCount)
-            setProcessingTime(processingTimeSum / frameCount)
-            frameCount = 0
-            processingTimeSum = 0
-            lastFpsTime = now
+    // Draw lanes (green lines) - lanes is an array of line segments
+    if (result.lanes && Array.isArray(result.lanes) && result.lanes.length > 0) {
+      ctx.strokeStyle = '#00ff00'
+      ctx.lineWidth = 3
+      
+      result.lanes.forEach(line => {
+        if (line && Array.isArray(line) && line.length === 2 && line[0] && line[1]) {
+          const [start, end] = line
+          if (Array.isArray(start) && Array.isArray(end) && start.length >= 2 && end.length >= 2) {
+            ctx.beginPath()
+            ctx.moveTo(start[0], start[1])
+            ctx.lineTo(end[0], end[1])
+            ctx.stroke()
           }
         }
-      } catch (err) {
-        console.error("Loop error:", err)
-      }
-
-      animationFrameRef.current = requestAnimationFrame(inferenceLoop)
+      })
     }
 
-    inferenceLoop()
+    // Draw detections with bounding boxes
+    if (!result.detections || !Array.isArray(result.detections)) return
+    
+    result.detections.forEach(det => {
+      // Validate bbox array exists and has correct length
+      if (!det.bbox || !Array.isArray(det.bbox) || det.bbox.length < 4) return
+      const [x1, y1, x2, y2] = det.bbox
+      const width = x2 - x1
+      const height = y2 - y1
 
+      // Color based on danger level and TTC
+      let color = '#00ff00' // Green (safe)
+      
+      if (det.danger) {
+        // Danger objects (vehicles, pedestrians)
+        if (det.ttc !== undefined && det.ttc !== null) {
+          if (det.ttc < 2.0) color = '#ff0000' // Red (critical)
+          else if (det.ttc < 3.5) color = '#ffaa00' // Orange (warning)
+        }
+      } else {
+        // Non-danger objects (trees, animals, objects)
+        color = '#00ccff' // Cyan (neutral)
+      }
+      
+      // Highlight new objects
+      if (det.is_new) {
+        color = '#ff00ff' // Magenta (new discovery!)
+      }
+
+      // Draw bounding box
+      ctx.strokeStyle = color
+      ctx.lineWidth = det.is_new ? 4 : 3
+      ctx.strokeRect(x1, y1, width, height)
+
+      // Draw label background
+      const className = det.cls || det.class || 'unknown'
+      const label = `${className} ${(det.conf * 100).toFixed(0)}%`
+      const distance = (det.distance_m !== undefined && det.distance_m !== null) ? ` ${det.distance_m.toFixed(1)}m` : ''
+      const ttc = det.ttc !== undefined && det.ttc !== null && det.ttc < 10 ? ` TTC:${det.ttc.toFixed(1)}s` : ''
+      const newTag = det.is_new ? ' 🆕' : ''
+      const fullLabel = label + distance + ttc + newTag
+
+      ctx.fillStyle = color
+      ctx.fillRect(x1, y1 - 30, ctx.measureText(fullLabel).width + 10, 25)
+
+      // Draw label text
+      ctx.fillStyle = '#ffffff'
+      ctx.font = det.is_new ? 'bold 16px Arial' : '16px Arial'
+      ctx.fillText(fullLabel, x1 + 5, y1 - 10)
+    })
+  }
+
+  // Save detections to backend
+  const saveDetections = async (detections: Detection[]) => {
+    try {
+      await fetch('http://localhost:8000/api/detections/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ detections })
+      })
+    } catch (error) {
+      console.error('Error saving detections:', error)
+    }
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
+      stopWebcam()
+      stopInference()
     }
-  }, [isRunning, config.model, config.confidence, config.maxDetections])
+  }, [])
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6">
-          {/* Header */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-                🚗 ADAS Live Detection
-              </h1>
-              <div className="flex items-center gap-3">
-                {modelWorkerStatus ? (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">
-                    <Wifi className="w-4 h-4 animate-pulse" />
-                    Model Worker
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm">
-                    <WifiOff className="w-4 h-4" />
-                    No Model Worker
-                  </div>
-                )}
-                {isConnected ? (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">
-                    <Wifi className="w-4 h-4 animate-pulse" />
-                    Camera Connected
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-500/20 text-gray-400 text-sm">
-                    <WifiOff className="w-4 h-4" />
-                    No Camera
-                  </div>
-                )}
-              </div>
-            </div>
-            <p className="text-foreground/60">
-              Hệ thống ADAS thực tế - Dữ liệu từ camera thực, xử lý bởi YOLOv8
-            </p>
-          </div>
-
-          {/* Warnings */}
-          {!modelWorkerStatus && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                ⚠️ <strong>Model Worker không hoạt động!</strong> Chạy: <code className="bg-black/20 px-2 py-1 rounded">python model-worker/app.py</code>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {config.cameraSource !== "webcam" && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                ℹ️ <strong>Chế độ {AVAILABLE_CAMERAS.find((c) => c.id === config.cameraSource)?.name}:</strong> Xem hướng dẫn cài đặt
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Video Canvas */}
-            <div className="lg:col-span-3 space-y-4">
-              <Card className="bg-card border-border overflow-hidden">
-                <div className="relative bg-black aspect-video">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover hidden"
-                    autoPlay
-                    playsInline
-                  />
-                  <canvas
-                    ref={canvasRef}
-                    width={640}
-                    height={480}
-                    className="w-full h-full"
-                  />
-
-                  {!isRunning && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                      <div className="text-center">
-                        <div className="text-5xl mb-4">📹</div>
-                        <p className="text-foreground/80 font-semibold mb-4">
-                          Sẵn sàng để phát hiện
-                        </p>
-                        <p className="text-foreground/50 text-sm">
-                          {modelWorkerStatus
-                            ? "Nhấn nút bên dưới để bắt đầu"
-                            : "Chạy Model Worker trước"}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Status Bar */}
-                  {isRunning && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-3">
-                      <div className="flex items-center justify-between text-white text-sm">
-                        <div className="flex gap-4">
-                          <span>📊 Model: {config.model}</span>
-                          <span>🎯 Confidence: {(config.confidence * 100).toFixed(0)}%</span>
-                          <span>🚗 Detections: {detections.length}</span>
-                        </div>
-                        <span className="text-cyan-400 font-mono">
-                          {fps.toFixed(1)} FPS | {processingTime.toFixed(0)}ms
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Controls */}
-                <div className="p-4 border-t border-border flex gap-3">
-                  {!isRunning ? (
-                    <Button
-                      onClick={startDetection}
-                      disabled={isDownloading || !modelWorkerStatus}
-                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Bắt Đầu Phát Hiện
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={stopDetection}
-                      className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                    >
-                      <Square className="w-4 h-4 mr-2" />
-                      Dừng Lại
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => window.location.reload()}
-                    variant="outline"
-                    size="icon"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-
-            {/* Right Sidebar - Config & Stats */}
-            <div className="space-y-4">
-              {/* Detection Config */}
-              <div>
-                <h2 className="text-sm font-semibold mb-3 text-foreground/80">⚙️ CẤU HÌNH</h2>
-                <DetectionConfigPanel
-                  config={config}
-                  onConfigChange={setConfig}
-                  availableModels={AVAILABLE_MODELS}
-                  availableCameras={AVAILABLE_CAMERAS}
-                  onModelDownload={handleModelDownload}
-                  isProcessing={isDownloading}
-                />
-              </div>
-
-              {/* Detection Stats */}
-              <div>
-                <h2 className="text-sm font-semibold mb-3 text-foreground/80">📈 THỐNG KÊ</h2>
-                <DetectionStats
-                  detections={detections.map((d) => ({
-                    id: d.id.toString(),
-                    class: d.cls,
-                    confidence: d.conf,
-                    x: d.bbox[0],
-                    y: d.bbox[1],
-                    width: d.bbox[2],
-                    height: d.bbox[3],
-                    color: d.color,
-                    danger: d.danger,
-                    ttc: d.ttc,
-                  }))}
-                  fps={fps}
-                  modelName={config.model}
-                  processingTime={processingTime}
-                  dangerDetected={detections.some((d) => d.danger)}
-                />
-              </div>
-
-              {/* Recent Detections from Database */}
-              <div>
-                <h2 className="text-sm font-semibold mb-3 text-foreground/80">
-                  💾 DỮ LIỆU ĐÃ LƯU ({recentDetections.length})
-                </h2>
-                <Card className="bg-card border-border">
-                  <div className="p-3 max-h-64 overflow-y-auto space-y-2">
-                    {recentDetections.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground text-sm">
-                        Chưa có dữ liệu detection
-                      </div>
-                    ) : (
-                      recentDetections.map((det, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-2 bg-accent/50 rounded border border-border text-xs"
-                        >
-                          <div className="flex-1">
-                            <div className="font-semibold text-foreground">
-                              {det.cls}
-                            </div>
-                            <div className="text-muted-foreground">
-                              {(det.conf * 100).toFixed(0)}% • {det.distance_m?.toFixed(1)}m
-                            </div>
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            {det.timestamp ? new Date(det.timestamp).toLocaleTimeString() : ''}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Shield className="w-8 h-8 text-primary" />
+            ADAS Unified System
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Hệ thống ADAS với AI tự học: Phát hiện MỌI đối tượng (80+ loại) + Tự động học từ dữ liệu mới + Cảnh báo thông minh
+          </p>
         </div>
-      </main>
+      </div>
+
+      <Alert>
+        <Zap className="h-4 w-4" />
+        <AlertDescription>
+          <strong>AI Model:</strong> YOLOv8n phát hiện TẤT CẢ 80 loại đối tượng COCO (xe, người, cây cối, động vật, vật thể, v.v.) + Lane Detection + Distance + TTC + Auto-Learning từ dữ liệu mới
+        </AlertDescription>
+      </Alert>
+
+      {/* Camera Control */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Video className="w-5 h-5" />
+            Camera & Live Stream
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              onClick={startWebcam}
+              disabled={!!stream || isVideoMode}
+              variant={stream ? 'secondary' : 'default'}
+            >
+              <Video className="w-4 h-4 mr-2" />
+              Bật Camera
+            </Button>
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={!!stream || isVideoMode}
+              variant={videoFile ? 'secondary' : 'default'}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Video
+            </Button>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoUpload}
+              className="hidden"
+            />
+            <Button
+              onClick={stopWebcam}
+              disabled={!stream && !videoFile}
+              variant="destructive"
+            >
+              <VideoOff className="w-4 h-4 mr-2" />
+              {isVideoMode ? 'Xóa Video' : 'Tắt Camera'}
+            </Button>
+            <div className="flex-1" />
+            <Button
+              onClick={isStreaming ? stopInference : startInference}
+              disabled={!stream && !videoFile}
+              variant={isStreaming ? 'destructive' : 'default'}
+            >
+              <Activity className="w-4 h-4 mr-2" />
+              {isStreaming ? 'Dừng Phát Hiện' : 'Bắt Đầu Phát Hiện'}
+            </Button>
+          </div>
+          
+          {/* Video Source Info */}
+          {(stream || videoFile) && (
+            <div className="text-sm text-muted-foreground">
+              {isVideoMode ? (
+                <Badge variant="secondary">📹 Video File: {videoFile?.name}</Badge>
+              ) : (
+                <Badge variant="secondary">🎥 Live Camera</Badge>
+              )}
+            </div>
+          )}
+
+          {/* Video Display */}
+          <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-contain"
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            />
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{fps}</div>
+                  <div className="text-sm text-muted-foreground">FPS</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{detectionCount}</div>
+                  <div className="text-sm text-muted-foreground">Detections</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{stats.inference_time.toFixed(0)}ms</div>
+                  <div className="text-sm text-muted-foreground">Inference Time</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Alerts Panel */}
+      {alerts.length > 0 && (
+        <Card className="border-red-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Cảnh Báo An Toàn
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {alerts.map((alert, index) => (
+              <Alert key={index} variant={alert.level === 'critical' ? 'destructive' : 'default'}>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong className="uppercase">{alert.level}:</strong> {alert.message}
+                  {alert.distance && ` (${alert.distance.toFixed(1)}m)`}
+                  {alert.ttc && ` - TTC: ${alert.ttc.toFixed(1)}s`}
+                </AlertDescription>
+              </Alert>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Auto-Learning Panel */}
+      {newObjects.length > 0 && (
+        <Card className="border-purple-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-600">
+              <Zap className="w-5 h-5" />
+              🆕 Phát Hiện Đối Tượng Mới - Đang Học!
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Hệ thống đã phát hiện và đang học các đối tượng mới:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {newObjects.map((obj, idx) => (
+                  <Badge key={idx} variant="outline" className="text-purple-600 border-purple-500">
+                    {obj.class} ({obj.reason === 'new_class' ? 'Loại mới' : 'Chất lượng cao'})
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Auto-Collection Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Thống Kê Auto-Learning
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{stats.unique_classes?.length || 0}</div>
+                  <div className="text-sm text-muted-foreground">Loại đối tượng</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">{collectionStats.total_collected}</div>
+                  <div className="text-sm text-muted-foreground">Đã thu thập</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">{collectionStats.new_objects_learned}</div>
+                  <div className="text-sm text-muted-foreground">Đối tượng mới học</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{stats.new_objects_count || 0}</div>
+                  <div className="text-sm text-muted-foreground">Mới (frame hiện tại)</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {stats.unique_classes && stats.unique_classes.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-semibold mb-2">Đối tượng đang phát hiện:</p>
+              <div className="flex flex-wrap gap-2">
+                {stats.unique_classes.map((cls, idx) => (
+                  <Badge key={idx} variant="secondary">{cls}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* System Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle>System Performance & Capabilities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-semibold">Model:</span> YOLOv8n Unified (80 COCO Classes)
+            </div>
+            <div>
+              <span className="font-semibold">Backend:</span> {isStreaming ? <Badge variant="default">Connected</Badge> : <Badge variant="secondary">Disconnected</Badge>}
+            </div>
+            <div>
+              <span className="font-semibold">Features:</span> ALL Objects, Lanes, Distance, TTC, Auto-Learning
+            </div>
+            <div>
+              <span className="font-semibold">Target FPS:</span> 10
+            </div>
+            <div className="col-span-2">
+              <span className="font-semibold">Detectable Objects:</span> 
+              <Badge variant="outline" className="ml-2">Vehicles</Badge>
+              <Badge variant="outline" className="ml-2">Pedestrians</Badge>
+              <Badge variant="outline" className="ml-2">Animals</Badge>
+              <Badge variant="outline" className="ml-2">Trees/Plants</Badge>
+              <Badge variant="outline" className="ml-2">Traffic Signs</Badge>
+              <Badge variant="outline" className="ml-2">And 75+ more!</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Color Legend */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Bảng Màu Phát Hiện</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-500"></div>
+              <span>Nguy hiểm (TTC &lt; 2s)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-500"></div>
+              <span>Cảnh báo (TTC &lt; 3.5s)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-500"></div>
+              <span>An toàn (phương tiện)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-cyan-500"></div>
+              <span>Đối tượng thường (cây, vật)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-purple-500"></div>
+              <span>🆕 Đối tượng mới học</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

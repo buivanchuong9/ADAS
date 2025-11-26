@@ -172,9 +172,9 @@ export default function DriverMonitor() {
               </Card>
 
               {(eyesClosed || fatigueLevel > 60 || distractionLevel > 60) && (
-                <Card className="bg-card border-border p-4 border-destructive/50 bg-destructive/5">
+                <Card className="p-4 border-destructive/50 bg-destructive/5">
                   <div className="flex gap-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Cảnh Báo</h4>
                       <p className="text-sm text-foreground/70">

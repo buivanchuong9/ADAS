@@ -29,6 +29,10 @@ from api.inference.router import router as inference_router
 from api.training.router import router as training_router
 from api.dataset.router import router as dataset_router
 from api.alerts.router import router as alerts_router
+from api.detections.router import router as detections_router
+from api.models.router import router as models_router
+from api.websocket_inference import router as ws_router
+from api.auto_learning.router import router as auto_learning_router
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -54,6 +58,10 @@ app.include_router(inference_router)
 app.include_router(training_router)
 app.include_router(dataset_router)
 app.include_router(alerts_router)
+app.include_router(detections_router)
+app.include_router(models_router)
+app.include_router(ws_router)
+app.include_router(auto_learning_router)
 
 # Initialize services
 model_service = ModelService()
@@ -246,7 +254,36 @@ async def save_detections(data: dict, db: Session = Depends(get_db)):
     try:
         detections_data = data.get("detections", [])
         trip_id = data.get("trip_id")
-        camera_id = data.get("camera_id", 1)  # Default camera ID
+        camera_id = data.get("camera_id")
+        
+        # If no trip_id provided, create a default trip or skip saving
+        if not trip_id:
+            # Try to get or create a default trip
+            default_trip = db.query(Trip).filter(Trip.driver_name == "Default Driver").first()
+            if not default_trip:
+                # Create a default trip
+                default_trip = Trip(
+                    driver_name="Default Driver",
+                    start_time=datetime.utcnow(),
+                    vehicle_id="WEBCAM-001"
+                )
+                db.add(default_trip)
+                db.flush()  # Get the ID without committing
+            trip_id = default_trip.id
+        
+        # If no camera_id provided, use default camera
+        if not camera_id:
+            default_camera = db.query(Camera).filter(Camera.name == "Default Camera").first()
+            if not default_camera:
+                default_camera = Camera(
+                    name="Default Camera",
+                    location="Front",
+                    resolution="1920x1080",
+                    fps=30.0
+                )
+                db.add(default_camera)
+                db.flush()
+            camera_id = default_camera.id
         
         saved_detections = []
         

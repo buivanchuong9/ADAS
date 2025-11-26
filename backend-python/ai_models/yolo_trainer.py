@@ -143,7 +143,9 @@ class YOLOTrainer:
         epochs: int = 50,
         batch_size: int = 16,
         img_size: int = 640,
-        callback: Optional[Callable] = None
+        callback: Optional[Callable] = None,
+        data_yaml: Optional[str] = None,
+        patience: int = 50
     ) -> tuple:
         """
         Train model
@@ -153,14 +155,18 @@ class YOLOTrainer:
             batch_size: Batch size
             img_size: Image size
             callback: Callback function(epoch, total_epochs, metrics)
+            data_yaml: Path to data.yaml (optional, defaults to dataset/training/data.yaml)
+            patience: Early stopping patience
         
         Returns:
             (model_path, metrics)
         """
-        data_yaml = self.dataset_dir / "data.yaml"
+        if data_yaml is None:
+            data_yaml = str(self.dataset_dir / "data.yaml")
         
-        if not data_yaml.exists():
-            raise ValueError("Dataset chưa được chuẩn bị. Chạy prepare_dataset() trước.")
+        data_yaml_path = Path(data_yaml)
+        if not data_yaml_path.exists():
+            raise ValueError(f"Dataset config not found: {data_yaml_path}")
         
         # Training với callback
         class TrainingCallback:
@@ -179,7 +185,7 @@ class YOLOTrainer:
         
         # Train
         results = self.model.train(
-            data=str(data_yaml),
+            data=str(data_yaml_path),
             epochs=epochs,
             batch=batch_size,
             imgsz=img_size,
@@ -187,6 +193,7 @@ class YOLOTrainer:
             name=self.model_name,
             exist_ok=True,
             verbose=True,
+            patience=patience,
             callbacks=[TrainingCallback(callback)] if callback else None
         )
         
