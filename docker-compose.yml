@@ -1,83 +1,101 @@
-version: '3.9'
+# ============================================
+# ADAS Platform - Unified Docker Compose
+# Full Stack: Backend + Frontend + Database
+# ============================================
+
+version: '3.8'
 
 services:
-  # Frontend - Next.js Application
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-    depends_on:
-      - backend
-    networks:
-      - adas-network
-
-  # Backend - Python FastAPI
+  # ============================================
+  # Backend Service (FastAPI + WebSocket)
+  # ============================================
   backend:
     build:
       context: ./backend-python
       dockerfile: Dockerfile
+    container_name: adas-backend
+
     ports:
       - "8000:8000"
-    environment:
-      - SQL_SERVER=sqlserver
-      - SQL_DATABASE=${SQL_DATABASE:-ADAS_DB}
-      - SQL_USERNAME=${SQL_USERNAME:-sa}
-      - SQL_PASSWORD=${SQL_PASSWORD}
-      - SQL_DRIVER=ODBC Driver 17 for SQL Server
-      - MODEL_WORKER_URL=http://model-worker:8000
-      - ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000
-      - PORT=8000
-    depends_on:
-      - sqlserver
-      - model-worker
+
     volumes:
+      # Source code (for development hot reload)
+      - ./backend-python:/app
+      # Persistent data
+      - ./backend-python/ai_models/weights:/app/ai_models/weights
+      - ./backend-python/adas.db:/app/adas.db
       - ./backend-python/logs:/app/logs
-    networks:
-      - adas-network
-    restart: unless-stopped
+      - ./backend-python/dataset:/app/dataset
 
-  # Model Worker - YOLO Inference
-  model-worker:
-    build:
-      context: ./model-worker
-      dockerfile: Dockerfile
-    ports:
-      - "8001:8000"
-    deploy:
-      resources:
-        limits:
-          memory: 4g
-    volumes:
-      - ./model-worker:/app
-      - model-cache:/root/.cache
-    networks:
-      - adas-network
-    restart: unless-stopped
-
-  # SQL Server Database
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: adas-sqlserver
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SQL_PASSWORD:-YourStrong@Password123}
-      - MSSQL_PID=Express
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver-data:/var/opt/mssql
-    networks:
-      - adas-network
+      - PYTHONUNBUFFERED=1
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CORS_ORIGINS=*
+      - DATABASE_URL=sqlite:///./adas.db
+      - WEIGHTS_DIR=/app/ai_models/weights
+      - ENABLE_AUTO_LEARNING=true
+      - ENABLE_VOICE_ALERTS=true
+      - ENABLE_DRIVER_MONITORING=true
+
     restart: unless-stopped
 
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    networks:
+      - adas-network
+
+  # ============================================
+  # Frontend Service (Next.js)
+  # ============================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adas-frontend
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      # Public API URL (for browser/client-side)
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # Internal API URL (for server-side calls within Docker)
+      - INTERNAL_API_URL=http://backend:8000
+      - NODE_ENV=production
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    networks:
+      - adas-network
+
+# ============================================
+# Networks
+# ============================================
 networks:
   adas-network:
     driver: bridge
+    name: adas-network
 
+# ============================================
+# Volumes (optional, for named volumes)
+# ============================================
 volumes:
-  sqlserver-data:
-  model-cache:
+  backend-data:
+    driver: local

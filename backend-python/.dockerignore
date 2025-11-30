@@ -1,0 +1,75 @@
+# ============================================
+# Docker Ignore File
+# Exclude unnecessary files from Docker image
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+docs/
+
+# Tests
+tests/
+*.test.py
+test_*.py
+
+# Logs (we'll create fresh in container)
+*.log
+logs/
+
+# Database (we'll use volume)
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Environment files (sensitive)
+.env
+.env.*
+!.env.example
+
+# Large model files (use volume instead)
+# ai_models/weights/*.pt
+# ai_models/weights/*.pth
+
+# Dataset (use volume)
+dataset/raw/*
+dataset/labels/*
+dataset/auto_collected/*

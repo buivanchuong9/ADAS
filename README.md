@@ -1,406 +1,371 @@
 # 🚗 ADAS Platform - Advanced Driver Assistance System
 
-> Hệ thống hỗ trợ lái xe tiên tiến với AI real-time detection, driver monitoring, và analytics dashboard
+> **Real-time AI-powered driver safety monitoring system**
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green)](https://fastapi.tiangolo.com)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-red)](https://microsoft.com/sql-server)
+## 🆕 For Team Members - First Time Setup
 
----
+**Nếu bạn mới clone project từ GitHub**, vui lòng đọc hướng dẫn setup đầy đủ:
 
-## 📦 Project Structure
+📖 **[SETUP_FOR_TEAM.md](./SETUP_FOR_TEAM.md)** - Hướng dẫn chi tiết cho team members
 
-```
-adas-platform/
-├── app/                    # Next.js 14 Frontend (React)
-│   ├── adas/              # ADAS detection page
-│   ├── dashboard/         # Main dashboard
-│   ├── driver-monitor/    # Driver monitoring
-│   └── api/               # API routes (unused, moved to backend)
-│
-├── backend-python/         # FastAPI Backend (Python)
-│   ├── main.py            # API server
-│   ├── models.py          # SQLAlchemy models
-│   ├── services.py        # Business logic
-│   └── docs/              # Complete documentation
-│
-├── adas_system/           # ROS2/Python ADAS modules
-│   ├── perception/        # Camera, LiDAR, BEV
-│   ├── tracking/          # DeepSORT tracker
-│   ├── prediction/        # Trajectory prediction
-│   ├── control/           # Vehicle controller
-│   └── decision/          # Safety state machine
-│
-├── model-worker/          # YOLO Inference Service
-│   └── app.py             # FastAPI inference API
-│
-└── components/            # React UI components
+Hoặc chạy script tự động:
+```bash
+./setup-first-time.sh
 ```
 
 ---
+AI-powered Advanced Driver Assistance System với real-time object detection, auto data collection, incremental training, và remote access capabilities.
+
+## ✨ Features
+
+- 🎯 **Real-time Object Detection** - YOLOv8 detection cho vehicles, pedestrians, traffic signs
+- 📊 **Auto Data Collection** - Tự động thu thập và label dữ liệu training
+- 🔄 **Incremental Training** - Tự động train model mới khi có đủ data
+- 🔔 **Alert System** - Cảnh báo nguy hiểm với voice notifications
+- 📹 **WebSocket Live Feed** - Streaming video với real-time inference
+- 🌐 **Remote Access** - Cloudflare Tunnel để access API từ bất kỳ đâu
+- 📈 **Analytics Dashboard** - Visualization và statistics
+- 🗄️ **Dataset Management** - Quản lý videos, labels, training data
 
 ## 🚀 Quick Start
 
-### Option 1: Docker (Recommended)
+### Prerequisites
 
-```bash
-# Clone repository
-git clone https://github.com/buivanchuong9/ADAS.git
-cd adas-platform
+- Python 3.8+
+- Node.js 16+ (cho frontend)
+- SQL Server (hoặc SQLite cho development)
+- Homebrew (macOS) hoặc apt (Linux) - cho Cloudflare Tunnel
 
-# Start full stack
-docker-compose up -d
-
-# Access
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000/docs
-```
-
-### Option 2: Manual Setup
-
-#### 1. Backend Setup (Python + SQL Server)
+### 1. Cài đặt Backend
 
 ```bash
 cd backend-python
-
-# Windows
-setup.bat
-
-# Linux/Mac
-./setup.sh
-
-# Configure .env
-cp .env.example .env
-# Edit .env with your SQL Server credentials
-
-# Create database
-python seed.py
-
-# Run server
-python main.py
+pip install -r requirements.txt
 ```
 
-#### 2. Frontend Setup (Next.js)
+### 2. Cài đặt Frontend
 
 ```bash
-# At root directory
 npm install
-# or
+# hoặc
 pnpm install
+```
 
-# Configure environment
-# Update API base URL in app/api/* if needed
+### 3. Chạy hệ thống
 
-# Run dev server
+**Option A: Local Only (cùng máy)**
+
+```bash
+# Terminal 1 - Backend
+cd backend-python
+python main.py
+
+# Terminal 2 - Frontend
 npm run dev
 ```
 
-#### 3. Model Worker (Optional)
+Access:
+- Backend API: http://localhost:8080/docs
+- Frontend: http://localhost:3000
+
+**Option B: Remote Access (khác máy, khác mạng)**
 
 ```bash
-cd model-worker
-pip install -r requirements.txt
-python app.py
+# Terminal 1 - Backend
+cd backend-python
+python main.py
+
+# Terminal 2 - Tunnel
+./start-tunnel.sh
+# Copy URL được print ra (VD: https://abc-123.trycloudflare.com)
+
+# Cập nhật frontend config
+echo "NEXT_PUBLIC_API_URL=https://abc-123.trycloudflare.com" > .env.local
+
+# Terminal 3 - Frontend
+npm run dev
 ```
 
----
+Giờ frontend có thể chạy ở **BẤT KỲ MÁY NÀO, BẤT KỲ ĐÂU!** 🌍
 
-## 📱 Application URLs
+## 📖 Documentation
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | http://localhost:3000 | Main web application |
-| **Dashboard** | http://localhost:3000/dashboard | Analytics & statistics |
-| **ADAS Page** | http://localhost:3000/adas | Real-time detection |
-| **Driver Monitor** | http://localhost:3000/driver-monitor | Fatigue detection |
-| **AI Assistant** | http://localhost:3000/ai-assistant | Chat assistant |
-| **Backend API** | http://localhost:8000/docs | FastAPI Swagger UI |
-| **API Health** | http://localhost:8000/health | Health check |
+- **[QUICKSTART.md](./QUICKSTART.md)** - Hướng dẫn nhanh setup và chạy
+- **[TUNNEL_SETUP.md](./TUNNEL_SETUP.md)** - Chi tiết về remote access với Cloudflare Tunnel
+- **API Docs** - http://localhost:8080/docs (interactive Swagger UI)
 
----
+## 🛠️ Available Scripts
 
-## 🏗️ System Architecture
+### Backend Scripts
 
-```
-┌─────────────────────┐      ┌──────────────────────┐      ┌─────────────────────┐
-│  Frontend (Next.js) │ ───▶ │ Backend (FastAPI)    │ ───▶ │ Model Worker (YOLO) │
-│  Port: 3000         │      │ Port: 8000           │      │ Port: 8001          │
-│  React + Tailwind   │      │ Python + SQLAlchemy  │      │ YOLOv8 Inference    │
-└─────────────────────┘      └──────────────────────┘      └─────────────────────┘
-                                      │
-                                      ▼
-                             ┌──────────────────┐
-                             │  SQL Server      │
-                             │  Database        │
-                             │  Port: 1433      │
-                             └──────────────────┘
+```bash
+./setup-tunnel.sh        # Cài đặt Cloudflare Tunnel
+./start-tunnel.sh        # Khởi động tunnel, expose backend ra internet
+./test-api.sh           # Test tất cả API endpoints
+./test-api.sh <URL>     # Test remote API endpoints
 ```
 
-**Stack:**
-- **Frontend**: Next.js 14 + React 19 + TypeScript + TailwindCSS
-- **Backend**: FastAPI + SQLAlchemy + pyodbc
-- **Database**: Microsoft SQL Server 2019+
-- **ML**: YOLOv8/v5 + OpenCV + PyTorch
-- **Communication**: REST API + WebSocket
+### Frontend Scripts
 
----
+```bash
+npm run dev             # Chạy development server
+npm run build           # Build production
+npm run start           # Start production server
+npm run lint            # Lint check
+```
 
-## 📋 System Requirements
+## 🌐 API Endpoints Overview
 
-| Component | Requirement |
-|-----------|-------------|
-| **Node.js** | 18.0+ |
-| **Python** | 3.10+ |
-| **SQL Server** | 2019+ (Express/Developer/Standard) |
-| **ODBC Driver** | 17 for SQL Server |
-| **RAM** | 8GB minimum, 16GB recommended |
-| **Disk** | 10GB free space |
-| **Ports** | 3000, 8000, 8001, 1433 |
+### Core
+- `GET /` - API information
+- `GET /health` - Health check
+- `GET /api/status` - Detailed status với DB check
+- `GET /docs` - Interactive API documentation
 
----
+### ADAS Features
+- `/api/cameras/*` - Camera management
+- `/api/models/*` - AI model management
+- `/api/detections/*` - Detection results
+- `/api/alerts/*` - Alert/warning system
+- `/api/dataset/*` - Dataset management
+- `/api/training/*` - Model training
+- `/api/auto-learning/*` - Auto incremental learning
+- `/api/inference/*` - Image/video inference
+- `/ws/infer` - WebSocket live inference
 
-## 💡 Features
+### Data Management
+- `/api/trips/*` - Trip tracking
+- `/api/events/*` - Event logging
+- `/api/drivers/*` - Driver management
+- `/api/analytics/*` - Analytics & statistics
 
-### ✅ Core Features
-- **Real-time Object Detection** - YOLOv8/v5 models (15+ variants)
-- **Driver Monitoring** - Fatigue & distraction detection
-- **Multi-camera Support** - Webcam, IP camera, smartphone
-- **Trip Management** - Track journeys with events
-- **Analytics Dashboard** - Real-time statistics & charts
-- **Event System** - Safety alerts & notifications
-- **AI Assistant** - Chat-based help system
-- **WebSocket Streaming** - Low-latency video inference
+**Xem danh sách đầy đủ tại [QUICKSTART.md](./QUICKSTART.md)**
 
-### 📊 Detection Capabilities
-- Vehicle detection (cars, trucks, buses)
-- Pedestrian detection
-- Traffic sign recognition
-- Lane detection
-- Driver pose estimation
-- Facial recognition
-- License plate detection (optional)
+## 🏗️ Architecture
 
----
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Frontend (Next.js)                  │
+│                                                         │
+│  ┌─────────┐  ┌──────────┐  ┌────────┐  ┌──────────┐ │
+│  │Dashboard│  │Detection │  │Training│  │Analytics │ │
+│  └─────────┘  └──────────┘  └────────┘  └──────────┘ │
+└────────────────────┬────────────────────────────────────┘
+                     │ HTTP/WebSocket
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│            Cloudflare Tunnel (Optional)                 │
+│         https://xyz.trycloudflare.com → localhost:8080  │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│              Backend (FastAPI Python)                   │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │Detection │  │Training  │  │Dataset   │            │
+│  │Engine    │  │Pipeline  │  │Manager   │            │
+│  └──────────┘  └──────────┘  └──────────┘            │
+│                                                         │
+│  ┌──────────────────────────────────────┐             │
+│  │      AI Models (YOLOv8)              │             │
+│  │  - Object Detection                  │             │
+│  │  - Auto Labeling                     │             │
+│  │  - Incremental Training              │             │
+│  └──────────────────────────────────────┘             │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│              Database (SQL Server/SQLite)               │
+│  - Detections, Alerts, Trips, Events                   │
+│  - Models, Datasets, Labels                            │
+│  - Analytics, Statistics                               │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## 🔧 Configuration
 
-### Backend Configuration
+### Backend Config
 
-Edit `backend-python/.env`:
+File: `backend-python/config.py`
+- Database connection
+- Model paths
+- Training parameters
+- Alert thresholds
 
-```env
-# SQL Server
-SQL_SERVER=localhost
-SQL_DATABASE=ADAS_DB
-SQL_USERNAME=sa
-SQL_PASSWORD=YourPassword
+### Frontend Config
 
-# Model Worker
-MODEL_WORKER_URL=http://localhost:8001
+File: `lib/api-config.ts`
+- API base URL
+- All endpoint paths
+- WebSocket URLs
 
-# CORS
-ALLOWED_ORIGINS=http://localhost:3000
-
-# Server
-PORT=8000
+Environment: `.env.local`
+```bash
+NEXT_PUBLIC_API_URL=https://your-tunnel-url.trycloudflare.com
 ```
-
-### Frontend Configuration
-
-Update API endpoints in `app/api/*/route.ts` if needed:
-
-```typescript
-const API_BASE = "http://localhost:8000";
-```
-
----
 
 ## 🧪 Testing
 
-### Backend Tests
+### Test Local API
 ```bash
-cd backend-python
-pytest -v
+./test-api.sh
 ```
 
-### API Testing
+### Test Remote API
 ```bash
-# Health check
-curl http://localhost:8000/health
-
-# Get cameras
-curl http://localhost:8000/api/cameras/list
-
-# API docs
-open http://localhost:8000/docs
+./test-api.sh https://your-tunnel-url.trycloudflare.com
 ```
 
----
+### Test specific endpoint
+```bash
+curl http://localhost:8080/api/status | jq
+curl http://localhost:8080/api/detections/stats | jq
+```
 
-## 📚 Documentation
+## 📊 Tech Stack
 
-- **Backend**: [backend-python/README.md](backend-python/README.md)
-- **Migration Guide**: [backend-python/MIGRATION_GUIDE.md](backend-python/MIGRATION_GUIDE.md)
-- **Windows Service**: [backend-python/WINDOWS_SERVICE.md](backend-python/WINDOWS_SERVICE.md)
-- **Docker**: [backend-python/DOCKER.md](backend-python/DOCKER.md)
-- **Testing**: [backend-python/TESTING.md](backend-python/TESTING.md)
-- **Quick Start**: [backend-python/QUICKSTART.md](backend-python/QUICKSTART.md)
+### Backend
+- **Framework**: FastAPI (Python)
+- **AI/ML**: YOLOv8, PyTorch, Ultralytics
+- **Database**: SQL Server / SQLite
+- **ORM**: SQLAlchemy
+- **Real-time**: WebSocket
+- **Deployment**: Uvicorn
 
----
+### Frontend
+- **Framework**: Next.js 14 (React)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Charts**: Recharts
+- **State**: React Hooks
+
+### DevOps
+- **Tunnel**: Cloudflare Tunnel (cloudflared)
+- **API Testing**: curl, custom scripts
+- **Documentation**: Swagger/OpenAPI
+
+## 🚀 Remote Access Setup
+
+1. **Install cloudflared:**
+   ```bash
+   ./setup-tunnel.sh
+   ```
+
+2. **Start backend:**
+   ```bash
+   cd backend-python && python main.py
+   ```
+
+3. **Start tunnel:**
+   ```bash
+   ./start-tunnel.sh
+   ```
+   Copy the URL printed (e.g., `https://abc-123.trycloudflare.com`)
+
+4. **Update frontend:**
+   ```bash
+   echo "NEXT_PUBLIC_API_URL=https://abc-123.trycloudflare.com" > .env.local
+   npm run dev
+   ```
+
+5. **Access from anywhere:**
+   - API: `https://abc-123.trycloudflare.com/docs`
+   - Frontend: Any machine running the frontend code
+
+**Chi tiết:** [TUNNEL_SETUP.md](./TUNNEL_SETUP.md)
+
+## 📱 Use Cases
+
+1. **Development Team** - Multiple developers ở khác địa điểm cùng test API
+2. **Mobile Testing** - Test từ điện thoại/tablet qua 4G/5G
+3. **Demo/Presentation** - Show clients từ xa mà không cần deploy
+4. **Cross-device Testing** - Test trên nhiều devices khác nhau
+5. **Remote Debugging** - Debug issues từ xa với production-like setup
+
+## 🔒 Security Notes
+
+- Cloudflare Tunnel URL là **public** - bất kỳ ai có link đều truy cập được
+- Chỉ dùng cho **development/testing**, không dùng cho production
+- Thêm authentication/authorization nếu cần bảo mật
+- Có thể dùng Cloudflare Access để protect tunnel
+- Production deployment nên dùng proper hosting với SSL
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| **Port already in use** | Kill process: `lsof -i :8000` then `kill -9 [PID]` |
-| **SQL Server connection failed** | 1. Check SQL Server running<br>2. Verify credentials in `.env`<br>3. Enable TCP/IP in SQL Config Manager |
-| **ODBC Driver not found** | Install: https://aka.ms/downloadmsodbcsql |
-| **Module not found (Python)** | `pip install -r requirements.txt` |
-| **npm install fails** | `npm install --legacy-peer-deps` |
-| **Database not exist** | Run `python backend-python/seed.py` |
+### Backend không chạy
+```bash
+cd backend-python
+pip install -r requirements.txt
+python main.py
+```
 
----
----
+### Port conflict
+```bash
+# Kill process on port 8080
+lsof -ti:8080 | xargs kill -9
+```
 
-## 🤝 Contributing
+### Tunnel issues
+```bash
+# Reinstall cloudflared
+./setup-tunnel.sh
 
-Contributions are welcome! Please:
+# Check tunnel status
+tail -f tunnel.log
+```
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Frontend không connect
+1. Check `.env.local` có đúng URL
+2. Restart Next.js: `npm run dev`
+3. Clear browser cache
+4. Check browser console for errors
 
----
+### CORS errors
+- Backend đã config `allow_origins=["*"]`
+- Restart backend nếu vẫn lỗi
+- Check Network tab trong browser DevTools
 
-## 📝 License
+## 📈 Performance
+
+- **Detection Speed**: ~30-60 FPS (depending on GPU)
+- **WebSocket Latency**: <100ms (local), ~200-500ms (via tunnel)
+- **Training Time**: ~1-5 hours (depending on dataset size)
+- **Auto Learning**: Incremental training mỗi 100-500 new samples
+
+## 🗺️ Roadmap
+
+- [ ] Multi-camera support
+- [ ] Advanced driver monitoring (drowsiness, distraction)
+- [ ] GPS integration for location-based alerts
+- [ ] Cloud deployment guide
+- [ ] Mobile app (React Native)
+- [ ] Advanced analytics dashboard
+- [ ] Model comparison tools
+- [ ] Distributed training support
+
+## 📄 License
 
 This project is for educational and research purposes.
 
----
+## 🤝 Contributing
 
-## 👤 Author
+Contributions welcome! Please:
+1. Fork the repo
+2. Create feature branch
+3. Make changes
+4. Submit PR
 
-**Bui Van Chuong**
+## 📧 Support
 
-- GitHub: [@buivanchuong9](https://github.com/buivanchuong9)
-- Repository: [ADAS Platform](https://github.com/buivanchuong9/ADAS)
-
----
-
-## 🙏 Acknowledgments
-
-- **YOLOv8** - Ultralytics
-- **FastAPI** - Sebastián Ramírez
-- **Next.js** - Vercel
-- **SQL Server** - Microsoft
-- **React** - Meta
+Issues? Questions?
+- Check [QUICKSTART.md](./QUICKSTART.md)
+- Check [TUNNEL_SETUP.md](./TUNNEL_SETUP.md)
+- Check `/docs` endpoint
+- Open GitHub issue
 
 ---
 
-**⭐ Star this repo if you find it useful!**
-
-*Built with ❤️ for safer driving*
-
-- ⚡ **Cần tốc độ cao** (live stream): YOLOv8 Nano
-- 🎯 **Cần độ chính xác cao**: YOLOv8 Large hoặc Faster RCNN
-- 👤 **Phát hiện tài xế mệt mỏi**: YOLOv8 Pose
-- 🚙 **Biển số xe**: License Plate Recognition
-- 🛑 **Biển báo**: Traffic Sign Detector
-
-### 2. Live Detection (Phát hiện thời gian thực)
-- Mở: http://localhost:3000/live
-- Cho phép truy cập camera
-- Đặt vật thể trước camera
-- Xem detection boxes realtime
-
-### 3. Dashboard (Analytics)
-- Mở: http://localhost:3000/dashboard
-- Xem recent events
-- Xem inference results
-- Data tự sync từ Firebase
-
-### 4. AI Assistant (Trợ lý AI)
-- Mở: http://localhost:3000/ai-assistant
-- Chat về lái xe an toàn
-- Nhận tư vấn từ AI
-
-### 5. Driver Monitor (Giám sát tài xế)
-- Mở: http://localhost:3000/driver-monitor
-- Phát hiện mệt mỏi
-- Cảnh báo an toàn
-
----
-
-## 🧪 Kiểm tra setup
-
-Chạy verification script:
-```bash
-# Windows
-check.bat
-
-# macOS/Linux
-bash check.sh
-```
-
-Kết quả mong đợi:
-```
-✓ Node.js: v18.x.x
-✓ .NET SDK: 8.x.x
-✓ Python: 3.11.x
-✓ npm packages installed
-✓ Python packages installed
-✓ Firebase service account found
-```
-
----
-
-## 🎯 Tips & Tricks
-
-💡 **Monitor logs**: Check terminal output khi services đang chạy
-💡 **Clear cache**: `rm -rf .next && npm install --legacy-peer-deps`
-💡 **Stop service**: Close that terminal window
-💡 **Different port**: Edit uvicorn/dotnet/npm commands
-💡 **Debug mode**: Add `--debug` flag khi chạy services
-
----
-
-## 📝 Các lệnh hữu ích
-
-```bash
-# Cài lại dependencies
-npm install --legacy-peer-deps --force
-cd model-worker && pip install -r requirements.txt --force-reinstall
-
-# Xóa cache
-rm -rf .next node_modules __pycache__ bin obj
-npm install
-
-# Check ports
-lsof -i :3000
-lsof -i :5000
-lsof -i :8000
-
-# Kill process on port
-kill -9 $(lsof -ti:3000)
-```
-
----
-
-## 🚀 Next Steps
-
-1. ✅ Run `setup.sh` or `setup.bat`
-2. ✅ Add `backend/firebase-service-account.json`
-3. ✅ Run `run.sh` or `run.ps1`
-4. ✅ Open http://localhost:3000/dashboard
-5. 🎉 Enjoy!
-
----
-
-**Questions?** Check terminal logs or verify Firebase credentials.
-
-**Ready to deploy?** Project is production-ready with Firebase backend!
-
-Made with ❤️ for ADAS Platform
+**Made with ❤️ for safer driving**

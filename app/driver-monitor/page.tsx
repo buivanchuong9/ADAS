@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import { useState, useRef, useEffect } from "react"
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { AlertTriangle, Eye, Zap, Play, Square } from "lucide-react"
+import { useEffect, useRef, useState } from 'react'
+import { Sidebar } from '@/components/sidebar'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { AlertTriangle, Play, Square, Eye, Zap } from 'lucide-react'
 
-export default function DriverMonitor() {
+export default function DriverMonitorPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isMonitoring, setIsMonitoring] = useState(false)
@@ -143,9 +143,8 @@ export default function DriverMonitor() {
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full transition-all ${
-                          fatigueLevel > 60 ? "bg-destructive" : "bg-primary"
-                        }`}
+                        className={`h-2 rounded-full transition-all ${fatigueLevel > 60 ? "bg-destructive" : "bg-primary"
+                          }`}
                         style={{ width: `${fatigueLevel}%` }}
                       />
                     </div>
@@ -161,9 +160,8 @@ export default function DriverMonitor() {
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full transition-all ${
-                          distractionLevel > 60 ? "bg-destructive" : "bg-primary"
-                        }`}
+                        className={`h-2 rounded-full transition-all ${distractionLevel > 60 ? "bg-destructive" : "bg-primary"
+                          }`}
                         style={{ width: `${distractionLevel}%` }}
                       />
                     </div>
@@ -172,9 +170,9 @@ export default function DriverMonitor() {
               </Card>
 
               {(eyesClosed || fatigueLevel > 60 || distractionLevel > 60) && (
-                <Card className="bg-card border-border p-4 border-destructive/50 bg-destructive/5">
+                <Card className="p-4 border-destructive/50 bg-destructive/5">
                   <div className="flex gap-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">Cảnh Báo</h4>
                       <p className="text-sm text-foreground/70">

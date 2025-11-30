@@ -1,58 +1,43 @@
-# Backend Python - Docker Compose
-version: '3.8'
+# ============================================
+# ADAS Backend - Docker Compose Configuration
+# FastAPI + WebSocket + YOLOv11
+# ============================================
 
 services:
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: adas-backend
+    
     ports:
       - "8000:8000"
-    environment:
-      - SQL_SERVER=${SQL_SERVER:-host.docker.internal}
-      - SQL_DATABASE=${SQL_DATABASE:-ADAS_DB}
-      - SQL_USERNAME=${SQL_USERNAME:-sa}
-      - SQL_PASSWORD=${SQL_PASSWORD}
-      - SQL_DRIVER=ODBC Driver 17 for SQL Server
-      - MODEL_WORKER_URL=http://model-worker:8000
-      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+    
     volumes:
+      - .:/app
+      - ./ai_models/weights:/app/ai_models/weights
+      - ./adas.db:/app/adas.db
       - ./logs:/app/logs
-    restart: unless-stopped
-    depends_on:
-      - sqlserver
-      - model-worker
-    networks:
-      - adas-network
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: adas-sqlserver
+      - ./dataset:/app/dataset
+    
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SQL_PASSWORD:-YourStrong@Password123}
-      - MSSQL_PID=Express
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver-data:/var/opt/mssql
-    restart: unless-stopped
-    networks:
-      - adas-network
-
-  model-worker:
-    build: ../model-worker
-    container_name: adas-model-worker
-    ports:
-      - "8001:8000"
-    volumes:
-      - ../model-worker:/app
-    restart: unless-stopped
-    networks:
-      - adas-network
+      - PYTHONUNBUFFERED=1
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CORS_ORIGINS=*
+      - DATABASE_URL=sqlite:///./adas.db
+      - WEIGHTS_DIR=/app/ai_models/weights
+    
+    restart: always
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
-  adas-network:
+  default:
+    name: adas-network
     driver: bridge
-
-volumes:
-  sqlserver-data:
