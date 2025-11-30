@@ -1,13 +1,19 @@
 # 🚀 ADAS - Quick Start Guide
 
-## 🎯 Chạy toàn bộ hệ thống với 1 lệnh
+## 🎯 Chạy toàn bộ hệ thống với 1 lệnh (NEW!)
 
-### Option 1: Tự động (Recommended)
+### ✨ Unified Docker Setup (Recommended)
 ```bash
-./start-fullstack.sh
+# Chạy cả Backend + Frontend với 1 lệnh
+docker compose up --build
+
+# Sau đó mở browser:
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
-### Option 2: Từng bước
+### Option 2: Từng bước (Legacy)
 
 #### Bước 1: Start Backend (Docker)
 ```bash

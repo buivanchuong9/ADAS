@@ -8,6 +8,7 @@ import { AlertCircle, Video, VideoOff, Activity, Zap, Shield, AlertTriangle, Upl
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
 import { VideoUploadCard } from '@/components/video-upload-card'
+import { shouldSendFrame, filterDetections, smoothDetections, drawProfessionalBox, getDetectionColor, getVietnameseLabel, getOptimalInterval } from '@/lib/detection-utils'
 
 interface Detection {
   cls: string
@@ -51,7 +52,7 @@ interface UnifiedResult {
     new_objects_learned: number
     last_collection: string | null
   }
-  new_objects?: Array<{class: string, reason: string}>
+  new_objects?: Array<{ class: string, reason: string }>
 }
 
 export default function ADASUnifiedPage() {
@@ -59,7 +60,7 @@ export default function ADASUnifiedPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   const [isStreaming, setIsStreaming] = useState(false)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [videoFile, setVideoFile] = useState<File | null>(null)
@@ -67,15 +68,15 @@ export default function ADASUnifiedPage() {
   const [fps, setFps] = useState(0)
   const [detectionCount, setDetectionCount] = useState(0)
   const [alerts, setAlerts] = useState<AlertInfo[]>([])
-  const [stats, setStats] = useState<{fps: number, inference_time: number, total_objects: number, unique_classes: string[], new_objects_count: number}>({ 
-    fps: 0, 
-    inference_time: 0, 
-    total_objects: 0, 
-    unique_classes: [], 
-    new_objects_count: 0 
+  const [stats, setStats] = useState<{ fps: number, inference_time: number, total_objects: number, unique_classes: string[], new_objects_count: number }>({
+    fps: 0,
+    inference_time: 0,
+    total_objects: 0,
+    unique_classes: [],
+    new_objects_count: 0
   })
   const [collectionStats, setCollectionStats] = useState({ total_collected: 0, new_objects_learned: 0, last_collection: null })
-  const [newObjects, setNewObjects] = useState<Array<{class: string, reason: string}>>([])
+  const [newObjects, setNewObjects] = useState<Array<{ class: string, reason: string }>>([])
   const [enableAutoCollection, setEnableAutoCollection] = useState(true)
   const lastSaveTimeRef = useRef<number>(0)
   const lastVoiceAlertRef = useRef<string>("")
@@ -84,11 +85,11 @@ export default function ADASUnifiedPage() {
   // Text-to-Speech cho cảnh báo giọng nói
   const speakAlert = (message: string) => {
     if (!voiceEnabledRef.current || lastVoiceAlertRef.current === message) return
-    
+
     // Chỉ phát cảnh báo mới (tránh lặp lại)
     lastVoiceAlertRef.current = message
     setTimeout(() => { lastVoiceAlertRef.current = "" }, 3000) // Reset sau 3s
-    
+
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel() // Cancel any ongoing speech
       const utterance = new SpeechSynthesisUtterance(message)
@@ -106,7 +107,7 @@ export default function ADASUnifiedPage() {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720, facingMode: 'environment' }
       })
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
         setStream(mediaStream)
@@ -136,7 +137,7 @@ export default function ADASUnifiedPage() {
     const file = e.target.files?.[0]
     if (file && file.type.startsWith('video/')) {
       setVideoFile(file)
-      
+
       // Stop any existing stream
       if (stream) {
         stream.getTracks().forEach(track => track.stop())
@@ -166,7 +167,7 @@ export default function ADASUnifiedPage() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     const wsUrl = apiUrl.replace('http://', 'ws://').replace('https://', 'wss://')
     const wsEndpoint = `${wsUrl}/ws/infer/yolo`
-    
+
     console.log('🔌 Connecting to WebSocket:', wsEndpoint)
     const ws = new WebSocket(wsEndpoint)
     wsRef.current = ws
@@ -179,10 +180,10 @@ export default function ADASUnifiedPage() {
     ws.onmessage = (event) => {
       try {
         const result: UnifiedResult = JSON.parse(event.data)
-        
+
         console.log('📦 Received:', result)
         console.log('🔍 Detections:', result.detections?.length || 0)
-        
+
         // Update stats (with fallbacks for undefined values)
         setStats({
           fps: result.stats?.fps || 0,
@@ -194,7 +195,7 @@ export default function ADASUnifiedPage() {
         setFps(result.stats?.fps || 0)
         setDetectionCount(result.detections?.length || 0)
         setAlerts(result.alerts || [])
-        
+
         // Voice alerts - phát cảnh báo qua loa
         if (result.voice_alerts && Array.isArray(result.voice_alerts) && result.voice_alerts.length > 0) {
           // Ưu tiên cảnh báo high priority
@@ -204,12 +205,12 @@ export default function ADASUnifiedPage() {
             speakAlert(alertToSpeak.message)
           }
         }
-        
+
         // Update collection stats
         if (result.collection_stats) {
           setCollectionStats(result.collection_stats as any)
         }
-        
+
         // Update new objects
         if (result.new_objects && result.new_objects.length > 0) {
           setNewObjects(result.new_objects)
@@ -240,12 +241,12 @@ export default function ADASUnifiedPage() {
       setIsStreaming(false)
     }
 
-    // Send frames at 10 FPS
+    // Send frames at optimized FPS with frame skipping
     const interval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN && videoRef.current) {
+      if (ws.readyState === WebSocket.OPEN && videoRef.current && shouldSendFrame()) {
         sendFrame(ws)
       }
-    }, 100) // 10 FPS
+    }, getOptimalInterval()) // Optimized FPS
 
     return () => clearInterval(interval)
   }
@@ -258,7 +259,7 @@ export default function ADASUnifiedPage() {
     }
     setIsStreaming(false)
     setAlerts([])
-    
+
     // Clear canvas
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d')
@@ -298,7 +299,7 @@ export default function ADASUnifiedPage() {
     }, 'image/jpeg', 0.8)
   }
 
-  // Draw detections, lanes, and alerts on canvas
+  // Draw detections, lanes, and alerts on canvas - OPTIMIZED
   const drawDetections = (result: UnifiedResult) => {
     if (!canvasRef.current) return
 
@@ -309,11 +310,11 @@ export default function ADASUnifiedPage() {
     // Clear previous drawings
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Draw lanes (green lines) - lanes is an array of line segments
+    // Draw lanes (green lines)
     if (result.lanes && Array.isArray(result.lanes) && result.lanes.length > 0) {
       ctx.strokeStyle = '#00ff00'
       ctx.lineWidth = 3
-      
+
       result.lanes.forEach(line => {
         if (line && Array.isArray(line) && line.length === 2 && line[0] && line[1]) {
           const [start, end] = line
@@ -327,56 +328,19 @@ export default function ADASUnifiedPage() {
       })
     }
 
-    // Draw detections with bounding boxes
+    // Filter and smooth detections
     if (!result.detections || !Array.isArray(result.detections)) return
-    
-    result.detections.forEach(det => {
-      // Validate bbox array exists and has correct length
-      if (!det.bbox || !Array.isArray(det.bbox) || det.bbox.length < 4) return
-      const [x1, y1, x2, y2] = det.bbox
-      const width = x2 - x1
-      const height = y2 - y1
 
-      // Color based on danger level and TTC
-      let color = '#00ff00' // Green (safe)
-      
-      if (det.danger) {
-        // Danger objects (vehicles, pedestrians)
-        if (det.ttc !== undefined && det.ttc !== null) {
-          if (det.ttc < 2.0) color = '#ff0000' // Red (critical)
-          else if (det.ttc < 3.5) color = '#ffaa00' // Orange (warning)
-        }
-      } else {
-        // Non-danger objects (trees, animals, objects)
-        color = '#00ccff' // Cyan (neutral)
-      }
-      
-      // Highlight new objects
-      if (det.is_new) {
-        color = '#ff00ff' // Magenta (new discovery!)
-      }
+    const filteredDetections = filterDetections(result.detections)
+    const smoothedDetections = smoothDetections(filteredDetections, (window as any).previousDetections || [])
 
-      // Draw bounding box
-      ctx.strokeStyle = color
-      ctx.lineWidth = det.is_new ? 4 : 3
-      ctx.strokeRect(x1, y1, width, height)
+      // Store for next frame
+      ; (window as any).previousDetections = smoothedDetections
 
-      // Draw label background
-      const className = det.cls || det.class || 'unknown'
-      const trackId = det.track_id !== undefined ? `#${det.track_id}` : ''
-      const label = `${trackId} ${className} ${(det.conf * 100).toFixed(0)}%`
-      const distance = (det.distance_m !== undefined && det.distance_m !== null) ? ` ${det.distance_m.toFixed(1)}m` : ''
-      const ttc = det.ttc !== undefined && det.ttc !== null && det.ttc < 10 ? ` TTC:${det.ttc.toFixed(1)}s` : ''
-      const newTag = det.is_new ? ' 🆕' : ''
-      const fullLabel = label + distance + ttc + newTag
-
-      ctx.fillStyle = color
-      ctx.fillRect(x1, y1 - 30, ctx.measureText(fullLabel).width + 10, 25)
-
-      // Draw label text
-      ctx.fillStyle = '#ffffff'
-      ctx.font = det.is_new ? 'bold 16px Arial' : '16px Arial'
-      ctx.fillText(fullLabel, x1 + 5, y1 - 10)
+    // Draw each detection with professional styling
+    smoothedDetections.forEach(det => {
+      const color = getDetectionColor(det)
+      drawProfessionalBox(ctx, det, color)
     })
   }
 
@@ -401,7 +365,7 @@ export default function ADASUnifiedPage() {
     const autoStart = async () => {
       // Tự động bật camera
       await startWebcam()
-      
+
       // Đợi 1 giây để camera khởi động
       setTimeout(() => {
         // Tự động bắt đầu phát hiện
@@ -410,9 +374,9 @@ export default function ADASUnifiedPage() {
         }
       }, 1000)
     }
-    
+
     autoStart()
-    
+
     // Cleanup on unmount
     return () => {
       stopWebcam()
@@ -426,7 +390,7 @@ export default function ADASUnifiedPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="w-8 h-8 text-primary" />
-            ADAS Unified System
+            Hệ Thống ADAS Thống Nhất
           </h1>
           <p className="text-muted-foreground mt-1">
             Hệ thống ADAS với AI tự học: Phát hiện MỌI đối tượng (80+ loại) + Tự động học từ dữ liệu mới + Cảnh báo thông minh
@@ -446,7 +410,7 @@ export default function ADASUnifiedPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Video className="w-5 h-5" />
-            Camera & Live Stream
+            Camera & Phát Trực Tiếp
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -465,7 +429,7 @@ export default function ADASUnifiedPage() {
               variant={videoFile ? 'secondary' : 'default'}
             >
               <Upload className="w-4 h-4 mr-2" />
-              Upload Video
+              Tải Video Lên
             </Button>
             <Input
               ref={fileInputRef}
@@ -492,7 +456,7 @@ export default function ADASUnifiedPage() {
               {isStreaming ? 'Dừng Phát Hiện' : 'Bắt Đầu Phát Hiện'}
             </Button>
           </div>
-          
+
           {/* Video Source Info */}
           {(stream || videoFile) && (
             <div className="text-sm text-muted-foreground">
@@ -533,7 +497,7 @@ export default function ADASUnifiedPage() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{detectionCount}</div>
-                  <div className="text-sm text-muted-foreground">Detections</div>
+                  <div className="text-sm text-muted-foreground">Phát Hiện</div>
                 </div>
               </CardContent>
             </Card>
@@ -541,7 +505,7 @@ export default function ADASUnifiedPage() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">{stats.inference_time.toFixed(0)}ms</div>
-                  <div className="text-sm text-muted-foreground">Inference Time</div>
+                  <div className="text-sm text-muted-foreground">Thời Gian Xử Lý</div>
                 </div>
               </CardContent>
             </Card>
@@ -642,7 +606,7 @@ export default function ADASUnifiedPage() {
               </CardContent>
             </Card>
           </div>
-          
+
           {stats.unique_classes && stats.unique_classes.length > 0 && (
             <div className="mt-4">
               <p className="text-sm font-semibold mb-2">Đối tượng đang phát hiện:</p>
@@ -659,30 +623,30 @@ export default function ADASUnifiedPage() {
       {/* System Info */}
       <Card>
         <CardHeader>
-          <CardTitle>System Performance & Capabilities</CardTitle>
+          <CardTitle>Hiệu Suất & Khả Năng Hệ Thống</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">Model:</span> YOLOv11n Unified (80 COCO Classes)
+              <span className="font-semibold">Mô Hình:</span> YOLOv11n Thống Nhất (80 Loại COCO)
             </div>
             <div>
-              <span className="font-semibold">Backend:</span> {isStreaming ? <Badge variant="default">Connected</Badge> : <Badge variant="secondary">Disconnected</Badge>}
+              <span className="font-semibold">Backend:</span> {isStreaming ? <Badge variant="default">Đã Kết Nối</Badge> : <Badge variant="secondary">Ngắt Kết Nối</Badge>}
             </div>
             <div>
-              <span className="font-semibold">Features:</span> ALL Objects, Lanes, Distance, TTC, Auto-Learning
+              <span className="font-semibold">Tính Năng:</span> TẤT CẢ Đối Tượng, Làn Đường, Khoảng Cách, TTC, Tự Học
             </div>
             <div>
-              <span className="font-semibold">Target FPS:</span> 10
+              <span className="font-semibold">FPS Mục Tiêu:</span> 15
             </div>
             <div className="col-span-2">
-              <span className="font-semibold">Detectable Objects:</span> 
-              <Badge variant="outline" className="ml-2">Vehicles</Badge>
-              <Badge variant="outline" className="ml-2">Pedestrians</Badge>
-              <Badge variant="outline" className="ml-2">Animals</Badge>
-              <Badge variant="outline" className="ml-2">Trees/Plants</Badge>
-              <Badge variant="outline" className="ml-2">Traffic Signs</Badge>
-              <Badge variant="outline" className="ml-2">And 75+ more!</Badge>
+              <span className="font-semibold">Đối Tượng Phát Hiện:</span>
+              <Badge variant="outline" className="ml-2">Phương Tiện</Badge>
+              <Badge variant="outline" className="ml-2">Người Đi Bộ</Badge>
+              <Badge variant="outline" className="ml-2">Động Vật</Badge>
+              <Badge variant="outline" className="ml-2">Cây/Cối</Badge>
+              <Badge variant="outline" className="ml-2">Biển Báo</Badge>
+              <Badge variant="outline" className="ml-2">Và 75+ loại khác!</Badge>
             </div>
           </div>
         </CardContent>

@@ -1,0 +1,101 @@
+# ============================================
+# ADAS Platform - Unified Docker Compose
+# Full Stack: Backend + Frontend + Database
+# ============================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # Backend Service (FastAPI + WebSocket)
+  # ============================================
+  backend:
+    build:
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: adas-backend
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      # Source code (for development hot reload)
+      - ./backend-python:/app
+      # Persistent data
+      - ./backend-python/ai_models/weights:/app/ai_models/weights
+      - ./backend-python/adas.db:/app/adas.db
+      - ./backend-python/logs:/app/logs
+      - ./backend-python/dataset:/app/dataset
+
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CORS_ORIGINS=*
+      - DATABASE_URL=sqlite:///./adas.db
+      - WEIGHTS_DIR=/app/ai_models/weights
+      - ENABLE_AUTO_LEARNING=true
+      - ENABLE_VOICE_ALERTS=true
+      - ENABLE_DRIVER_MONITORING=true
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    networks:
+      - adas-network
+
+  # ============================================
+  # Frontend Service (Next.js)
+  # ============================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adas-frontend
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      # Public API URL (for browser/client-side)
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # Internal API URL (for server-side calls within Docker)
+      - INTERNAL_API_URL=http://backend:8000
+      - NODE_ENV=production
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    networks:
+      - adas-network
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  adas-network:
+    driver: bridge
+    name: adas-network
+
+# ============================================
+# Volumes (optional, for named volumes)
+# ============================================
+volumes:
+  backend-data:
+    driver: local

@@ -1,5 +1,19 @@
 # 🚗 ADAS Platform - Advanced Driver Assistance System
 
+> **Real-time AI-powered driver safety monitoring system**
+
+## 🆕 For Team Members - First Time Setup
+
+**Nếu bạn mới clone project từ GitHub**, vui lòng đọc hướng dẫn setup đầy đủ:
+
+📖 **[SETUP_FOR_TEAM.md](./SETUP_FOR_TEAM.md)** - Hướng dẫn chi tiết cho team members
+
+Hoặc chạy script tự động:
+```bash
+./setup-first-time.sh
+```
+
+---
 AI-powered Advanced Driver Assistance System với real-time object detection, auto data collection, incremental training, và remote access capabilities.
 
 ## ✨ Features
