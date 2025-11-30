@@ -29,7 +29,7 @@ interface Detection {
 
 export default function ModelWebcamPage() {
   const [models, setModels] = useState<ModelInfo[]>([])
-  const [selectedModel, setSelectedModel] = useState<string>('yolov8n')
+  const [selectedModel, setSelectedModel] = useState<string>('yolo11n')
   const [isDownloading, setIsDownloading] = useState<string | null>(null)
   const [isStreaming, setIsStreaming] = useState(false)
   const [detections, setDetections] = useState<Detection[]>([])
@@ -57,7 +57,7 @@ export default function ModelWebcamPage() {
         setModels(data.models)
         
         // Auto-download essential models if not downloaded
-        const essentialModels = ['yolov8n', 'yolop', 'midas_small']
+        const essentialModels = ['yolo11n', 'yolop', 'midas_small']
         for (const modelId of essentialModels) {
           const model = data.models.find((m: ModelInfo) => m.id === modelId)
           if (model && !model.downloaded) {

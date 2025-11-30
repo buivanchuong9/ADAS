@@ -1,6 +1,6 @@
 """
 YOLO Detector
-Wrapper cho YOLOv8 detection
+Wrapper cho YOLOv11 detection
 """
 import torch
 from ultralytics import YOLO
@@ -12,21 +12,21 @@ from pathlib import Path
 
 class YOLODetector:
     """
-    YOLO Vehicle Detector
+    YOLO Vehicle Detector (YOLOv11)
     """
     
     def __init__(self, model_path: str = None):
         """
         Args:
-            model_path: Đường dẫn đến model weights. Nếu None, dùng yolov8n.pt mặc định
+            model_path: Đường dẫn đến model weights. Nếu None, dùng yolo11n.pt mặc định
         """
         if model_path is None:
             # Dùng pretrained model
-            model_path = "yolov8n.pt"
+            model_path = "yolo11n.pt"
         
         self.model = YOLO(model_path)
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        print(f"YOLO Detector initialized on {self.device}")
+        print(f"YOLOv11 Detector initialized on {self.device}")
         
         # COCO classes cho vehicle
         self.vehicle_classes = {

@@ -147,8 +147,8 @@ class DetectionResult(BaseModel):
 
 class ModelStatus(BaseModel):
     """Response model for model status"""
-    yolov8n_loaded: bool
-    yolov8m_loaded: bool
+    yolo11n_loaded: bool
+    yolo11m_loaded: bool
     yolop_loaded: bool
     lanenet_loaded: bool
     midas_loaded: bool
@@ -178,8 +178,8 @@ class ModelManager:
         logger.info(f"Using device: {self.device}")
         
         self.model_files = {
-            "yolov8n": "yolov8n.pt",
-            "yolov8m": "yolov8m.pt",
+            "yolo11n": "yolo11n.pt",
+            "yolo11m": "yolo11m.pt",
             "yolop": "yolop.pt",
             "lanenet": "lanenet.pt",
             "midas": "midas.pt",
@@ -193,8 +193,8 @@ class ModelManager:
         """Load all AI models at startup"""
         logger.info("Loading AI models...")
         
-        # YOLOv8n - Fast vehicle/person detection
-        self._load_yolo_model("yolov8n")
+        # YOLOv11n - Fast vehicle/person detection
+        self._load_yolo_model("yolo11n")
         
         # YOLOv8m - High accuracy vehicle detection
         self._load_yolo_model("yolov8m")

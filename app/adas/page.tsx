@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Video, VideoOff, Activity, Zap, Shield, AlertTriangle, Upload } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
+import { VideoUploadCard } from '@/components/video-upload-card'
 
 interface Detection {
   cls: string
@@ -18,6 +19,7 @@ interface Detection {
   danger?: boolean
   is_new?: boolean
   class_id?: number
+  track_id?: number  // ID để track object
 }
 
 interface LaneInfo {
@@ -75,6 +77,28 @@ export default function ADASUnifiedPage() {
   const [collectionStats, setCollectionStats] = useState({ total_collected: 0, new_objects_learned: 0, last_collection: null })
   const [newObjects, setNewObjects] = useState<Array<{class: string, reason: string}>>([])
   const [enableAutoCollection, setEnableAutoCollection] = useState(true)
+  const lastSaveTimeRef = useRef<number>(0)
+  const lastVoiceAlertRef = useRef<string>("")
+  const voiceEnabledRef = useRef<boolean>(true)
+
+  // Text-to-Speech cho cảnh báo giọng nói
+  const speakAlert = (message: string) => {
+    if (!voiceEnabledRef.current || lastVoiceAlertRef.current === message) return
+    
+    // Chỉ phát cảnh báo mới (tránh lặp lại)
+    lastVoiceAlertRef.current = message
+    setTimeout(() => { lastVoiceAlertRef.current = "" }, 3000) // Reset sau 3s
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel() // Cancel any ongoing speech
+      const utterance = new SpeechSynthesisUtterance(message)
+      utterance.lang = 'vi-VN' // Vietnamese
+      utterance.rate = 1.2 // Faster speaking
+      utterance.pitch = 1.1
+      utterance.volume = 1.0
+      window.speechSynthesis.speak(utterance)
+    }
+  }
 
   // Start webcam
   const startWebcam = async () => {
@@ -138,11 +162,17 @@ export default function ADASUnifiedPage() {
       return
     }
 
-    const ws = new WebSocket('ws://localhost:8000/ws/adas-unified')
+    // Get API URL from environment
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const wsUrl = apiUrl.replace('http://', 'ws://').replace('https://', 'wss://')
+    const wsEndpoint = `${wsUrl}/ws/infer/yolo`
+    
+    console.log('🔌 Connecting to WebSocket:', wsEndpoint)
+    const ws = new WebSocket(wsEndpoint)
     wsRef.current = ws
 
     ws.onopen = () => {
-      console.log('WebSocket connected to unified ADAS endpoint')
+      console.log('✅ WebSocket connected successfully')
       setIsStreaming(true)
     }
 
@@ -165,6 +195,16 @@ export default function ADASUnifiedPage() {
         setDetectionCount(result.detections?.length || 0)
         setAlerts(result.alerts || [])
         
+        // Voice alerts - phát cảnh báo qua loa
+        if (result.voice_alerts && Array.isArray(result.voice_alerts) && result.voice_alerts.length > 0) {
+          // Ưu tiên cảnh báo high priority
+          const highPriority = result.voice_alerts.find((a: any) => a.priority === 'high')
+          const alertToSpeak = highPriority || result.voice_alerts[0]
+          if (alertToSpeak?.message) {
+            speakAlert(alertToSpeak.message)
+          }
+        }
+        
         // Update collection stats
         if (result.collection_stats) {
           setCollectionStats(result.collection_stats as any)
@@ -178,9 +218,13 @@ export default function ADASUnifiedPage() {
         // Draw on canvas
         drawDetections(result)
 
-        // Save to database
+        // Save to database - CHỈ MỐI 5 GIÂY để giảm load
+        const now = Date.now()
         if (result.detections && Array.isArray(result.detections) && result.detections.length > 0) {
-          saveDetections(result.detections)
+          if (now - lastSaveTimeRef.current > 5000) {  // 5 giây
+            saveDetections(result.detections)
+            lastSaveTimeRef.current = now
+          }
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error)
@@ -319,7 +363,8 @@ export default function ADASUnifiedPage() {
 
       // Draw label background
       const className = det.cls || det.class || 'unknown'
-      const label = `${className} ${(det.conf * 100).toFixed(0)}%`
+      const trackId = det.track_id !== undefined ? `#${det.track_id}` : ''
+      const label = `${trackId} ${className} ${(det.conf * 100).toFixed(0)}%`
       const distance = (det.distance_m !== undefined && det.distance_m !== null) ? ` ${det.distance_m.toFixed(1)}m` : ''
       const ttc = det.ttc !== undefined && det.ttc !== null && det.ttc < 10 ? ` TTC:${det.ttc.toFixed(1)}s` : ''
       const newTag = det.is_new ? ' 🆕' : ''
@@ -335,21 +380,40 @@ export default function ADASUnifiedPage() {
     })
   }
 
-  // Save detections to backend
+  // Save detections to backend - Throttled
   const saveDetections = async (detections: Detection[]) => {
     try {
-      await fetch('http://localhost:8000/api/detections/save', {
+      const response = await fetch('http://localhost:8000/api/detections/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ detections })
       })
+      if (!response.ok) {
+        console.error('Failed to save detections:', response.statusText)
+      }
     } catch (error) {
-      console.error('Error saving detections:', error)
+      // Silent fail - không log spam
     }
   }
 
-  // Cleanup on unmount
+  // Auto-start camera and inference on mount
   useEffect(() => {
+    const autoStart = async () => {
+      // Tự động bật camera
+      await startWebcam()
+      
+      // Đợi 1 giây để camera khởi động
+      setTimeout(() => {
+        // Tự động bắt đầu phát hiện
+        if (videoRef.current && videoRef.current.srcObject) {
+          startInference()
+        }
+      }, 1000)
+    }
+    
+    autoStart()
+    
+    // Cleanup on unmount
     return () => {
       stopWebcam()
       stopInference()
@@ -373,7 +437,7 @@ export default function ADASUnifiedPage() {
       <Alert>
         <Zap className="h-4 w-4" />
         <AlertDescription>
-          <strong>AI Model:</strong> YOLOv8n phát hiện TẤT CẢ 80 loại đối tượng COCO (xe, người, cây cối, động vật, vật thể, v.v.) + Lane Detection + Distance + TTC + Auto-Learning từ dữ liệu mới
+          <strong>AI Model:</strong> YOLOv11n phát hiện TẤT CẢ 80 loại đối tượng COCO (xe, người, cây cối, động vật, vật thể, v.v.) + Lane Detection + Distance + TTC + Auto-Learning từ dữ liệu mới
         </AlertDescription>
       </Alert>
 
@@ -600,7 +664,7 @@ export default function ADASUnifiedPage() {
         <CardContent>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">Model:</span> YOLOv8n Unified (80 COCO Classes)
+              <span className="font-semibold">Model:</span> YOLOv11n Unified (80 COCO Classes)
             </div>
             <div>
               <span className="font-semibold">Backend:</span> {isStreaming ? <Badge variant="default">Connected</Badge> : <Badge variant="secondary">Disconnected</Badge>}
@@ -623,6 +687,9 @@ export default function ADASUnifiedPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Video Upload for Training */}
+      <VideoUploadCard />
 
       {/* Color Legend */}
       <Card>

@@ -159,7 +159,7 @@ class AIModel(Base):
     id = Column("Id", Integer, primary_key=True, index=True)
     model_id = Column("ModelId", String(100), unique=True, nullable=False, index=True)
     name = Column("Name", String(200), nullable=False)
-    model_type = Column("ModelType", String(50), default="yolov8")  # yolov8, yolop, midas
+    model_type = Column("ModelType", String(50), default="yolo11")  # yolo11, yolop, midas
     size = Column("Size", String(50))
     downloaded = Column("Downloaded", Boolean, default=False)
     accuracy = Column("Accuracy", Float)

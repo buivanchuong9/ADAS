@@ -202,11 +202,11 @@ def register_dataset_routes(app):
     async def export_yolo_dataset():
         """
         Export collected dataset to YOLO training format
-        Creates a data.yaml file for YOLOv8 training
+        Creates a data.yaml file for YOLOv11 training
         """
         try:
             # Create data.yaml
-            data_yaml_content = f"""# ADAS Dataset for YOLOv8 Training
+            data_yaml_content = f"""# ADAS Dataset for YOLOv11 Training
 path: {DATASET_BASE_DIR.absolute()}
 train: images
 val: images

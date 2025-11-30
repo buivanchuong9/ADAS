@@ -54,7 +54,7 @@ def test_training_start():
     
     payload = {
         "model_name": "test_model_v1",
-        "base_model": "yolov8n.pt",
+        "base_model": "yolo11n.pt",
         "epochs": 2,  # Chỉ 2 epochs để test nhanh
         "batch_size": 8,
         "img_size": 640

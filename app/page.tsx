@@ -43,7 +43,7 @@ export default function LiveDetection() {
       if (videoRef.current && ctx) {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
 
-        // TODO: Integrate YOLOv8 model for real object detection
+        // TODO: Integrate YOLOv11 model for real object detection
         // Mock detection boxes for demo
         ctx.strokeStyle = "#ff6b35"
         ctx.lineWidth = 2

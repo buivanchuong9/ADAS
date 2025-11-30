@@ -1,33 +1,80 @@
-"use client"
+'use client'
 
-import { useState, useRef, useEffect } from "react"
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { AlertTriangle, Eye, Zap, Play, Square } from "lucide-react"
+import { useEffect, useRef, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Eye, Video, VideoOff, Activity, AlertTriangle, Phone, User } from 'lucide-react'
 
-export default function DriverMonitor() {
+interface DriverState {
+  state: 'alert' | 'drowsy' | 'distracted' | 'phone_use' | 'asleep'
+  attention_score: number
+  ear: number
+  perclos: number
+  yawn_detected: boolean
+  yawn_count: number
+  head_pose: {
+    pitch: number
+    yaw: number
+    roll: number
+  }
+  gaze_direction: string
+  looking_away_duration: number
+  phone_detected: boolean
+  emotion: string
+  alerts: string[]
+  face_detected: boolean
+  face_bbox: number[] | null
+  confidence: number
+}
+
+export default function DriverMonitorPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isMonitoring, setIsMonitoring] = useState(false)
-  const [fatigueLevel, setFatigueLevel] = useState(0)
-  const [distractionLevel, setDistractionLevel] = useState(0)
-  const [eyesClosed, setEyesClosed] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
+  const [ws, setWs] = useState<WebSocket | null>(null)
+  const [driverState, setDriverState] = useState<DriverState | null>(null)
+  const [stats, setStats] = useState({ fps: 0, inference_time: 0 })
 
-  const startMonitoring = async () => {
+  // Determine WebSocket URL
+  const getWebSocketUrl = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    return apiUrl.replace('http', 'ws') + '/api/driver/ws/monitor'
+  }
+
+  // Start webcam
+  const startWebcam = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' }
+      })
+      
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setIsMonitoring(true)
+        videoRef.current.srcObject = mediaStream
+        await videoRef.current.play()
       }
-    } catch (err) {
-      console.error("Lỗi truy cập camera:", err)
+      
+      setStream(mediaStream)
+    } catch (error) {
+      console.error('Webcam error:', error)
+      alert('Không thể truy cập webcam!')
     }
   }
 
-  const stopMonitoring = () => {
-    if (videoRef.current?.srcObject) {
+  // Stop webcam
+  const stopWebcam = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+  }
+
+  // Start monitoring (continuing from here...)
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
       tracks.forEach((track) => track.stop())
       setIsMonitoring(false)

@@ -1,6 +1,6 @@
 """
 ADAS Unified Model - Tất cả tính năng trong 1 model với auto-learning
-- YOLOv8 detection (ALL 80 COCO classes: vehicles, pedestrians, trees, animals, etc.)
+- YOLOv11 detection (ALL 80 COCO classes: vehicles, pedestrians, trees, animals, etc.)
 - Lane detection
 - Depth estimation
 - TTC computation
@@ -35,14 +35,16 @@ class ADASUnifiedModel:
         self.weights_dir = Path(weights_dir)
         self.enable_auto_collection = enable_auto_collection
         
-        # Load YOLOv8n - fastest and most reliable
-        yolo_path = self.weights_dir / "yolov8n.pt"
+        # Load YOLOv11n - fastest and most reliable
+        yolo_path = self.weights_dir / "yolo11n.pt"
         if yolo_path.exists():
-            print("Loading YOLOv8n for ALL object detection...")
+            print("🚀 Loading YOLOv11n for ALL object detection...")
             self.yolo = YOLO(str(yolo_path))
-            print("✅ YOLOv8n loaded - Can detect all 80 COCO classes")
+            print("✅ YOLOv11n loaded - Can detect all 80 COCO classes (Faster & More Accurate than v8!)")
         else:
-            raise FileNotFoundError(f"YOLOv8n not found at {yolo_path}")
+            print(f"⚠️ YOLOv11n not found at {yolo_path}, downloading...")
+            self.yolo = YOLO("yolo11n.pt")  # Auto-download
+            print("✅ YOLOv11n downloaded and loaded")
         
         # All 80 COCO classes - detect everything!
         self.coco_classes = {
@@ -64,6 +66,22 @@ class ADASUnifiedModel:
             75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'
         }
         
+        # DETECT NHIỀU OBJECTS - Nhưng giữ mượt mà nhờ tracking
+        self.important_classes = {
+            # Người
+            'person',
+            # Xe cộ
+            'bicycle', 'car', 'motorcycle', 'bus', 'train', 'truck', 'boat',
+            # Động vật
+            'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
+            # Giao thông
+            'traffic light', 'stop sign', 'fire hydrant', 'parking meter',
+            # Đồ vật ngoài đường
+            'backpack', 'umbrella', 'handbag', 'suitcase', 'bench', 'potted plant',
+            # Thể thao
+            'skateboard', 'surfboard', 'sports ball', 'kite'
+        }
+        
         # Danger classes for TTC alerts (vehicles, pedestrians)
         self.danger_classes = {
             'person', 'bicycle', 'car', 'motorcycle', 'bus', 'truck',
@@ -73,6 +91,18 @@ class ADASUnifiedModel:
         # TTC thresholds
         self.ttc_critical = 2.0  # seconds
         self.ttc_warning = 3.5   # seconds
+        
+        # OBJECT TRACKING - Giữ objects ổn định, không nháy
+        self.tracked_objects = {}  # {track_id: {'bbox', 'class', 'conf', 'last_seen', 'stable_frames'}}
+        self.next_track_id = 0
+        self.iou_threshold = 0.2  # Giảm để match dễ hơn
+        self.max_disappeared = 10  # Giữ 1 giây trước khi xóa
+        self.min_stable_frames = 1  # Hiển thị ngay sau 1 frame
+        
+        # ALERT TRACKING - Giữ alerts hiển thị ổn định 3-5 giây
+        self.active_alerts = {}  # {alert_key: {'alert', 'start_time', 'last_update'}}
+        self.alert_display_duration = 3.0  # Hiển thị ít nhất 3 giây
+        self.alert_cooldown = 1.0  # Sau đó cooldown 1 giây trước khi hiện lại
         
         # Auto-collection settings
         self.collection_dir = Path("dataset/auto_collected")
@@ -183,6 +213,141 @@ class ADASUnifiedModel:
         except Exception as e:
             print(f"⚠️ Error saving training data: {e}")
     
+    def _compute_iou(self, box1, box2):
+        """Tính IoU giữa 2 bounding boxes"""
+        x1_1, y1_1, x2_1, y2_1 = box1
+        x1_2, y1_2, x2_2, y2_2 = box2
+        
+        # Tính diện tích giao nhau
+        x_left = max(x1_1, x1_2)
+        y_top = max(y1_1, y1_2)
+        x_right = min(x2_1, x2_2)
+        y_bottom = min(y2_1, y2_2)
+        
+        if x_right < x_left or y_bottom < y_top:
+            return 0.0
+        
+        intersection = (x_right - x_left) * (y_bottom - y_top)
+        
+        # Tính diện tích hợp nhất
+        area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+        union = area1 + area2 - intersection
+        
+        return intersection / union if union > 0 else 0.0
+    
+    def _update_tracking(self, current_detections):
+        """Update object tracking - Giữ objects ổn định"""
+        # Match current detections với tracked objects
+        matched_tracks = set()
+        updated_detections = []
+        
+        for det in current_detections:
+            best_iou = 0
+            best_track_id = None
+            
+            # Tìm tracked object khớp nhất
+            for track_id, tracked in self.tracked_objects.items():
+                if tracked['class'] == det['class']:  # Cùng class
+                    iou = self._compute_iou(det['bbox'], tracked['bbox'])
+                    if iou > best_iou and iou > self.iou_threshold:
+                        best_iou = iou
+                        best_track_id = track_id
+            
+            if best_track_id is not None:
+                # SMOOTH bbox một chút để giảm nháy khi di chuyển
+                old_bbox = self.tracked_objects[best_track_id]['bbox']
+                new_bbox = det['bbox']
+                
+                # 80% mới, 20% cũ - Theo sát nhưng vẫn mượt
+                alpha = 0.8
+                smoothed_bbox = [
+                    alpha * new_bbox[i] + (1 - alpha) * old_bbox[i]
+                    for i in range(4)
+                ]
+                
+                # Update tracked object
+                self.tracked_objects[best_track_id].update({
+                    'bbox': smoothed_bbox,
+                    'conf': det['conf'],
+                    'last_seen': 0,  # RESET counter
+                    'stable_frames': self.tracked_objects[best_track_id]['stable_frames'] + 1
+                })
+                matched_tracks.add(best_track_id)
+                det['bbox'] = smoothed_bbox
+                det['track_id'] = best_track_id
+                det['stable'] = True  # Luôn stable khi đã match
+            else:
+                # Tạo track mới
+                self.tracked_objects[self.next_track_id] = {
+                    'bbox': det['bbox'],
+                    'class': det['class'],
+                    'conf': det['conf'],
+                    'last_seen': 0,
+                    'stable_frames': 1
+                }
+                det['track_id'] = self.next_track_id
+                det['stable'] = True  # Hiển thị ngay
+                self.next_track_id += 1
+            
+            updated_detections.append(det)
+        
+        # Xóa objects không được match
+        to_remove = []
+        for track_id in self.tracked_objects:
+            if track_id not in matched_tracks:
+                self.tracked_objects[track_id]['last_seen'] += 1
+                # Xóa nhanh khi không thấy
+                if self.tracked_objects[track_id]['last_seen'] > self.max_disappeared:
+                    to_remove.append(track_id)
+        
+        for track_id in to_remove:
+            del self.tracked_objects[track_id]
+        
+        # Chỉ giữ stable objects
+        stable_detections = [det for det in updated_detections if det.get('stable', False)]
+        
+        return stable_detections
+    
+    def _update_alerts(self, new_alerts):
+        """Update alert tracking - Giữ alerts hiển thị ổn định 3-5 giây"""
+        current_time = time.time()
+        
+        # Update existing alerts và thêm mới
+        for alert in new_alerts:
+            # Create unique key cho alert (class + level)
+            alert_key = f"{alert['class']}_{alert['level']}"
+            
+            if alert_key in self.active_alerts:
+                # Update existing alert
+                self.active_alerts[alert_key]['last_update'] = current_time
+                self.active_alerts[alert_key]['alert'] = alert  # Update với thông tin mới
+            else:
+                # Add new alert
+                self.active_alerts[alert_key] = {
+                    'alert': alert,
+                    'start_time': current_time,
+                    'last_update': current_time
+                }
+        
+        # Cleanup old alerts - Chỉ xóa nếu đã hết thời gian hiển thị VÀ cooldown
+        to_remove = []
+        for alert_key, alert_data in self.active_alerts.items():
+            time_since_last_update = current_time - alert_data['last_update']
+            time_since_start = current_time - alert_data['start_time']
+            
+            # Xóa nếu:
+            # - Đã hiển thị đủ 3 giây VÀ
+            # - Không được update trong 1 giây (cooldown)
+            if time_since_start >= self.alert_display_duration and time_since_last_update >= self.alert_cooldown:
+                to_remove.append(alert_key)
+        
+        for alert_key in to_remove:
+            del self.active_alerts[alert_key]
+        
+        # Return all active alerts (cả mới và cũ đang active)
+        return [data['alert'] for data in self.active_alerts.values()]
+    
     def estimate_distance(self, bbox, frame_height):
         """Ước tính khoảng cách dựa trên kích thước bbox"""
         x1, y1, x2, y2 = bbox
@@ -255,9 +420,8 @@ class ADASUnifiedModel:
         start_time = time.time()
         h, w = frame.shape[:2]
         
-        # 1. YOLO Detection - Detect ALL 80 COCO classes!
-        # Lower conf threshold to catch more objects including trees, animals, etc.
-        results = self.yolo(frame, conf=0.25, iou=0.45, imgsz=640, verbose=False)[0]
+        # 1. YOLO Detection - Detect objects với conf hợp lý
+        results = self.yolo(frame, conf=0.35, iou=0.45, imgsz=640, verbose=False)[0]
         
         # Print detected objects with class names for debugging
         if len(results.boxes) > 0:
@@ -276,6 +440,10 @@ class ADASUnifiedModel:
             conf = float(box.conf[0])
             cls_id = int(box.cls[0])
             cls_name = results.names[cls_id]
+            
+            # CHỈ GIỮ OBJECTS QUAN TRỌNG - Bỏ qua đồ vật nhỏ
+            if cls_name not in self.important_classes:
+                continue
             
             # Check if this is a new/unique object
             is_new, reason = self._is_new_object(cls_name, [x1, y1, x2, y2], conf)
@@ -336,14 +504,20 @@ class ADASUnifiedModel:
                         'ttc': float(ttc)
                     })
         
-        # 2. Auto-collect training data if enabled and new objects detected
+        # 2. TRACKING - Giữ objects ổn định, không nháy nháy
+        detections = self._update_tracking(detections)
+        
+        # 2.3. ALERT TRACKING - Giữ alerts ổn định 3-5 giây
+        alerts = self._update_alerts(alerts)
+        
+        # 2.5. Auto-collect training data if enabled and new objects detected
         if collect_data and self.enable_auto_collection and len(new_objects) > 0:
             frame_id = f"frame_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
             self._save_training_data(frame, detections, frame_id)
             self.collection_stats['new_objects_learned'] += len(new_objects)
         
-        # 3. Lane Detection (lightweight)
-        lanes = self.detect_lanes(frame)
+        # 3. Lane Detection - TẮT ĐI CHO NHẸ
+        lanes = []  # Tắt lane detection
         
         # 4. Stats
         inference_time = (time.time() - start_time) * 1000

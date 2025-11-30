@@ -17,11 +17,11 @@ class YOLOTrainer:
     YOLO Model Trainer
     """
     
-    def __init__(self, model_name: str, base_model: str = "yolov8n.pt"):
+    def __init__(self, model_name: str, base_model: str = "yolo11n.pt"):
         """
         Args:
-            model_name: Tên model mới
-            base_model: Base model (yolov8n, yolov8s, yolov8m, yolov8l, yolov8x)
+            model_name: Tên model cần train
+            base_model: Base model (yolo11n, yolo11s, yolo11m, yolo11l, yolo11x)
         """
         self.model_name = model_name
         self.base_model = base_model

@@ -1,4 +1,4 @@
-# Python Backend Dependencies for ADAS System
+# Python Backend Dependencies for ADAS System v4.0
 # Python 3.13 compatible
 
 # Web Framework
@@ -41,11 +41,19 @@ torchvision>=0.15.0
 ultralytics>=8.0.0  # YOLOv8
 timm>=0.9.0  # PyTorch Image Models (for MiDaS)
 
-# YAML
+# YAML Configuration (v4.0)
 PyYAML>=6.0
 
-# Numpy
+# Numerical Computing
 numpy>=1.24.0
+
+# NEW: v4.0 Architecture - Testing Framework
+pytest>=7.4.0          # Unit testing
+pytest-asyncio>=0.21.0 # Async test support
+pytest-cov>=4.1.0      # Code coverage
+
+# NEW: v4.0 Architecture - Scientific Computing (Sensor Fusion)
+scipy>=1.11.0          # Scientific computing (Kalman filter, optimization)
 
 # Voice/TTS
 pyttsx3>=2.90  # Text-to-Speech (offline)

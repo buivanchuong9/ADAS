@@ -211,7 +211,7 @@ class LabelResponse(BaseModel):
 
 class TrainingRequest(BaseModel):
     model_name: str = Field(..., description="Tên model mới")
-    base_model: str = Field(default="yolov8n.pt", description="Base model")
+    base_model: str = Field(default="yolo11n.pt", description="Base model")
     epochs: int = Field(default=50, ge=1, le=1000)
     batch_size: int = Field(default=16, ge=1, le=128)
     img_size: int = Field(default=640, ge=320, le=1280)
@@ -223,6 +223,6 @@ class TrainingResponse(BaseModel):
     status: str
     message: str
     model_name: str
-    base_model: str = "yolov8n.pt"
+    base_model: str = "yolo11n.pt"
     epochs: int = 50
 
