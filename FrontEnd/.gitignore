@@ -1,0 +1,118 @@
+# macOS
+.DS_Store
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnp/
+.pnpm-store/
+
+# pnpm store (local)
+.pnpm-store/
+
+# Environment files
+.env
+.env.*
+.env.*.local
+.env.local
+.env.docker
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+backend-python/venv/
+backend-python/logs/
+model-worker/__pycache__/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+coverage/
+coverage.*
+*.cover
+*.coverage
+htmlcov/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+
+# macOS and Windows
+Thumbs.db
+.DS_Store
+
+# Model files (large)
+*.pt
+*.onnx
+*.engine
+!model-worker/yolov8n.pt
+
+# .NET build artifacts
+bin/
+obj/
+**/bin/
+**/obj/
+*.exe
+*.dll
+*.pdb
+*.mdb
+*.cache
+Release/
+*.user
+.vs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+env/
+.env/
+model-worker/venv/
+
+# Large model / dataset files
+model-worker/*.pt
+model-worker/yolov8n.pt
+*.h5
+*.ckpt
+
+# Python DB
+*.sqlite3
+*.db
+
+# Docker
+docker-compose.override.yml
+
+# Other
+*.bak
+*.tmp
+
+# Keep lockfiles (pnpm-lock.yaml) and package.json checked in by default
+# If you want to ignore lockfiles, uncomment the following:
+# pnpm-lock.yaml
