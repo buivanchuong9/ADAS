@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# lib/  # Commented out to allow FrontEnd/lib/
+# lib64/  # Commented out to allow FrontEnd/lib/
 parts/
 sdist/
 var/
