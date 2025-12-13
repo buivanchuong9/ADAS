@@ -1,11 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import { motion, Variants } from "framer-motion";
+import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Activity,
   AlertTriangle,
@@ -17,12 +23,12 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-} from "lucide-react"
-import Link from "next/link"
-import { HighchartsChart } from "@/components/charts/highcharts-chart"
-import { API_CONFIG } from "@/lib/api-config"
+} from "lucide-react";
+import Link from "next/link";
+import { HighchartsChart } from "@/components/charts/highcharts-chart";
+import { API_CONFIG } from "@/lib/api-config";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -31,19 +37,19 @@ const containerVariants = {
       delayChildren: 0.2,
     },
   },
-}
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
       duration: 0.5,
-      ease: [0.4, 0, 0.2, 1],
+      ease: [0.4, 0, 0.2, 1] as const,
     },
   },
-}
+};
 
 export default function HomePage() {
   const [stats, setStats] = useState({
@@ -51,46 +57,52 @@ export default function HomePage() {
     activeCameras: 0,
     totalDetections: 0,
     alertsToday: 0,
-  })
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const statusRes = await fetch(`${API_CONFIG.BASE_URL}/api/status`)
-        const statusData = await statusRes.json()
+        const statusRes = await fetch(`${API_CONFIG.BASE_URL}/api/status`);
+        const statusData = await statusRes.json();
 
-        const alertsRes = await fetch(`${API_CONFIG.BASE_URL}/api/alerts/stats`)
-        const alertsData = await alertsRes.json()
+        const alertsRes = await fetch(
+          `${API_CONFIG.BASE_URL}/api/alerts/stats`
+        );
+        const alertsData = await alertsRes.json();
 
         setStats({
-          systemStatus: statusData.status === "success" ? "hoạt động" : "ngoại tuyến",
+          systemStatus:
+            statusData.status === "success" ? "hoạt động" : "ngoại tuyến",
           activeCameras: 1,
           totalDetections: 0,
-          alertsToday: alertsData.data?.total_alerts || alertsData.total_alerts || 0,
-        })
+          alertsToday:
+            alertsData.data?.total_alerts || alertsData.total_alerts || 0,
+        });
       } catch (err) {
-        console.error("Failed to fetch stats:", err)
+        console.error("Failed to fetch stats:", err);
       }
-    }
+    };
 
-    fetchStats()
-    const interval = setInterval(fetchStats, 5000)
-    return () => clearInterval(interval)
-  }, [])
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Sample chart data
   const detectionChartData = [
-    { name: 'Cars', y: 45 },
-    { name: 'Pedestrians', y: 25 },
-    { name: 'Cycles', y: 20 },
-    { name: 'Others', y: 10 },
-  ]
+    { name: "Cars", y: 45 },
+    { name: "Pedestrians", y: 25 },
+    { name: "Cycles", y: 20 },
+    { name: "Others", y: 10 },
+  ];
 
-  const performanceChartData = [{
-    name: 'Performance',
-    data: [65, 72, 68, 75, 80, 78, 85],
-    color: '#667eea',
-  }]
+  const performanceChartData = [
+    {
+      name: "Performance",
+      data: [65, 72, 68, 75, 80, 78, 85],
+      color: "#667eea",
+    },
+  ];
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
@@ -144,7 +156,10 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
-                <Badge variant="outline" className="border-primary/50 text-primary bg-primary/10 backdrop-blur-sm">
+                <Badge
+                  variant="outline"
+                  className="border-primary/50 text-primary bg-primary/10 backdrop-blur-sm"
+                >
                   v3.0 Professional
                 </Badge>
               </motion.div>
@@ -159,12 +174,13 @@ export default function HomePage() {
               </motion.h1>
 
               <motion.p
-                className="text-xl text-muted-foreground max-w-3xl mb-8 leading-relaxed"
+                className="text-xl text-muted-foreground max-w-3xl mb-8 leading-relaxed p-5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                Real-time AI-powered safety monitoring with WebSocket streaming, automatic data collection, and intelligent alerts.
+                Real-time AI-powered safety monitoring with WebSocket streaming,
+                automatic data collection, and intelligent alerts.
               </motion.p>
 
               <motion.div
@@ -231,8 +247,11 @@ export default function HomePage() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Card glass className="border-border/50 hover:border-primary/30 transition-all duration-300">
-                  <CardHeader className="pb-3">
+                <Card
+                  glass
+                  className="border-border/50 hover:border-primary/30 transition-all duration-300"
+                >
+                  <CardHeader className="pb-6">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-muted-foreground">
                         {stat.title}
@@ -240,7 +259,7 @@ export default function HomePage() {
                       <stat.icon className={`w-5 h-5 text-${stat.color}`} />
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pb-8">
                     <div className="flex items-center gap-2 mb-2">
                       {stat.title === "Trạng Thái Hệ Thống" && (
                         <motion.div
@@ -249,12 +268,14 @@ export default function HomePage() {
                           transition={{ duration: 2, repeat: Infinity }}
                         />
                       )}
-                      <span className="text-3xl font-bold text-foreground capitalize">
+                      <span className="text-xl font-bold text-foreground capitalize">
                         {stat.value}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      {stat.trend && <TrendingUp className="w-3 h-3 text-success" />}
+                      {stat.trend && (
+                        <TrendingUp className="w-3 h-3 text-success" />
+                      )}
                       {stat.description}
                     </p>
                   </CardContent>
@@ -274,6 +295,7 @@ export default function HomePage() {
               type="pie"
               data={detectionChartData}
               height={350}
+              className="pl-8"
             />
             <HighchartsChart
               title="System Performance"
@@ -292,7 +314,9 @@ export default function HomePage() {
             <Card glass>
               <CardHeader>
                 <CardTitle className="text-xl">Thao Tác Nhanh</CardTitle>
-                <CardDescription>Các tác vụ và phím tắt thường dùng</CardDescription>
+                <CardDescription>
+                  Các tác vụ và phím tắt thường dùng
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -328,14 +352,18 @@ export default function HomePage() {
                       className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-white/5 to-white/0 border border-white/10 hover:border-primary/50 hover:from-white/10 hover:to-white/5 transition-all duration-300 group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                        <div
+                          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                        >
                           <action.icon className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
                             {action.title}
                           </div>
-                          <div className="text-sm text-muted-foreground">{action.description}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {action.description}
+                          </div>
                         </div>
                       </div>
                       <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -348,7 +376,9 @@ export default function HomePage() {
             <Card glass>
               <CardHeader>
                 <CardTitle className="text-xl">Tính Năng Hệ Thống</CardTitle>
-                <CardDescription>Điều làm nên sức mạnh của ADAS</CardDescription>
+                <CardDescription>
+                  Điều làm nên sức mạnh của ADAS
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
@@ -367,7 +397,9 @@ export default function HomePage() {
                   >
                     <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="font-medium text-foreground">{feature}</div>
+                      <div className="font-medium text-foreground">
+                        {feature}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {index === 0 && "Xử lý video độ trễ thấp"}
                         {index === 1 && "Nhận dạng đối tượng hiện đại nhất"}
@@ -389,7 +421,9 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl">Hoạt Động Gần Đây</CardTitle>
-                    <CardDescription>Sự kiện và phát hiện mới nhất của hệ thống</CardDescription>
+                    <CardDescription>
+                      Sự kiện và phát hiện mới nhất của hệ thống
+                    </CardDescription>
                   </div>
                   <Link href="/events">
                     <Button variant="glass" size="sm">
@@ -402,9 +436,26 @@ export default function HomePage() {
               <CardContent>
                 <div className="space-y-3">
                   {[
-                    { icon: Clock, text: "Hệ thống khởi động thành công", subtext: "Tất cả dịch vụ hoạt động", time: "Vừa xong" },
-                    { icon: CheckCircle2, text: "Kết nối cơ sở dữ liệu thành công", subtext: "SQLite sẵn sàng", time: "1 phút trước", color: "success" },
-                    { icon: Activity, text: "Backend API trực tuyến", subtext: "Cổng 8000 đang lắng nghe", time: "2 phút trước", color: "primary" },
+                    {
+                      icon: Clock,
+                      text: "Hệ thống khởi động thành công",
+                      subtext: "Tất cả dịch vụ hoạt động",
+                      time: "Vừa xong",
+                    },
+                    {
+                      icon: CheckCircle2,
+                      text: "Kết nối cơ sở dữ liệu thành công",
+                      subtext: "SQLite sẵn sàng",
+                      time: "1 phút trước",
+                      color: "success",
+                    },
+                    {
+                      icon: Activity,
+                      text: "Backend API trực tuyến",
+                      subtext: "Cổng 8000 đang lắng nghe",
+                      time: "2 phút trước",
+                      color: "primary",
+                    },
                   ].map((activity, index) => (
                     <motion.div
                       key={index}
@@ -413,12 +464,22 @@ export default function HomePage() {
                       transition={{ delay: 1 + index * 0.1 }}
                       className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
                     >
-                      <activity.icon className={`w-5 h-5 text-${activity.color || 'muted-foreground'}`} />
+                      <activity.icon
+                        className={`w-5 h-5 text-${
+                          activity.color || "muted-foreground"
+                        }`}
+                      />
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground">{activity.text}</div>
-                        <div className="text-xs text-muted-foreground">{activity.subtext}</div>
+                        <div className="text-sm font-medium text-foreground">
+                          {activity.text}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {activity.subtext}
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">{activity.time}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {activity.time}
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -428,5 +489,5 @@ export default function HomePage() {
         </motion.div>
       </main>
     </div>
-  )
+  );
 }
