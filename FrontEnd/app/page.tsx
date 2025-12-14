@@ -190,13 +190,19 @@ export default function HomePage() {
                 transition={{ delay: 0.6 }}
               >
                 <Link href="/adas">
-                  <Button size="lg" variant="gradient" className="shadow-xl">
+                  <Button
+                    size="lg"
+                    className="shadow-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  >
                     <Zap className="w-5 h-5 mr-2" />
                     Start Detection
                   </Button>
                 </Link>
                 <Link href="/dashboard">
-                  <Button size="lg" variant="glass" className="shadow-lg">
+                  <Button
+                    size="lg"
+                    className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30"
+                  >
                     View Dashboard
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
