@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Video,
@@ -14,61 +14,61 @@ import {
   Car,
   Brain,
   AlertTriangle,
-} from "lucide-react"
+} from "lucide-react";
 
 const navigation = [
   {
     name: "Bảng Điều Khiển",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Tổng quan hệ thống"
+    description: "Tổng quan hệ thống",
   },
   {
     name: "Phát Hiện Trực Tiếp",
     href: "/",
     icon: Video,
-    description: "ADAS thời gian thực"
+    description: "ADAS thời gian thực",
   },
   {
     name: "Giám Sát ADAS",
     href: "/adas",
     icon: Car,
-    description: "Giám sát nâng cao"
+    description: "Giám sát nâng cao",
   },
   {
     name: "Giám Sát Tài Xế",
     href: "/driver-monitor",
     icon: Eye,
-    description: "Hành vi tài xế"
+    description: "Hành vi tài xế",
   },
   {
     name: "Phân Tích",
     href: "/analytics",
     icon: BarChart3,
-    description: "Số liệu hiệu suất"
+    description: "Số liệu hiệu suất",
   },
   {
     name: "Thu Thập Dữ Liệu",
     href: "/data-collection",
     icon: Database,
-    description: "Quản lý dataset"
+    description: "Quản lý dataset",
   },
   {
     name: "Trợ Lý AI",
     href: "/ai-assistant",
     icon: Brain,
-    description: "Hỗ trợ AI"
+    description: "Hỗ trợ AI",
   },
   {
     name: "Sự Kiện",
     href: "/events",
     icon: AlertTriangle,
-    description: "Lịch sử cảnh báo"
+    description: "Lịch sử cảnh báo",
   },
-]
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <motion.aside
@@ -79,7 +79,7 @@ export function Sidebar() {
     >
       {/* Glassmorphism overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent pointer-events-none" />
-      
+
       {/* Logo Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -96,8 +96,11 @@ export function Sidebar() {
             <Car className="w-7 h-7 text-white" />
           </motion.div>
           <div>
-            <h1 className="text-lg font-bold text-sidebar-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-              Nền Tảng ADAS
+            <h1
+              className="font-bold text-sidebar-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
+              style={{ fontSize: "2.5rem" }}
+            >
+              ADAS Platform
             </h1>
             <p className="text-xs text-muted-foreground">v3.0 Chuyên Nghiệp</p>
           </div>
@@ -107,8 +110,8 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto relative z-10">
         {navigation.map((item, index) => {
-          const isActive = pathname === item.href
-          const Icon = item.icon
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
 
           return (
             <motion.div
@@ -138,23 +141,31 @@ export function Sidebar() {
                 {/* Hover shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
-                <Icon className={cn(
-                  "w-5 h-5 transition-all duration-300 relative z-10",
-                  isActive ? "scale-110 text-primary" : "group-hover:scale-110 group-hover:text-primary"
-                )} />
+                <Icon
+                  className={cn(
+                    "w-5 h-5 transition-all duration-300 relative z-10",
+                    isActive
+                      ? "scale-110 text-primary"
+                      : "group-hover:scale-110 group-hover:text-primary"
+                  )}
+                />
 
                 <div className="flex-1 relative z-10">
                   <div className="font-semibold text-sm">{item.name}</div>
-                  <div className={cn(
-                    "text-xs transition-opacity",
-                    isActive ? "opacity-90" : "opacity-60 group-hover:opacity-80"
-                  )}>
+                  <div
+                    className={cn(
+                      "text-xs transition-opacity",
+                      isActive
+                        ? "opacity-90"
+                        : "opacity-60 group-hover:opacity-80"
+                    )}
+                  >
                     {item.description}
                   </div>
                 </div>
               </Link>
             </motion.div>
-          )
+          );
         })}
       </nav>
 
@@ -186,10 +197,12 @@ export function Sidebar() {
               animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <span className="text-xs font-semibold text-success">Hệ Thống Trực Tuyến</span>
+            <span className="text-xs font-semibold text-success">
+              Hệ Thống Trực Tuyến
+            </span>
           </div>
         </motion.div>
       </motion.div>
     </motion.aside>
-  )
+  );
 }

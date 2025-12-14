@@ -1,134 +1,142 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import Highcharts from "highcharts"
-import HighchartsReact from "highcharts-react-official"
-import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { useEffect, useRef } from "react";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+import { motion } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Highcharts theme for premium look
 const premiumTheme: Highcharts.Options = {
   chart: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     style: {
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     },
   },
   colors: [
-    '#667eea', // Primary blue
-    '#764ba2', // Purple
-    '#f093fb', // Pink
-    '#4facfe', // Light blue
-    '#43e97b', // Green
-    '#fa709a', // Rose
-    '#fee140', // Yellow
-    '#0ba360', // Dark green
+    "#667eea", // Primary blue
+    "#764ba2", // Purple
+    "#f093fb", // Pink
+    "#4facfe", // Light blue
+    "#43e97b", // Green
+    "#fa709a", // Rose
+    "#fee140", // Yellow
+    "#0ba360", // Dark green
   ],
   title: {
     style: {
-      color: '#ffffff',
-      fontWeight: '600',
-      fontSize: '18px',
+      color: "#ffffff",
+      fontWeight: "600",
+      fontSize: "18px",
     },
   },
   subtitle: {
     style: {
-      color: '#9ca3af',
+      color: "#9ca3af",
     },
   },
   xAxis: {
-    gridLineColor: 'rgba(255, 255, 255, 0.1)',
-    lineColor: 'rgba(255, 255, 255, 0.2)',
-    minorGridLineColor: 'rgba(255, 255, 255, 0.05)',
-    tickColor: 'rgba(255, 255, 255, 0.2)',
+    gridLineColor: "rgba(255, 255, 255, 0.1)",
+    lineColor: "rgba(255, 255, 255, 0.2)",
+    minorGridLineColor: "rgba(255, 255, 255, 0.05)",
+    tickColor: "rgba(255, 255, 255, 0.2)",
     labels: {
       style: {
-        color: '#9ca3af',
+        color: "#9ca3af",
       },
     },
     title: {
       style: {
-        color: '#ffffff',
+        color: "#ffffff",
       },
     },
   },
   yAxis: {
-    gridLineColor: 'rgba(255, 255, 255, 0.1)',
-    lineColor: 'rgba(255, 255, 255, 0.2)',
-    minorGridLineColor: 'rgba(255, 255, 255, 0.05)',
-    tickColor: 'rgba(255, 255, 255, 0.2)',
+    gridLineColor: "rgba(255, 255, 255, 0.1)",
+    lineColor: "rgba(255, 255, 255, 0.2)",
+    minorGridLineColor: "rgba(255, 255, 255, 0.05)",
+    tickColor: "rgba(255, 255, 255, 0.2)",
     labels: {
       style: {
-        color: '#9ca3af',
+        color: "#9ca3af",
       },
     },
     title: {
       style: {
-        color: '#ffffff',
+        color: "#ffffff",
       },
     },
   },
   legend: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     itemStyle: {
-      color: '#9ca3af',
+      color: "#9ca3af",
     },
     itemHoverStyle: {
-      color: '#ffffff',
+      color: "#ffffff",
     },
     itemHiddenStyle: {
-      color: '#4b5563',
+      color: "#4b5563",
     },
   },
   tooltip: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 12,
     style: {
-      color: '#ffffff',
+      color: "#ffffff",
     },
     shadow: {
-      color: 'rgba(0, 0, 0, 0.5)',
+      color: "rgba(0, 0, 0, 0.5)",
     },
   },
   plotOptions: {
     series: {
       dataLabels: {
-        color: '#ffffff',
+        color: "#ffffff",
       },
       marker: {
-        lineColor: '#ffffff',
+        lineColor: "#ffffff",
       },
     },
     boxplot: {
-      fillColor: '#505053',
+      fillColor: "#505053",
     },
     candlestick: {
-      lineColor: 'white',
+      lineColor: "white",
     },
     errorbar: {
-      color: 'white',
+      color: "white",
     },
   },
   credits: {
     enabled: false,
   },
-}
+};
 
 // Apply theme
-if (typeof Highcharts !== 'undefined') {
-  Highcharts.setOptions(premiumTheme)
+if (typeof Highcharts !== "undefined") {
+  Highcharts.setOptions(premiumTheme);
 }
 
 interface HighchartsChartProps {
-  title?: string
-  description?: string
-  type: "line" | "pie" | "bar" | "area" | "column"
-  data: any
-  height?: number
-  className?: string
-  options?: Highcharts.Options
+  title?: string;
+  description?: string;
+  type: "line" | "pie" | "bar" | "area" | "column";
+  data: any;
+  height?: number;
+  className?: string;
+  headerClassName?: string;
+  options?: Highcharts.Options;
 }
 
 export function HighchartsChart({
@@ -138,27 +146,36 @@ export function HighchartsChart({
   data,
   height = 300,
   className,
+  headerClassName = "text-white",
   options = {},
 }: HighchartsChartProps) {
-  const chartRef = useRef<HighchartsReact.RefObject>(null)
+  const chartRef = useRef<HighchartsReact.RefObject>(null);
 
   // Default chart configuration based on type
   const getDefaultOptions = (): Highcharts.Options => {
     const baseOptions: Highcharts.Options = {
       chart: {
-        type: type === "pie" ? "pie" : type === "bar" ? "bar" : type === "area" ? "area" : "line",
+        type:
+          type === "pie"
+            ? "pie"
+            : type === "bar"
+            ? "bar"
+            : type === "area"
+            ? "area"
+            : "line",
         height: height,
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         borderRadius: 12,
         style: {
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         },
       },
       credits: {
         enabled: false,
       },
       ...options,
-    }
+    };
 
     if (type === "pie") {
       return {
@@ -166,26 +183,38 @@ export function HighchartsChart({
         plotOptions: {
           pie: {
             allowPointSelect: true,
-            cursor: 'pointer',
+            cursor: "pointer",
             dataLabels: {
               enabled: true,
-              format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+              format: "<b>{point.name}</b>: {point.percentage:.1f} %",
               style: {
-                color: '#ffffff',
-                textOutline: 'none',
+                color: "#ffffff",
+                textOutline: "none",
+              },
+            },
+            title: {
+              style: {
+                color: "#ffffff",
+              },
+            },
+            legend: {
+              itemStyle: {
+                color: "#ffffff",
               },
             },
             showInLegend: true,
             borderWidth: 2,
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: "rgba(255, 255, 255, 0.1)",
           },
         },
-        series: [{
-          type: 'pie',
-          name: 'Share',
-          data: data,
-        }],
-      } as Highcharts.Options
+        series: [
+          {
+            type: "pie",
+            name: "Share",
+            data: data,
+          },
+        ],
+      } as Highcharts.Options;
     }
 
     if (type === "line" || type === "area") {
@@ -197,7 +226,7 @@ export function HighchartsChart({
               enabled: true,
               radius: 4,
               lineWidth: 2,
-              lineColor: '#ffffff',
+              lineColor: "#ffffff",
             },
             lineWidth: 3,
             states: {
@@ -216,7 +245,7 @@ export function HighchartsChart({
           },
         },
         series: Array.isArray(data) ? data : [data],
-      } as Highcharts.Options
+      } as Highcharts.Options;
     }
 
     return {
@@ -232,10 +261,10 @@ export function HighchartsChart({
         },
       },
       series: Array.isArray(data) ? data : [data],
-    } as Highcharts.Options
-  }
+    } as Highcharts.Options;
+  };
 
-  const chartOptions = getDefaultOptions()
+  const chartOptions = getDefaultOptions();
 
   return (
     <motion.div
@@ -243,14 +272,20 @@ export function HighchartsChart({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card glass className={cn("", className)}>
+      <Card glass>
         {(title || description) && (
           <CardHeader>
-            {title && <CardTitle>{title}</CardTitle>}
-            {description && <CardDescription>{description}</CardDescription>}
+            {title && (
+              <CardTitle className={headerClassName}>{title}</CardTitle>
+            )}
+            {description && (
+              <CardDescription className={headerClassName}>
+                {description}
+              </CardDescription>
+            )}
           </CardHeader>
         )}
-        <CardContent>
+        <CardContent className={className}>
           <div className="relative">
             <HighchartsReact
               highcharts={Highcharts}
@@ -261,16 +296,16 @@ export function HighchartsChart({
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }
 
 // Mini line chart component
 interface MiniLineChartProps {
-  data: number[]
-  labels?: string[]
-  color?: string
-  height?: number
-  className?: string
+  data: number[];
+  labels?: string[];
+  color?: string;
+  height?: number;
+  className?: string;
 }
 
 export function MiniLineChart({
@@ -282,9 +317,9 @@ export function MiniLineChart({
 }: MiniLineChartProps) {
   const chartOptions: Highcharts.Options = {
     chart: {
-      type: 'line',
+      type: "line",
       height: height,
-      backgroundColor: 'transparent',
+      backgroundColor: "transparent",
       spacing: [0, 0, 0, 0],
     },
     title: {
@@ -318,24 +353,25 @@ export function MiniLineChart({
         fillColor: {
           linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
           stops: [
-            [0, color + '40'],
-            [1, color + '00'],
+            [0, color + "40"],
+            [1, color + "00"],
           ],
         },
         fillOpacity: 0.3,
       },
     },
-    series: [{
-      type: 'area',
-      name: 'Value',
-      data: data,
-    }],
-  }
+    series: [
+      {
+        type: "area",
+        name: "Value",
+        data: data,
+      },
+    ],
+  };
 
   return (
     <div className={className}>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} />
     </div>
-  )
+  );
 }
-
