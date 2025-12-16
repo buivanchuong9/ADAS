@@ -23,10 +23,11 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-} from "lucide-react";
-import Link from "next/link";
-import { HighchartsChart } from "@/components/charts/highcharts-chart";
-import { API_CONFIG } from "@/lib/api-config";
+} from "lucide-react"
+import Link from "next/link"
+import { HighchartsChart } from "@/components/charts/highcharts-chart"
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -62,13 +63,11 @@ export default function HomePage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const statusRes = await fetch(`${API_CONFIG.BASE_URL}/api/status`);
-        const statusData = await statusRes.json();
+        const statusRes = await fetch(getApiUrl(API_ENDPOINTS.HEALTH))
+        const statusData = await statusRes.json()
 
-        const alertsRes = await fetch(
-          `${API_CONFIG.BASE_URL}/api/alerts/stats`
-        );
-        const alertsData = await alertsRes.json();
+        const alertsRes = await fetch(getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS))
+        const alertsData = await alertsRes.json()
 
         setStats({
           systemStatus:

@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 interface UploadResult {
   id: number;
@@ -54,10 +56,8 @@ export function VideoUploadCard() {
         formData.append("description", description);
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-      // Upload file
-      const response = await fetch(`${apiUrl}/api/videos/upload`, {
+      // Upload file to ADAS vision/video
+      const response = await fetch(getApiUrl(API_ENDPOINTS.VISION_VIDEO), {
         method: "POST",
         body: formData,
       });
@@ -75,10 +75,9 @@ export function VideoUploadCard() {
         // Auto process for training
         setTimeout(async () => {
           try {
-            const processResponse = await fetch(
-              `${apiUrl}/api/videos/${data.data.id}/process`,
-              { method: "POST" }
-            );
+            const processResponse = await fetch(getApiUrl(API_ENDPOINTS.VIDEO_PROCESS(data.data.id)), {
+              method: "POST",
+            });
             const processData = await processResponse.json();
             console.log("✅ Video processed for training:", processData);
           } catch (err) {

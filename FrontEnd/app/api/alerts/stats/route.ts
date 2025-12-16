@@ -1,14 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const hours = searchParams.get('hours') || '24'
     
-    // Fetch alert stats from backend (Phase 1)
-    const response = await fetch(`${BACKEND_URL}/api/alerts/stats?hours=${hours}`, {
+    // Fetch alert stats from ADAS backend (mapped to admin statistics; path assumed)
+    // Use admin statistics endpoint for alert stats
+    const response = await fetch(`${getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS)}?hours=${hours}`, {
       headers: {
         'Content-Type': 'application/json',
       },

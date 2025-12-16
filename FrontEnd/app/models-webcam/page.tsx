@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Camera, Download, PlayCircle, StopCircle, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { getWebSocketUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 interface ModelInfo {
   id: string
@@ -139,7 +141,8 @@ export default function ModelWebcamPage() {
     await startWebcam()
 
     // Connect WebSocket
-    const ws = new WebSocket(`ws://localhost:8000/ws/stream`)
+    // Connect to ADAS streaming WebSocket (assumed equivalent endpoint)
+    const ws = new WebSocket(getWebSocketUrl(API_ENDPOINTS.WS_STREAM))
     wsRef.current = ws
 
     ws.onopen = () => {

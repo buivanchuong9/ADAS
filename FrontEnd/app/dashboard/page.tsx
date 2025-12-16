@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Activity, AlertTriangle, Camera, Database, TrendingUp } from "lucide-react"
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+import { API_BASE_URL, getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 interface Stats {
   totalDetections: number
@@ -40,7 +41,7 @@ export default function DashboardPage() {
   const fetchData = async () => {
     try {
       // Fetch analytics
-      const analyticsRes = await fetch(`${BACKEND_URL}/api/analytics/dashboard`)
+      const analyticsRes = await fetch(getApiUrl(API_ENDPOINTS.ADMIN_OVERVIEW))
       if (analyticsRes.ok) {
         const data = await analyticsRes.json()
         // Handle both direct data and wrapped response
@@ -49,7 +50,7 @@ export default function DashboardPage() {
       }
 
       // Fetch detection stats
-      const detectionRes = await fetch(`${BACKEND_URL}/api/detections/stats`)
+      const detectionRes = await fetch(getApiUrl(API_ENDPOINTS.DETECTIONS_STATS))
       if (detectionRes.ok) {
         const data = await detectionRes.json()
         // Handle both formats

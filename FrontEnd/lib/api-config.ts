@@ -1,35 +1,26 @@
 // API Configuration for ADAS Platform
 // Tự động detect môi trường và cấu hình URL phù hợp
 
+import { API_ENDPOINTS } from './api-endpoints'
+
 // Determine the environment
 const isDevelopment = process.env.NODE_ENV === 'development'
 const isClient = typeof window !== 'undefined'
 
 // Backend API URL
 const getBaseUrl = (): string => {
-  // Trong môi trường development
-  if (isDevelopment) {
-    // Nếu đang chạy trên client (browser)
-    if (isClient) {
-      return 'http://localhost:8000'
-    }
-    // Nếu đang chạy trên server (SSR)
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  }
+  const configured = process.env.NEXT_PUBLIC_API_URL
+  if (configured) return configured
 
-  // Trong môi trường production
-  if (isClient) {
-    // Sử dụng window.location để tự động detect
-    return process.env.NEXT_PUBLIC_API_URL || `${window.location.protocol}//${window.location.hostname}:8000`
-  }
-
-  // SSR trong production
-  return process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000'
+  // Default to official ADAS backend; no localhost fallback allowed
+  return 'https://adas-api.aiotlab.edu.vn'
 }
+
+export const API_BASE_URL = getBaseUrl()
 
 // WebSocket URL
 const getWsBaseUrl = (): string => {
-  const baseUrl = getBaseUrl()
+  const baseUrl = API_BASE_URL
   
   // Chuyển http/https thành ws/wss
   if (baseUrl.startsWith('https://')) {
@@ -38,51 +29,15 @@ const getWsBaseUrl = (): string => {
     return baseUrl.replace('http://', 'ws://')
   }
   
-  // Default fallback
-  return `ws://localhost:8000`
+  // Default to secure websocket on ADAS host
+  return 'wss://adas-api.aiotlab.edu.vn'
 }
 
 // API Configuration Object
 export const API_CONFIG = {
-  BASE_URL: getBaseUrl(),
+  BASE_URL: API_BASE_URL,
   WS_BASE_URL: getWsBaseUrl(),
-  
-  // API Endpoints
-  ENDPOINTS: {
-    // System
-    STATUS: '/api/status',
-    HEALTH: '/health',
-    
-    // ADAS
-    ADAS_STREAM: '/ws/adas/stream',
-    ADAS_CONFIG: '/api/adas/config',
-    
-    // Alerts
-    ALERTS: '/api/alerts',
-    ALERTS_STATS: '/api/alerts/stats',
-    
-    // Detections
-    DETECTIONS: '/api/detections',
-    DETECTIONS_STATS: '/api/detections/stats',
-    
-    // Video Upload
-    VIDEO_UPLOAD: '/api/upload/video',
-    VIDEO_INFERENCE: '/ws/inference/video',
-    
-    // Models
-    MODELS: '/api/models',
-    MODELS_WEBCAM: '/ws/models/webcam',
-    
-    // Analytics
-    ANALYTICS: '/api/analytics',
-    
-    // Driver Monitoring
-    DRIVER_MONITOR: '/api/driver-monitoring',
-    
-    // Dataset
-    DATASET: '/api/dataset',
-  },
-  
+  ENDPOINTS: API_ENDPOINTS,
   // Timeout settings
   TIMEOUT: {
     REQUEST: 30000, // 30 seconds

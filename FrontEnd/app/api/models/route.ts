@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/models/available`, {
+    const response = await fetch(getApiUrl(API_ENDPOINTS.MODELS_AVAILABLE), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
