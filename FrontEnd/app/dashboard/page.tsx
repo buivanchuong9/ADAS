@@ -92,7 +92,7 @@ export default function DashboardPage() {
                     <Database className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.totalDetections.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{(stats.totalDetections ?? 0).toLocaleString()}</div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Từ database thật
                     </p>
@@ -118,7 +118,7 @@ export default function DashboardPage() {
                     <Camera className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.totalTrips}</div>
+                    <div className="text-2xl font-bold">{stats.totalTrips ?? 0}</div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Chuyến đi đã ghi
                     </p>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                     <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.totalEvents}</div>
+                    <div className="text-2xl font-bold">{stats.totalEvents ?? 0}</div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Sự kiện cảnh báo
                     </p>
@@ -144,18 +144,20 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle>Phân bố theo lớp đối tượng</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Dữ liệu thật từ {stats.totalDetections.toLocaleString()} detections
+                    Dữ liệu thật từ {(stats.totalDetections ?? 0).toLocaleString()} detections
                   </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {classes.map((cls, idx) => (
+                    {classes.map((cls, idx) => {
+                      const countVal = cls.count ?? 0
+                      return (
                       <div key={idx} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{cls.class_name}</Badge>
                             <span className="text-sm text-muted-foreground">
-                              {cls.count.toLocaleString()} detections
+                              {countVal.toLocaleString()} detections
                             </span>
                           </div>
                           <span className="text-sm font-medium">
@@ -163,15 +165,23 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          {(() => {
+                            const counts = classes.map(c => c.count ?? 0)
+                            const maxCount = Math.max(...counts, 1)
+                            const width = (countVal / maxCount) * 100
+                            return (
                           <div 
                             className="h-full bg-primary rounded-full transition-all"
                             style={{ 
-                              width: `${(cls.count / Math.max(...classes.map(c => c.count))) * 100}%` 
+                              width: `${width}%` 
                             }}
                           />
+                            )
+                          })()}
                         </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -185,14 +195,14 @@ export default function DashboardPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {classes
-                        .sort((a, b) => b.count - a.count)
+                        .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
                         .slice(0, 3)
                         .map((cls, idx) => (
                           <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                             <div>
                               <div className="font-semibold">{cls.class_name}</div>
                               <div className="text-sm text-muted-foreground">
-                                {cls.count.toLocaleString()} detections
+                                {(cls.count ?? 0).toLocaleString()} detections
                               </div>
                             </div>
                             <Badge variant="default" className="text-lg">
@@ -211,7 +221,7 @@ export default function DashboardPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {classes
-                        .sort((a, b) => b.avg_confidence - a.avg_confidence)
+                        .sort((a, b) => (b.avg_confidence ?? 0) - (a.avg_confidence ?? 0))
                         .slice(0, 3)
                         .map((cls, idx) => (
                           <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -237,7 +247,7 @@ export default function DashboardPage() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="p-4 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold">{stats.totalDetections.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">{(stats.totalDetections ?? 0).toLocaleString()}</div>
                       <div className="text-sm text-muted-foreground">Total Rows</div>
                     </div>
                     <div className="p-4 bg-muted rounded-lg">
@@ -247,7 +257,7 @@ export default function DashboardPage() {
                     <div className="p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">
                         {classes.length > 0 
-                          ? ((classes.reduce((sum, c) => sum + c.avg_confidence, 0) / classes.length) * 100).toFixed(1)
+                          ? ((classes.reduce((sum, c) => sum + (c.avg_confidence ?? 0), 0) / classes.length) * 100).toFixed(1)
                           : 0}%
                       </div>
                       <div className="text-sm text-muted-foreground">Avg Confidence</div>
