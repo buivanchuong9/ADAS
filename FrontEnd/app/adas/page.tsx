@@ -1,368 +1,286 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ADASOverlay } from "@/components/adas/ADASOverlay"
-import { ArrowLeft, Camera, Settings, Zap, AlertTriangle, Activity } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { getWebSocketUrl } from "@/lib/api-config"
+import { getApiUrl } from "@/lib/api-config"
 import { API_ENDPOINTS } from "@/lib/api-endpoints"
+import { ArrowLeft, Upload, PlayCircle, Film, CheckCircle2, Loader2, AlertTriangle, Sparkles, Database, ShieldCheck, RefreshCw } from "lucide-react"
+
+type VisionResponse = {
+  message?: string
+  data?: any
+}
 
 export default function ADASPage() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const wsRef = useRef<WebSocket | null>(null)
   const { toast } = useToast()
+  const [file, setFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [processingMsg, setProcessingMsg] = useState<string>("")
+  const [result, setResult] = useState<VisionResponse | null>(null)
+  const [sampleLoading, setSampleLoading] = useState(false)
+  const [stage, setStage] = useState<"input" | "done">("input")
 
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [modelStatus, setModelStatus] = useState("disconnected") // disconnected, connecting, ready
-  const [fps, setFps] = useState(0)
-  const [inferenceTime, setInferenceTime] = useState(0)
-  const [adasData, setAdasData] = useState<any>(null)
-  const [selectedCamera, setSelectedCamera] = useState<string>("")
-  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
-
-  // Get available cameras
   useEffect(() => {
-    async function getCameras() {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices()
-        const videoDevices = devices.filter(device => device.kind === 'videoinput')
-        setCameras(videoDevices)
-        if (videoDevices.length > 0) {
-          setSelectedCamera(videoDevices[0].deviceId)
-        }
-      } catch (err) {
-        console.error("Error getting cameras", err)
+    return () => {
+      if (previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl)
       }
     }
-    getCameras()
-  }, [])
+  }, [previewUrl])
 
-  const connectWebSocket = () => {
-    setModelStatus("connecting")
-    // 🆕 Connect to NEW ADAS WebSocket endpoint with cross-platform URL support
-    const wsUrl = getWebSocketUrl(API_ENDPOINTS.WS_ADAS_STREAM)
-    console.log(`🔌 Connecting to ADAS WebSocket: ${wsUrl}`)
-    const ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      console.log("🔌 Connected to ADAS WebSocket")
-      setModelStatus("ready")
-      
-      // Send initial config
-      ws.send(JSON.stringify({
-        type: 'config',
-        config: {
-          enable_tsr: true,
-          enable_fcw: true,
-          enable_ldw: true,
-          enable_audio: false
-        }
-      }))
-      
-      toast({
-        title: "ADAS System Ready",
-        description: "Connected to ADAS Detection Backend",
-      })
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const response = JSON.parse(event.data)
-        const msgType = response.type || ''
-
-        // Handle ADAS WebSocket response format
-        if (msgType === 'adas_result') {
-          // ADAS result from /ws/adas/stream
-          const data = response.data || {}
-          setAdasData({
-            detections: data.fcw_detections || [],
-            tracks: data.tracks || [],
-            lanes: data.ldw_data?.lanes || [],
-            ldw: {
-              active: data.ldw_data?.is_departing || false,
-              is_departing: data.ldw_data?.is_departing || false,
-              departure_side: data.ldw_data?.departure_side || null
-            },
-            alerts: data.alerts || [],
-            tsr: data.tsr_detections || [],
-            vehicle_speed: data.vehicle_speed || 0,
-            speed_limit: data.speed_limit || null,
-            stats: {
-              fps: response.fps || 0,
-              process_time_ms: response.process_time_ms || 0
-            }
-          })
-          setFps(response.fps || 0)
-          setInferenceTime(response.process_time_ms || 0)
-        } else if (msgType === 'config_updated') {
-          console.log("✅ ADAS config updated:", response.config)
-        } else if (msgType === 'ping') {
-          // Heartbeat - no action needed
-        } else if (msgType === 'error') {
-          console.error("ADAS WebSocket error:", response.message)
-          toast({
-            title: "ADAS Error",
-            description: response.message || "Unknown error",
-            variant: "destructive"
-          })
-        } else {
-          console.warn("Unknown message type:", msgType, response)
-        }
-      } catch (error) {
-        console.error("Failed to parse WebSocket message:", error)
-      }
-    }
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error)
-      setModelStatus("error")
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect to ADAS backend. Retrying...",
-        variant: "destructive"
-      })
-    }
-
-    ws.onclose = (event) => {
-      console.log(`WebSocket closed (code: ${event.code}, reason: ${event.reason || 'none'})`)
-      if (isStreaming && event.code !== 1000) {
-        // Not a normal closure - attempt reconnection with exponential backoff
-        setModelStatus("reconnecting")
-        const reconnectDelay = Math.min(2000 * Math.pow(2, 0), 10000) // Max 10s delay
-        setTimeout(() => {
-          if (isStreaming) {
-            console.log("🔄 Reconnecting to ADAS WebSocket...")
-            connectWebSocket()
-          }
-        }, reconnectDelay)
-      } else {
-        setModelStatus("disconnected")
-      }
-    }
-
-    wsRef.current = ws
+  const handleFile = (f: File | null) => {
+    setResult(null)
+    setProcessingMsg("")
+    setFile(f)
+    if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(f ? URL.createObjectURL(f) : null)
   }
 
-  const startStream = async () => {
+  const uploadAndAnalyze = async () => {
+    if (!file) {
+      toast({ title: "Chưa chọn video", description: "Vui lòng chọn một file video để phân tích", variant: "destructive" })
+      return
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          deviceId: selectedCamera ? { exact: selectedCamera } : undefined,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
+      setUploading(true)
+      setProcessingMsg("Đang tải và phân tích video...")
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch(getApiUrl(API_ENDPOINTS.VISION_VIDEO), {
+        method: "POST",
+        body: formData,
       })
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
-      }
-
-      setIsStreaming(true)
-      connectWebSocket()
-
+      const data = await res.json()
+      setResult(data)
+      setProcessingMsg("")
+      toast({ title: "Đã gửi video", description: "Video đang được AI phân tích và lưu vào dataset." })
+      setStage("done")
     } catch (err) {
-      console.error("Error accessing camera:", err)
-      toast({
-        title: "Camera Error",
-        description: "Could not access camera. Please check permissions.",
-        variant: "destructive"
-      })
+      console.error(err)
+      toast({ title: "Lỗi phân tích", description: "Không thể gửi video lên BE.", variant: "destructive" })
+    } finally {
+      setUploading(false)
     }
   }
 
-  const stopStream = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-      tracks.forEach(track => track.stop())
-      videoRef.current.srcObject = null
-    }
-
-    if (wsRef.current) {
-      wsRef.current.close()
-      wsRef.current = null
-    }
-
-    setIsStreaming(false)
-    setModelStatus("disconnected")
-  }
-
-  // Frame processing loop
-  useEffect(() => {
-    if (!isStreaming || modelStatus !== "ready") return
-
-    const processFrame = () => {
-      if (!videoRef.current || !canvasRef.current || !wsRef.current) return
-
-      if (wsRef.current.readyState === WebSocket.OPEN) {
-        const video = videoRef.current
-        const canvas = canvasRef.current
-        const ctx = canvas.getContext("2d")
-
-        if (ctx && video.videoWidth > 0) {
-          // Draw video to canvas (hidden)
-          canvas.width = video.videoWidth
-          canvas.height = video.videoHeight
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-          // Convert to base64
-          // Reduce quality slightly for speed if needed (0.7)
-          const base64Frame = canvas.toDataURL("image/jpeg", 0.7)
-
-          // Send to ADAS WebSocket endpoint with proper format
-          wsRef.current.send(JSON.stringify({
-            type: "frame",
-            data: base64Frame,
-            vehicle_speed: 0.0, // TODO: Get from GPS/OBD if available
-            config: {
-              enable_tsr: true,
-              enable_fcw: true,
-              enable_ldw: true,
-              enable_audio: false
-            }
-          }))
-        }
+  const useSampleVideo = async () => {
+    try {
+      setSampleLoading(true)
+      setResult(null)
+      setProcessingMsg("Đang lấy video mẫu...")
+      const res = await fetch(getApiUrl(API_ENDPOINTS.DATASET))
+      const data = await res.json()
+      const first = (data?.data && Array.isArray(data.data) ? data.data[0] : Array.isArray(data) ? data[0] : null) || null
+      const candidate = first?.video_url || first?.file_url || first?.file_path || null
+      if (candidate) {
+        setPreviewUrl(candidate)
+        setProcessingMsg("Video mẫu sẵn sàng, hãy phân tích hoặc xem trước.")
+      } else {
+        setProcessingMsg("")
+        toast({ title: "Không tìm thấy video mẫu", description: "Dataset chưa có video mẫu.", variant: "destructive" })
       }
-
-      // Schedule next frame (limit to ~30 FPS to avoid flooding)
-      requestAnimationFrame(processFrame)
+    } catch (err) {
+      console.error(err)
+      setProcessingMsg("")
+      toast({ title: "Lỗi lấy video mẫu", description: "Không thể lấy video mẫu từ dataset.", variant: "destructive" })
+    } finally {
+      setSampleLoading(false)
     }
-
-    const animationId = requestAnimationFrame(processFrame)
-    return () => cancelAnimationFrame(animationId)
-  }, [isStreaming, modelStatus])
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-      {/* Premium Header with glass morphism */}
-      <header className="flex items-center justify-between p-4 bg-card/60 border-b border-border/40 backdrop-blur-xl z-10">
-        <div className="flex items-center gap-4">
+    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-foreground">
+      <header className="flex items-center justify-between p-5 border-b border-white/5 bg-card/70 backdrop-blur-xl">
+        <div className="flex items-center gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-all">
-              <ArrowLeft className="w-6 h-6" />
+            <Button variant="ghost" size="icon" className="text-muted-foreground">
+              <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              <Zap className="w-5 h-5 text-primary drop-shadow-[0_0_8px_hsl(189_94%_55%_/_0.5)]" />
-              ADAS Pro v3.1 Drive Mode
-            </h1>
-            <div className="flex items-center gap-2 text-xs">
-              <span className={`w-2 h-2 rounded-full animate-pulse ${
-                modelStatus === 'ready' ? 'bg-success shadow-[0_0_8px_hsl(158_64%_52%)]' : 
-                modelStatus === 'connecting' ? 'bg-warning shadow-[0_0_8px_hsl(38_92%_58%)]' :
-                'bg-destructive'
-              }`} />
-              <span className={modelStatus === 'ready' ? 'text-success' : 'text-muted-foreground'}>
-                {modelStatus.toUpperCase()}
-              </span>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="gap-1">
+                <Sparkles className="w-3 h-3 text-primary" />
+                Realtime AI
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <ShieldCheck className="w-3 h-3 text-success" />
+                Saved to dataset
+              </Badge>
             </div>
+            <h1 className="text-2xl font-bold flex items-center gap-2 mt-2">
+              <Film className="w-5 h-5 text-primary" />
+              ADAS Video Analysis
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Upload hoặc dùng video mẫu, AI phân tích và lưu vào dataset.
+            </p>
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden md:block bg-muted/50 px-4 py-2 rounded-lg border border-border/50">
-            <div className="text-sm font-mono text-primary font-bold">{fps} FPS</div>
-            <div className="text-xs text-muted-foreground">{inferenceTime}ms latency</div>
-          </div>
-
-          {!isStreaming ? (
-            <Button onClick={startStream} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg glow-primary transition-all">
-              <Camera className="w-4 h-4 mr-2" />
-              Start System
-            </Button>
-          ) : (
-            <Button onClick={stopStream} variant="destructive" className="shadow-lg">
-              Stop System
-            </Button>
-          )}
-
-          <Button variant="ghost" size="icon" className="hover:bg-muted">
-            <Settings className="w-5 h-5" />
-          </Button>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">Backend: /vision/video</Badge>
+          <Badge variant="secondary" className="gap-1">
+            <Database className="w-3 h-3" />
+            Dataset ready
+          </Badge>
         </div>
       </header>
 
-      {/* Main Viewport with premium gradient */}
-      <main className="flex-1 relative bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center overflow-hidden">
-        {/* Video Feed Container */}
-        <div className="relative w-full h-full max-w-[1920px] aspect-video">
-          <video
-            ref={videoRef}
-            className="absolute top-0 left-0 w-full h-full object-contain rounded-lg"
-            playsInline
-            muted
-          />
+      <main className="flex-1 p-6">
+        <div className="grid gap-6 xl:grid-cols-3">
+          {stage === "input" ? (
+            <div className="space-y-4 xl:col-span-1">
+              <Card className="border-primary/30 shadow-lg shadow-primary/10 bg-linear-to-br from-slate-900/70 via-slate-900 to-slate-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-primary" />
+                    1) Chọn video
+                  </CardTitle>
+                  <CardDescription>Upload video hoặc dùng video mẫu từ dataset</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => handleFile(e.target.files?.[0] || null)}
+                    disabled={uploading}
+                    className="cursor-pointer border-border/50 bg-slate-950/50"
+                  />
+                  <div className="flex gap-2">
+                    <Button className="w-full" onClick={uploadAndAnalyze} disabled={uploading || (!file && !previewUrl)}>
+                      {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                      Phân tích video
+                    </Button>
+                    <Button variant="secondary" onClick={useSampleVideo} disabled={sampleLoading}>
+                      {sampleLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
+                      Video mẫu
+                    </Button>
+                  </div>
 
-          {/* Overlay */}
-          {isStreaming && videoRef.current && (
-            <ADASOverlay
-              width={videoRef.current.videoWidth || 1280}
-              height={videoRef.current.videoHeight || 720}
-              data={adasData}
-            />
-          )}
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="rounded-lg border border-border/50 bg-slate-950/50 p-3">
+                      <div className="text-xs text-muted-foreground">Trạng thái</div>
+                      <div className="font-semibold flex items-center gap-2">
+                        <Loader2 className={`h-3.5 w-3.5 ${uploading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
+                        {uploading ? "Đang phân tích" : "Sẵn sàng"}
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-border/50 bg-slate-950/50 p-3">
+                      <div className="text-xs text-muted-foreground">Nguồn video</div>
+                      <div className="font-semibold">{file ? "Upload mới" : previewUrl ? "Video mẫu" : "Chưa chọn"}</div>
+                    </div>
+                  </div>
 
-          {/* Hidden Canvas for processing */}
-          <canvas ref={canvasRef} className="hidden" />
+                  {processingMsg && (
+                    <div className="text-sm text-muted-foreground flex items-center gap-2 rounded-md border border-border/50 bg-slate-950/60 px-3 py-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {processingMsg}
+                    </div>
+                  )}
 
-          {/* Premium placeholder when not streaming */}
-          {!isStreaming && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/30 backdrop-blur-2xl rounded-lg border border-border/50">
-              <div className="relative">
-                <Activity className="w-20 h-20 text-primary/40 mb-4 animate-pulse" />
-                <div className="absolute inset-0 blur-xl bg-primary/20 rounded-full" />
-              </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                System Standby
-              </h2>
-              <p className="text-muted-foreground mt-2 text-lg">Connect camera to activate ADAS</p>
+                  {result && (
+                    <div className="text-sm space-y-1 bg-slate-950/60 p-3 rounded border border-border/50">
+                      <div className="flex items-center gap-2 text-success">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Kết quả
+                      </div>
+                      <pre className="text-xs whitespace-pre-wrap break-all">
+                        {JSON.stringify(result, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    Quy trình lưu trữ
+                  </CardTitle>
+                  <CardDescription className="text-sm">Video đã phân tích sẽ vào dataset và sẵn sàng cho bước kế tiếp.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1"><Upload className="w-3 h-3" />Upload</Badge>
+                    <span>Gửi video tới /vision/video</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1"><Sparkles className="w-3 h-3" />AI</Badge>
+                    <span>AI phân tích nội dung video</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1"><Database className="w-3 h-3" />Dataset</Badge>
+                    <span>Lưu kết quả vào dataset và có thể lấy lại bằng “Video mẫu”</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          )}
-        </div>
+          ) : null}
 
-        {/* Premium Dashboard Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/95 to-transparent pt-24 pointer-events-none">
-          <div className="max-w-7xl mx-auto grid grid-cols-3 gap-8 pointer-events-auto">
-            {/* Left: Speed & Status with glow */}
-            <div className="flex items-end gap-4 bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-xl">
-              <div>
-                <div className="text-7xl font-bold font-mono bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent drop-shadow-2xl">
-                  0
-                </div>
-                <div className="text-sm text-muted-foreground font-semibold tracking-wider">KM/H</div>
-              </div>
-              <div className="mb-3">
-                <Badge className="bg-success/20 text-success border-success/50 shadow-lg glow-accent">
-                  AUTOPILOT READY
+          <Card className="xl:col-span-2 h-full shadow-2xl bg-linear-to-br from-slate-950/80 via-slate-900/80 to-slate-900 border border-white/5">
+            <CardHeader className="space-y-2">
+              <div className="flex items-center justify-between">
+                <CardTitle>2) Xem video đang được phân tích</CardTitle>
+                <Badge variant="outline" className="gap-1">
+                  <AlertTriangle className="h-3 w-3 text-warning" />
+                  Lưu vào dataset tự động
                 </Badge>
               </div>
-            </div>
-
-            {/* Center: Alerts with premium styling */}
-            <div className="flex flex-col items-center justify-end pb-2">
-              {adasData?.ldw?.is_departing && (
-                <div className="flex items-center gap-3 px-6 py-3 bg-destructive/20 backdrop-blur-xl border-2 border-destructive/60 rounded-2xl text-destructive animate-pulse shadow-2xl glow-accent">
-                  <AlertTriangle className="w-6 h-6" />
-                  <span className="font-bold text-lg tracking-wide">LANE DEPARTURE</span>
+              <CardDescription>
+                Video sẽ được gửi tới AI và lưu vào dataset. Bạn có thể dùng video mẫu để tránh upload lớn.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 shadow-inner">
+                {previewUrl ? (
+                  <video
+                    key={previewUrl}
+                    src={previewUrl}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-2">
+                    <Upload className="w-8 h-8" />
+                    <p>Chưa có video. Upload hoặc dùng video mẫu.</p>
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <p>Đang phân tích...</p>
+                  </div>
+                )}
+              </div>
+              {stage === "done" ? (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Button variant="default" onClick={() => setStage("input")} className="gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Phân tích video khác
+                  </Button>
+                  <Button variant="secondary" onClick={() => window.history.back()} className="gap-2">
+                    <ArrowLeft className="w-4 h-4" />
+                    Quay lại
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  Dữ liệu sau phân tích sẽ được lưu vào dataset và có thể truy xuất ở bước “Video mẫu”.
                 </div>
               )}
-            </div>
-
-            {/* Right: Detection stats with premium card */}
-            <div className="flex justify-end items-end">
-              <div className="text-right bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-xl">
-                <div className="text-sm text-muted-foreground font-medium">Objects Detected</div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-                  {adasData?.tracks?.length || 0}
-                </div>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
