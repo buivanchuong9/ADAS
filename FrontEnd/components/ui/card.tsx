@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import * as React from 'react'
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import * as React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    hover?: boolean
-    glass?: boolean
+    hover?: boolean;
+    glass?: boolean;
   }
 >(({ className, hover = true, glass = false, children, ...props }, ref) => {
-  const { onDrag, ...restProps } = props as any
-  
+  const { onDrag, ...restProps } = props as any;
+
   return (
     <motion.div
       ref={ref}
       data-slot="card"
       className={cn(
-        'relative flex flex-col gap-6 rounded-2xl border py-6 overflow-hidden',
+        "relative flex flex-col gap-6 rounded-2xl border py-6 overflow-hidden",
         glass
-          ? 'bg-white/5 backdrop-blur-xl border-white/10 shadow-xl'
-          : 'bg-card text-card-foreground border-border/50 shadow-lg',
-        hover && 'hover:shadow-2xl transition-all duration-300',
-        className,
+          ? "bg-white/5 backdrop-blur-xl border-white/10 shadow-xl"
+          : "bg-card text-card-foreground border-border/50 shadow-lg",
+        hover && "hover:shadow-2xl transition-all duration-300",
+        className
       )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -38,17 +38,17 @@ const Card = React.forwardRef<
           <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
         </>
       )}
-      
+
       {/* Neumorphism subtle shadow */}
       {!glass && (
         <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       )}
-      
+
       <div className="relative z-10">{children}</div>
     </motion.div>
-  )
-})
-Card.displayName = "Card"
+  );
+});
+Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
@@ -58,13 +58,13 @@ const CardHeader = React.forwardRef<
     ref={ref}
     data-slot="card-header"
     className={cn(
-      '@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6',
-      className,
+      "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 text-white",
+      className
     )}
     {...props}
   />
-))
-CardHeader.displayName = "CardHeader"
+));
+CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<
   HTMLDivElement,
@@ -73,11 +73,14 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     data-slot="card-title"
-    className={cn('leading-none font-bold text-lg bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent', className)}
+    className={cn(
+      "leading-none font-bold text-lg bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent text-white",
+      className
+    )}
     {...props}
   />
-))
-CardTitle.displayName = "CardTitle"
+));
+CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<
   HTMLDivElement,
@@ -86,11 +89,11 @@ const CardDescription = React.forwardRef<
   <div
     ref={ref}
     data-slot="card-description"
-    className={cn('text-muted-foreground text-sm leading-relaxed', className)}
+    className={cn("text-muted-foreground text-sm leading-relaxed", className)}
     {...props}
   />
-))
-CardDescription.displayName = "CardDescription"
+));
+CardDescription.displayName = "CardDescription";
 
 const CardAction = React.forwardRef<
   HTMLDivElement,
@@ -100,13 +103,13 @@ const CardAction = React.forwardRef<
     ref={ref}
     data-slot="card-action"
     className={cn(
-      'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
-      className,
+      "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+      className
     )}
     {...props}
   />
-))
-CardAction.displayName = "CardAction"
+));
+CardAction.displayName = "CardAction";
 
 const CardContent = React.forwardRef<
   HTMLDivElement,
@@ -115,11 +118,11 @@ const CardContent = React.forwardRef<
   <div
     ref={ref}
     data-slot="card-content"
-    className={cn('px-6', className)}
+    className={cn("px-6", className)}
     {...props}
   />
-))
-CardContent.displayName = "CardContent"
+));
+CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<
   HTMLDivElement,
@@ -128,11 +131,11 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     data-slot="card-footer"
-    className={cn('flex items-center px-6 [.border-t]:pt-6', className)}
+    className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
     {...props}
   />
-))
-CardFooter.displayName = "CardFooter"
+));
+CardFooter.displayName = "CardFooter";
 
 export {
   Card,
@@ -142,4 +145,4 @@ export {
   CardAction,
   CardDescription,
   CardContent,
-}
+};

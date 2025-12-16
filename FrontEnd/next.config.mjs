@@ -8,10 +8,9 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    turbo: {
-      root: process.cwd(),
-    },
+    // để trống hoặc thêm các option hợp lệ khác nếu cần
   },
 }
 
 export default nextConfig
+

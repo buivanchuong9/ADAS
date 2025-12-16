@@ -1,0 +1,30 @@
+name: Deploy ADAS UI to Windows Server
+
+on:
+  push:
+    branches:
+      - deploy   # Nhánh để auto deploy
+
+jobs:
+  build:
+    runs-on: self-hosted   # Chạy trên runner của Windows Server
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      # ⚠️ Thay build thành dist nếu mày dùng Vite
+      - name: Deploy to IIS
+        run: |
+          robocopy build "C:\inetpub\wwwroot\adas" /MIR
