@@ -75,7 +75,8 @@ export function Sidebar() {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      className="w-64 bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 flex flex-col relative overflow-hidden"
+      className="w-64 bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 flex flex-col relative overflow-hidden rounded-2xl"
+
     >
       {/* Glassmorphism overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent pointer-events-none" />
