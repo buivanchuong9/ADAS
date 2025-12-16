@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Forward to backend NEW /api/detections/save endpoint
-    const response = await fetch(`${BACKEND_URL}/api/detections/save`, {
+    // Forward to ADAS detections save (assumed equivalent path)
+    const response = await fetch(getApiUrl(API_ENDPOINTS.DETECTIONS_SAVE), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,8 +45,8 @@ export async function GET(request: NextRequest) {
     if (camera_id) query += `&camera_id=${camera_id}`
     if (class_name) query += `&class_name=${class_name}`
     
-    // Fetch recent detections from backend NEW endpoint
-    const response = await fetch(`${BACKEND_URL}/api/detections/recent?${query}`, {
+    // Fetch recent detections from ADAS endpoint (assumed equivalent path)
+    const response = await fetch(`${getApiUrl(API_ENDPOINTS.DETECTIONS_RECENT)}?${query}`, {
       headers: {
         'Content-Type': 'application/json',
       },

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
+
 export async function GET() {
   try {
-    // Forward to FastAPI backend
-    const response = await fetch("http://localhost:8000/api/dataset", {
+    // Forward to ADAS backend dataset (assumed equivalent)
+    const response = await fetch(getApiUrl(API_ENDPOINTS.DATASET), {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -29,8 +32,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     
-    // Forward to FastAPI backend
-    const response = await fetch("http://localhost:8000/api/dataset", {
+    // Forward to ADAS backend dataset upload (assumed equivalent)
+    const response = await fetch(getApiUrl(API_ENDPOINTS.DATASET), {
       method: "POST",
       body: formData
     })

@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Send driver status to backend (stored as event or driver_status)
-    const response = await fetch(`${BACKEND_URL}/api/events`, {
+    // Send driver status to ADAS events (assumed equivalent path)
+    const response = await fetch(getApiUrl(API_ENDPOINTS.EVENTS), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,8 +35,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    // Fetch recent driver status from backend events
-    const response = await fetch(`${BACKEND_URL}/api/events/list?type=driver_status&limit=1`, {
+    // Fetch recent driver status from ADAS events (assumed equivalent path)
+    const response = await fetch(`${getApiUrl(API_ENDPOINTS.EVENTS_LIST)}?type=driver_status&limit=1`, {
       headers: {
         'Content-Type': 'application/json',
       },

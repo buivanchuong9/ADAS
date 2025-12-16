@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+import { getApiUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
 
-    // Send event to FastAPI backend
-    const response = await fetch(`${BACKEND_URL}/api/events`, {
+    // Send event to ADAS backend (assumed equivalent path)
+    const response = await fetch(getApiUrl(API_ENDPOINTS.EVENTS), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,8 +39,8 @@ export async function GET(request: NextRequest) {
     if (type) params.append('type', type)
     if (limit) params.append('limit', limit)
 
-    // Fetch events from FastAPI backend
-    const response = await fetch(`${BACKEND_URL}/api/events/list?${params.toString()}`, {
+    // Fetch events from ADAS backend (assumed equivalent path)
+    const response = await fetch(`${getApiUrl(API_ENDPOINTS.EVENTS_LIST)}?${params.toString()}`, {
       headers: {
         'Content-Type': 'application/json',
       },

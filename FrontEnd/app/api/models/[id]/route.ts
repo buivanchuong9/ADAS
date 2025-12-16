@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 export async function POST(
   request: NextRequest,
@@ -10,7 +11,7 @@ export async function POST(
   try {
     const modelId = id;
     
-    const response = await fetch(`${BACKEND_URL}/api/models/download/${modelId}`, {
+    const response = await fetch(getApiUrl(API_ENDPOINTS.MODEL_DOWNLOAD(modelId)), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +45,7 @@ export async function GET(
   try {
     const modelId = id;
     
-    const response = await fetch(`${BACKEND_URL}/api/models/info/${modelId}`, {
+    const response = await fetch(getApiUrl(API_ENDPOINTS.MODEL_INFO(modelId)), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export async function DELETE(
     const { id } = await params;
     const modelId = id;
     
-    const response = await fetch(`${BACKEND_URL}/api/models/delete/${modelId}`, {
+    const response = await fetch(getApiUrl(API_ENDPOINTS.MODEL_DELETE(modelId)), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

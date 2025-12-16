@@ -8,6 +8,7 @@ import { ArrowLeft, Camera, Settings, Zap, AlertTriangle, Activity } from "lucid
 import Link from "next/link"
 import { useToast } from "@/components/ui/use-toast"
 import { getWebSocketUrl } from "@/lib/api-config"
+import { API_ENDPOINTS } from "@/lib/api-endpoints"
 
 export default function ADASPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -43,7 +44,7 @@ export default function ADASPage() {
   const connectWebSocket = () => {
     setModelStatus("connecting")
     // 🆕 Connect to NEW ADAS WebSocket endpoint with cross-platform URL support
-    const wsUrl = getWebSocketUrl("/ws/adas/stream")
+    const wsUrl = getWebSocketUrl(API_ENDPOINTS.WS_ADAS_STREAM)
     console.log(`🔌 Connecting to ADAS WebSocket: ${wsUrl}`)
     const ws = new WebSocket(wsUrl)
 
