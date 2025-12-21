@@ -26,16 +26,18 @@ jobs:
         working-directory: ./FrontEnd
         run: npm run build
 
-      - name: Deploy to IIS folder
+      - name: Deploy to IIS
         run: |
-          if (-not (Test-Path "${{ env.DEPLOY_PATH }}")) {
-            New-Item -ItemType Directory -Path "${{ env.DEPLOY_PATH }}" -Force
-          }
-
-          Write-Host "Deploying FE to ${{ env.DEPLOY_PATH }}"
-
-          robocopy FrontEnd\.next\standalone "${{ env.DEPLOY_PATH }}" /MIR
-          robocopy FrontEnd\.next\static "${{ env.DEPLOY_PATH }}\.next\static" /MIR
-          robocopy FrontEnd\public "${{ env.DEPLOY_PATH }}\public" /MIR
-          exit 0
+          $ErrorActionPreference = "Stop"
+          $siteName = "ADAS_FE"
+          $target = "C:\inetpub\wwwroot\adas_fe"
+          
+          Stop-Website -Name $siteName
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          Copy-Item ".\FrontEnd\.next\standalone\*" -Destination $target -Recurse -Force
+          Copy-Item ".\FrontEnd\.next\static" -Destination "$target\.next\static" -Recurse -Force
+          Copy-Item ".\FrontEnd\public" -Destination "$target\public" -Recurse -Force
+          
+          Start-Website -Name $siteName
         shell: powershell
