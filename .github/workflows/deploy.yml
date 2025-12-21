@@ -18,15 +18,12 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
       - name: Install dependencies
+        working-directory: ./FrontEnd
         run: npm ci
 
       - name: Build frontend
+        working-directory: ./FrontEnd
         run: npm run build
 
       - name: Deploy to IIS folder
@@ -37,6 +34,8 @@ jobs:
 
           Write-Host "Deploying FE to ${{ env.DEPLOY_PATH }}"
 
-          robocopy dist "${{ env.DEPLOY_PATH }}" /MIR
+          robocopy FrontEnd\.next\standalone "${{ env.DEPLOY_PATH }}" /MIR
+          robocopy FrontEnd\.next\static "${{ env.DEPLOY_PATH }}\.next\static" /MIR
+          robocopy FrontEnd\public "${{ env.DEPLOY_PATH }}\public" /MIR
           exit 0
         shell: powershell
