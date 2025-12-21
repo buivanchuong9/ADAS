@@ -40,12 +40,28 @@ jobs:
           $siteName = "ADAS_FE"
           $target = "C:\inetpub\wwwroot\adas_fe"
           
-          Stop-Website -Name $siteName
+          # Stop website and app pool
+          Write-Host "Stopping website and application pool..."
+          Stop-Website -Name $siteName -ErrorAction SilentlyContinue
+          Stop-WebAppPool -Name $siteName -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 3
+          
+          # Clear target directory
+          Write-Host "Clearing target directory..."
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
           
+          # Copy new files
+          Write-Host "Copying new build files..."
           Copy-Item ".\FrontEnd\.next\standalone\*" -Destination $target -Recurse -Force
           Copy-Item ".\FrontEnd\.next\static" -Destination "$target\.next\static" -Recurse -Force
           Copy-Item ".\FrontEnd\public" -Destination "$target\public" -Recurse -Force
           
+          # Start app pool and website
+          Write-Host "Starting application pool and website..."
+          Start-WebAppPool -Name $siteName
+          Start-Sleep -Seconds 2
           Start-Website -Name $siteName
+          
+          Write-Host "Deployment completed successfully!"
+        shell: powershell
         shell: powershell
