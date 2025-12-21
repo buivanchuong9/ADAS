@@ -36,23 +36,44 @@ jobs:
 
       - name: Deploy to IIS
         run: |
-          $ErrorActionPreference = "Stop"
           $siteName = "ADAS_FE"
           $target = "C:\inetpub\wwwroot\adas_fe"
           
           # Stop website and app pool
           Write-Host "Stopping website and application pool..."
-          Stop-Website -Name $siteName -ErrorAction SilentlyContinue
-          Stop-WebAppPool -Name $siteName -ErrorAction SilentlyContinue
+          try {
+            Stop-Website -Name $siteName -ErrorAction Stop
+            Write-Host "Website stopped"
+          } catch {
+            Write-Host "Website already stopped or not found"
+          }
+          
+          try {
+            Stop-WebAppPool -Name $siteName -ErrorAction Stop
+            Write-Host "App pool stopped"
+          } catch {
+            Write-Host "App pool already stopped or not found"
+          }
+          
           Start-Sleep -Seconds 3
           
           # Clear target directory
           Write-Host "Clearing target directory..."
-          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          if (Test-Path $target) {
+            Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          } else {
+            New-Item -ItemType Directory -Path $target -Force | Out-Null
+          }
           
           # Copy new files from view folder
           Write-Host "Copying new build files from view folder..."
+          if (-not (Test-Path ".\FrontEnd\view")) {
+            Write-Error "View folder not found!"
+            exit 1
+          }
+          
           Copy-Item ".\FrontEnd\view\*" -Destination $target -Recurse -Force
+          Write-Host "Files copied successfully"
           
           # Start app pool and website
           Write-Host "Starting application pool and website..."
