@@ -3,17 +3,23 @@
   "version": "1.0.0",
   "description": "Hệ Thống Hỗ Trợ Lái Xe Nâng Cao (ADAS) - Advanced Driver Assistance System",
   "private": true,
+
   "scripts": {
     "dev": "next dev",
+
     "build": "next build",
-    "start": "next start",
+    "export": "next export",
+    "build:static": "next build && next export",
+
     "lint": "eslint .",
+
     "backend": "node -e \"require('child_process').execSync(process.platform === 'win32' ? 'start-backend.bat' : 'bash start-backend.sh', {stdio: 'inherit'})\"",
     "backend:build": "docker compose build backend",
     "backend:stop": "docker compose down",
     "backend:logs": "docker compose logs -f backend",
-    "dev:fullstack": "concurrently \"npm run dev:backend\" \"npm run dev\" --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\"",
-    "dev:backend": "python3 backend-python/start_dev.py"
+
+    "dev:backend": "python3 backend-python/start_dev.py",
+    "dev:fullstack": "concurrently \"npm run dev:backend\" \"npm run dev\" --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
