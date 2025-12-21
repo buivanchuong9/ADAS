@@ -1,30 +1,42 @@
-name: Deploy ADAS UI to Windows Server
+name: ADAS Frontend CI/CD
 
 on:
   push:
     branches:
-      - deploy   # Nhánh để auto deploy
+      - main
+      - deploy
 
 jobs:
-  build:
-    runs-on: self-hosted   # Chạy trên runner của Windows Server
+  build-deploy:
+    runs-on: self-hosted
+
+    env:
+      DEPLOY_PATH: 'C:\inetpub\wwwroot\adas_fe'
+      NODE_VERSION: '18'
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build project
+      - name: Build frontend
         run: npm run build
 
-      # ⚠️ Thay build thành dist nếu mày dùng Vite
-      - name: Deploy to IIS
+      - name: Deploy to IIS folder
         run: |
-          robocopy build "C:\inetpub\wwwroot\adas" /MIR
+          if (-not (Test-Path "${{ env.DEPLOY_PATH }}")) {
+            New-Item -ItemType Directory -Path "${{ env.DEPLOY_PATH }}" -Force
+          }
+
+          Write-Host "Deploying FE to ${{ env.DEPLOY_PATH }}"
+
+          robocopy dist "${{ env.DEPLOY_PATH }}" /MIR
+          exit 0
+        shell: powershell
