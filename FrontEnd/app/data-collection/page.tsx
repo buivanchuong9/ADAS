@@ -406,7 +406,7 @@ export default function DataCollectionPage() {
             {preview && (
               <div className="space-y-2">
                 <Label>Vẽ Khung Chứa Đối Tượng</Label>
-                <div className="relative border rounded-lg overflow-hidden bg-black">
+                <div className="relative border-2 border-blue-200 rounded-lg overflow-hidden bg-gray-100">
                   <img
                     ref={imageRef}
                     src={preview}

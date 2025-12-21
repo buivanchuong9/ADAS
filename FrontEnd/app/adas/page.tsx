@@ -95,7 +95,7 @@ export default function ADASPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-foreground">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-900">
       <header className="flex items-center justify-between p-5 border-b border-white/5 bg-card/70 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <Link href="/">
@@ -136,7 +136,7 @@ export default function ADASPage() {
         <div className="grid gap-6 xl:grid-cols-3">
           {stage === "input" ? (
             <div className="space-y-4 xl:col-span-1">
-              <Card className="border-primary/30 shadow-lg shadow-primary/10 bg-linear-to-br from-slate-900/70 via-slate-900 to-slate-800">
+              <Card className="border-blue-300 shadow-lg bg-white">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Upload className="w-4 h-4 text-primary" />
@@ -150,7 +150,7 @@ export default function ADASPage() {
                     accept="video/*"
                     onChange={(e) => handleFile(e.target.files?.[0] || null)}
                     disabled={uploading}
-                    className="cursor-pointer border-border/50 bg-slate-950/50"
+                    className="cursor-pointer border-blue-200 bg-blue-50/50 hover:bg-blue-50"
                   />
                   <div className="flex gap-2">
                     <Button className="w-full" onClick={uploadAndAnalyze} disabled={uploading || (!file && !previewUrl)}>
@@ -164,28 +164,28 @@ export default function ADASPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-lg border border-border/50 bg-slate-950/50 p-3">
-                      <div className="text-xs text-muted-foreground">Trạng thái</div>
-                      <div className="font-semibold flex items-center gap-2">
-                        <Loader2 className={`h-3.5 w-3.5 ${uploading ? "animate-spin text-primary" : "text-muted-foreground"}`} />
+                    <div className="rounded-lg border-2 border-blue-200 bg-blue-50 p-3 hover:bg-blue-100 transition-colors">
+                      <div className="text-xs text-blue-700 font-medium">Trạng thái</div>
+                      <div className="font-semibold flex items-center gap-2 text-blue-900">
+                        <Loader2 className={`h-3.5 w-3.5 ${uploading ? "animate-spin text-blue-600" : "text-gray-400"}`} />
                         {uploading ? "Đang phân tích" : "Sẵn sàng"}
                       </div>
                     </div>
-                    <div className="rounded-lg border border-border/50 bg-slate-950/50 p-3">
-                      <div className="text-xs text-muted-foreground">Nguồn video</div>
-                      <div className="font-semibold">{file ? "Upload mới" : previewUrl ? "Video mẫu" : "Chưa chọn"}</div>
+                    <div className="rounded-lg border-2 border-green-200 bg-green-50 p-3 hover:bg-green-100 transition-colors">
+                      <div className="text-xs text-green-700 font-medium">Nguồn video</div>
+                      <div className="font-semibold text-green-900">{file ? "Upload mới" : previewUrl ? "Video mẫu" : "Chưa chọn"}</div>
                     </div>
                   </div>
 
                   {processingMsg && (
-                    <div className="text-sm text-muted-foreground flex items-center gap-2 rounded-md border border-border/50 bg-slate-950/60 px-3 py-2">
+                    <div className="text-sm text-gray-700 flex items-center gap-2 rounded-md border-2 border-purple-200 bg-purple-50 px-3 py-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       {processingMsg}
                     </div>
                   )}
 
                   {result && (
-                    <div className="text-sm space-y-1 bg-slate-950/60 p-3 rounded border border-border/50">
+                    <div className="text-sm space-y-1 bg-indigo-50 p-3 rounded border-2 border-indigo-200">
                       <div className="flex items-center gap-2 text-success">
                         <CheckCircle2 className="h-4 w-4" />
                         Kết quả
@@ -224,10 +224,10 @@ export default function ADASPage() {
             </div>
           ) : null}
 
-          <Card className="xl:col-span-2 h-full shadow-2xl bg-linear-to-br from-slate-950/80 via-slate-900/80 to-slate-900 border border-white/5">
-            <CardHeader className="space-y-2">
+          <Card className="xl:col-span-2 h-full shadow-lg bg-white border-2 border-blue-200">
+            <CardHeader className="space-y-2 bg-gradient-to-r from-blue-50 to-purple-50">
               <div className="flex items-center justify-between">
-                <CardTitle>2) Xem video đang được phân tích</CardTitle>
+                <CardTitle className="text-blue-900">2) Xem video đang được phân tích</CardTitle>
                 <Badge variant="outline" className="gap-1">
                   <AlertTriangle className="h-3 w-3 text-warning" />
                   Lưu vào dataset tự động
@@ -238,7 +238,7 @@ export default function ADASPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 shadow-inner">
+              <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200 shadow-sm">
                 {previewUrl ? (
                   <video
                     key={previewUrl}
@@ -256,7 +256,7 @@ export default function ADASPage() {
                   </div>
                 )}
                 {uploading && (
-                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white gap-2">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 flex flex-col items-center justify-center text-gray-800 gap-2">
                     <Loader2 className="h-6 w-6 animate-spin" />
                     <p>Đang phân tích...</p>
                   </div>
