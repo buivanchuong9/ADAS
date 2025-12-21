@@ -1,30 +1,51 @@
-name: Deploy ADAS UI to Windows Server
+name: ADAS Frontend CI/CD
 
 on:
   push:
     branches:
-      - deploy   # Nhánh để auto deploy
+      - main
+      - deploy
 
 jobs:
-  build:
-    runs-on: self-hosted   # Chạy trên runner của Windows Server
+  build-deploy:
+    runs-on: self-hosted
+
+    env:
+      DEPLOY_PATH: 'C:\inetpub\wwwroot\adas_fe'
+      NODE_VERSION: '18'
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - name: Clean root lockfile
+        run: |
+          if (Test-Path "package-lock.json") {
+            Remove-Item "package-lock.json" -Force
+            Write-Host "Removed root package-lock.json"
+          }
+        shell: powershell
 
       - name: Install dependencies
-        run: npm install
+        working-directory: ./FrontEnd
+        run: npm ci --legacy-peer-deps
 
-      - name: Build project
+      - name: Build frontend
+        working-directory: ./FrontEnd
         run: npm run build
 
-      # ⚠️ Thay build thành dist nếu mày dùng Vite
       - name: Deploy to IIS
         run: |
-          robocopy build "C:\inetpub\wwwroot\adas" /MIR
+          $ErrorActionPreference = "Stop"
+          $siteName = "ADAS_FE"
+          $target = "C:\inetpub\wwwroot\adas_fe"
+          
+          Stop-Website -Name $siteName
+          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          Copy-Item ".\FrontEnd\.next\standalone\*" -Destination $target -Recurse -Force
+          Copy-Item ".\FrontEnd\.next\static" -Destination "$target\.next\static" -Recurse -Force
+          Copy-Item ".\FrontEnd\public" -Destination "$target\public" -Recurse -Force
+          
+          Start-Website -Name $siteName
+        shell: powershell
