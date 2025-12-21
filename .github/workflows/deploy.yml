@@ -18,6 +18,14 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Clean root lockfile
+        run: |
+          if (Test-Path "package-lock.json") {
+            Remove-Item "package-lock.json" -Force
+            Write-Host "Removed root package-lock.json"
+          }
+        shell: powershell
+
       - name: Install dependencies
         working-directory: ./FrontEnd
         run: npm ci --legacy-peer-deps
