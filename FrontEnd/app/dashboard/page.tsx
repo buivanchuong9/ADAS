@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Sidebar } from "@/components/sidebar"
+import { MobileNav } from "@/components/mobile-nav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Activity, AlertTriangle, Camera, Database, TrendingUp } from "lucide-react"
@@ -66,13 +67,14 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <MobileNav />
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">📊 Dashboard</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">📊 Dashboard</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-2">
               Tổng quan hệ thống ADAS với dữ liệu thật từ database
             </p>
           </div>
@@ -85,7 +87,7 @@ export default function DashboardPage() {
           ) : (
             <>
               {/* Stats Cards */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Tổng Detections</CardTitle>
@@ -187,7 +189,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Class Confidence */}
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Top 3 Classes</CardTitle>
@@ -245,7 +247,7 @@ export default function DashboardPage() {
                   <CardTitle>Database Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                     <div className="p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">{(stats.totalDetections ?? 0).toLocaleString()}</div>
                       <div className="text-sm text-muted-foreground">Total Rows</div>

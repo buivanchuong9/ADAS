@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
+import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -105,11 +106,12 @@ export default function HomePage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 overflow-hidden">
+      <MobileNav />
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
         <motion.div
-          className="p-8 space-y-8"
+          className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -117,7 +119,7 @@ export default function HomePage() {
           {/* Hero Section - Premium Glassmorphism */}
           <motion.div
             variants={itemVariants}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/20 via-accent/10 to-background border border-primary/20 p-10 backdrop-blur-xl"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary/20 via-accent/10 to-background border border-primary/20 p-6 sm:p-8 lg:p-10 backdrop-blur-xl"
           >
             {/* Animated gradient orbs */}
             <motion.div
@@ -164,7 +166,7 @@ export default function HomePage() {
               </motion.div>
 
               <motion.h1
-                className="text-5xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -173,7 +175,7 @@ export default function HomePage() {
               </motion.h1>
 
               <motion.p
-                className="text-xl text-muted-foreground max-w-3xl mb-8 leading-relaxed p-5"
+                className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mb-6 sm:mb-8 leading-relaxed p-3 sm:p-5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -183,7 +185,7 @@ export default function HomePage() {
               </motion.p>
 
               <motion.div
-                className="flex gap-4"
+                className="flex flex-wrap gap-3 sm:gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
@@ -191,19 +193,19 @@ export default function HomePage() {
                 <Link href="/adas">
                   <Button
                     size="lg"
-                    className="shadow-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                    className="shadow-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white w-full sm:w-auto"
                   >
-                    <Zap className="w-5 h-5 mr-2" />
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Start Detection
                   </Button>
                 </Link>
                 <Link href="/dashboard">
                   <Button
                     size="lg"
-                    className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30"
+                    className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto"
                   >
                     View Dashboard
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </Button>
                 </Link>
               </motion.div>
@@ -213,7 +215,7 @@ export default function HomePage() {
           {/* System Status Cards - Premium Grid */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
           >
             {[
               {
@@ -292,29 +294,29 @@ export default function HomePage() {
           {/* Charts Section */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
           >
             <HighchartsChart
               title="Detection Distribution"
               description="Current detection breakdown"
               type="pie"
               data={detectionChartData}
-              height={350}
-              className="pl-8"
+              height={300}
+              className="sm:pl-8"
             />
             <HighchartsChart
               title="System Performance"
               description="Performance over time"
               type="line"
               data={performanceChartData}
-              height={350}
+              height={300}
             />
           </motion.div>
 
           {/* Quick Actions & Features */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
           >
             <Card glass>
               <CardHeader>

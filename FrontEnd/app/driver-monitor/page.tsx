@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Sidebar } from '@/components/sidebar'
+import { MobileNav } from '@/components/mobile-nav'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, Play, Square, Eye, Zap } from 'lucide-react'
@@ -83,17 +84,18 @@ export default function DriverMonitorPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <MobileNav />
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Giám Sát Tài Xế</h1>
-            <p className="text-gray-600">Theo dõi tình trạng tài xế và phát hiện mệt mỏi, phân tán</p>
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Giám Sát Tài Xế</h1>
+            <p className="text-sm sm:text-base text-gray-600">Theo dõi tình trạng tài xế và phát hiện mệt mỏi, phân tán</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+            <div className="xl:col-span-2">
               <Card className="bg-card border-border overflow-hidden">
                 <div className="relative bg-black aspect-video">
                   <video ref={videoRef} className="w-full h-full object-cover hidden" autoPlay playsInline />

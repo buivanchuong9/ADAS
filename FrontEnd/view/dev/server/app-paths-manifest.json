@@ -1,0 +1,10 @@
+{
+  "/adas/page": "app/adas/page.js",
+  "/ai-assistant/page": "app/ai-assistant/page.js",
+  "/analytics/page": "app/analytics/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/data-collection/page": "app/data-collection/page.js",
+  "/driver-monitor/page": "app/driver-monitor/page.js",
+  "/events/page": "app/events/page.js",
+  "/page": "app/page.js"
+}
