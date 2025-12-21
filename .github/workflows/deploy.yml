@@ -50,9 +50,9 @@ jobs:
           Write-Host "Clearing target directory..."
           Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
           
-          # Copy new files
-          Write-Host "Copying new build files..."
-          Copy-Item ".\FrontEnd\out\*" -Destination $target -Recurse -Force
+          # Copy new files from view folder
+          Write-Host "Copying new build files from view folder..."
+          Copy-Item ".\FrontEnd\view\*" -Destination $target -Recurse -Force
           
           # Start app pool and website
           Write-Host "Starting application pool and website..."
