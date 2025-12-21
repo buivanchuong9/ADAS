@@ -1,0 +1,1051 @@
+================================================================================
+DANH SÁCH API CẦN THIẾT CHO ADAS FRONTEND - ĐẦY ĐỦ
+Ngày phân tích: 21/12/2025
+Backend Developer: implement tất cả các API sau
+================================================================================
+
+I. CÁC API ĐÃ CÓ TRONG BACKEND (Theo Swagger)
+================================================================================
+
+✅ System & Health Check:
+   - GET  /health                           
+     Response: { status: "ok", timestamp: "..." }
+
+✅ Admin & Analytics:
+   - GET  /admin/overview                   
+     Response: { 
+       totalDetections: number,
+       totalTrips: number, 
+       totalEvents: number,
+       avgSafetyScore: number 
+     }
+
+   - GET  /admin/statistics                 
+     Response: {
+       classes: [{ class_name: string, count: number, avg_confidence: number }],
+       total: number
+     }
+
+   - GET  /admin/charts                     
+     Response: { chart_data: any[] }
+
+   - GET  /admin/video/{videoId}/timeline   
+     Response: { timeline: any[] }
+
+✅ Vision/Video Processing:
+   - POST /vision/video                     
+     Request: FormData { file: File, description?: string }
+     Response: {
+       success: boolean,
+       message: string,
+       data: {
+         id: number,
+         filename: string,
+         file_size_mb: number,
+         uploaded_at: string,
+         status: string
+       }
+     }
+
+   - POST /vision/video/{id}/process        
+     Response: { success: boolean, message: string }
+
+
+II. CÁC API CẦN IMPLEMENT - DETECTIONS (CRITICAL ⚠️)
+================================================================================
+
+❌ POST /api/detections/save
+   Mục đích: Lưu kết quả detection từ video/webcam
+   Request: {
+     video_id?: number,
+     camera_id?: string,
+     detections: [{
+       class_name: string,
+       class_id: number,
+       confidence: number,
+       bbox: [x1, y1, x2, y2],
+       timestamp: string
+     }],
+     metadata?: any
+   }
+   Response: { success: boolean, detection_id: number }
+
+❌ GET /api/detections/recent
+   Mục đích: Lấy danh sách detections gần đây
+   Query Params: limit=20, camera_id?, class_name?
+   Response: {
+     success: boolean,
+     detections: [{
+       id: number,
+       class_name: string,
+       confidence: number,
+       timestamp: string,
+       camera_id: string,
+       bbox: [x1, y1, x2, y2]
+     }]
+   }
+
+❌ GET /api/detections/stats
+   Mục đích: Thống kê detections (cho dashboard)
+   Response: {
+     total_detections: number,
+     classes: [{
+       class_name: string,
+       count: number,
+       avg_confidence: number
+     }],
+     by_camera: [{
+       camera_id: string,
+       count: number
+     }]
+   }
+
+
+III. CÁC API CẦN IMPLEMENT - DATASET (CRITICAL ⚠️)
+================================================================================
+
+❌ GET /api/dataset
+   Mục đích: Lấy danh sách dataset/videos đã upload
+   Query Params: limit=50, page=1, status?, type?
+   Response: {
+     success: boolean,
+     data: [{
+       id: number,
+       filename: string,
+       file_path: string,
+       video_url?: string,
+       file_url?: string,
+       description?: string,
+       file_size_mb: number,
+       duration_seconds?: number,
+       uploaded_at: string,
+       status: "uploaded" | "processing" | "ready" | "error",
+       ready_for_training: boolean,
+       metadata?: any
+     }],
+     total: number,
+     page: number,
+     limit: number
+   }
+
+❌ POST /api/dataset
+   Mục đích: Upload file vào dataset (video/image)
+   Request: FormData {
+     file: File,
+     description?: string,
+     type?: "video" | "image",
+     tags?: string[]
+   }
+   Response: {
+     success: boolean,
+     message: string,
+     data: {
+       id: number,
+       filename: string,
+       file_path: string,
+       file_size_mb: number,
+       uploaded_at: string
+     }
+   }
+
+❌ DELETE /api/dataset/{id}
+   Mục đích: Xóa file khỏi dataset
+   Response: { success: boolean, message: string }
+
+❌ GET /api/dataset/{id}
+   Mục đích: Lấy thông tin chi tiết 1 dataset item
+   Response: {
+     success: boolean,
+     data: {
+       id: number,
+       filename: string,
+       file_path: string,
+       video_url?: string,
+       description?: string,
+       uploaded_at: string,
+       detections_count?: number,
+       metadata?: any
+     }
+   }
+
+
+IV. CÁC API CẦN IMPLEMENT - MODELS (HIGH PRIORITY 🔴)
+================================================================================
+
+❌ GET /api/models/available
+   Mục đích: List tất cả models có thể dùng
+   Response: {
+     success: boolean,
+     models: [{
+       id: string,
+       name: string,
+       description: string,
+       type: "detection" | "segmentation" | "depth",
+       size_mb: number,
+       accuracy: number,
+       speed_ms: number,
+       downloaded: boolean,
+       file_path?: string,
+       download_url?: string
+     }],
+     total_models: number
+   }
+
+❌ POST /api/models/download/{id}
+   Mục đích: Download model về server
+   Response: {
+     success: boolean,
+     message: string,
+     model: {
+       id: string,
+       name: string,
+       file_path: string,
+       size_mb: number,
+       downloaded: true
+     }
+   }
+
+❌ GET /api/models/info/{id}
+   Mục đích: Lấy thông tin chi tiết model
+   Response: {
+     success: boolean,
+     model: {
+       id: string,
+       name: string,
+       description: string,
+       type: string,
+       size_mb: number,
+       accuracy: number,
+       speed_ms: number,
+       downloaded: boolean,
+       classes: string[],
+       input_size: [width, height],
+       metadata: any
+     }
+   }
+
+❌ DELETE /api/models/delete/{id}
+   Mục đích: Xóa model khỏi server
+   Response: { success: boolean, message: string }
+
+❌ POST /api/models/download-all
+   Mục đích: Download tất cả essential models
+   Response: {
+     success: boolean,
+     downloaded: string[],
+     failed: string[]
+   }
+
+
+V. CÁC API CẦN IMPLEMENT - EVENTS (MEDIUM PRIORITY 🟡)
+================================================================================
+
+❌ POST /api/events
+   Mục đích: Tạo event mới (collision, lane departure, etc.)
+   Request: {
+     type: "collision" | "lane_departure" | "fatigue" | "distraction" | "speed" | "driver_status",
+     severity: "critical" | "warning" | "info",
+     description: string,
+     timestamp: string,
+     location?: string,
+     metadata?: any,
+     video_id?: number,
+     camera_id?: string
+   }
+   Response: {
+     success: boolean,
+     event_id: number,
+     message: string
+   }
+
+❌ GET /api/events/list
+   Mục đích: Lấy danh sách events
+   Query Params: type?, limit=50, page=1, severity?, from_date?, to_date?
+   Response: {
+     success: boolean,
+     events: [{
+       id: number,
+       type: string,
+       severity: string,
+       title: string,
+       description: string,
+       timestamp: string,
+       location?: string,
+       metadata?: any,
+       acknowledged: boolean
+     }],
+     total: number
+   }
+
+❌ PUT /api/events/{id}/acknowledge
+   Mục đích: Đánh dấu event đã xem/xử lý
+   Response: { success: boolean }
+
+❌ DELETE /api/events/{id}
+   Mục đích: Xóa event
+   Response: { success: boolean }
+
+
+VI. CÁC API CẦN IMPLEMENT - TRIPS (MEDIUM PRIORITY 🟡)
+================================================================================
+
+❌ POST /api/trips
+   Mục đích: Tạo trip mới (chuyến đi)
+   Request: {
+     driver_id?: string,
+     vehicle_id?: string,
+     start_time: string,
+     end_time?: string,
+     start_location?: string,
+     end_location?: string,
+     distance_km?: number,
+     metadata?: any
+   }
+   Response: {
+     success: boolean,
+     trip_id: number
+   }
+
+❌ GET /api/trips/list
+   Mục đích: Lấy danh sách trips
+   Query Params: limit=50, page=1, driver_id?, from_date?, to_date?
+   Response: {
+     success: boolean,
+     trips: [{
+       id: number,
+       driver_id?: string,
+       vehicle_id?: string,
+       start_time: string,
+       end_time?: string,
+       distance_km: number,
+       duration_minutes: number,
+       safety_score: number,
+       events_count: number,
+       status: "ongoing" | "completed"
+     }],
+     total: number
+   }
+
+❌ GET /api/trips/{id}
+   Mục đích: Chi tiết 1 trip
+   Response: {
+     success: boolean,
+     trip: {
+       id: number,
+       start_time: string,
+       end_time: string,
+       distance_km: number,
+       avg_speed: number,
+       safety_score: number,
+       events: any[],
+       detections: any[],
+       route?: any,
+       metadata?: any
+     }
+   }
+
+❌ PUT /api/trips/{id}/complete
+   Mục đích: Đánh dấu trip hoàn thành
+   Request: { end_time: string, distance_km: number }
+   Response: { success: boolean }
+
+❌ GET /api/trips/analytics
+   Mục đích: Thống kê tổng hợp trips (cho Analytics page)
+   Response: {
+     total_trips: number,
+     total_distance_km: number,
+     avg_safety_score: number,
+     by_date: [{
+       date: string,
+       trips_count: number,
+       total_distance: number,
+       avg_score: number
+     }]
+   }
+
+
+VII. CÁC API CẦN IMPLEMENT - ALERTS (MEDIUM PRIORITY 🟡)
+================================================================================
+
+❌ GET /api/alerts/latest
+   Mục đích: Lấy alerts mới nhất (real-time warnings)
+   Query Params: limit=10, severity?, unplayed_only=false
+   Response: {
+     success: boolean,
+     alerts: [{
+       id: number,
+       type: string,
+       severity: "critical" | "warning" | "info",
+       message: string,
+       timestamp: string,
+       played: boolean,
+       data?: any
+     }]
+   }
+
+❌ GET /api/alerts/stats
+   Mục đích: Thống kê alerts
+   Response: {
+     total: number,
+     by_severity: {
+       critical: number,
+       warning: number,
+       info: number
+     },
+     recent_24h: number,
+     unplayed: number
+   }
+
+❌ PUT /api/alerts/{id}/played
+   Mục đích: Đánh dấu alert đã phát
+   Response: { success: boolean }
+
+
+VIII. CÁC API CẦN IMPLEMENT - DRIVER STATUS (LOW PRIORITY 🟢)
+================================================================================
+
+❌ POST /api/driver-status
+   Mục đích: Gửi trạng thái tài xế (fatigue, distraction)
+   Request: {
+     driver_id?: string,
+     fatigue_level: number,      // 0-100
+     distraction_level: number,  // 0-100
+     eyes_closed: boolean,
+     head_pose?: any,
+     timestamp: string,
+     camera_id?: string
+   }
+   Response: {
+     success: boolean,
+     alert_triggered: boolean,
+     recommendations?: string[]
+   }
+
+❌ GET /api/driver-status
+   Mục đích: Lấy trạng thái tài xế hiện tại
+   Query Params: driver_id?, camera_id?
+   Response: {
+     success: boolean,
+     status: {
+       fatigue_level: number,
+       distraction_level: number,
+       eyes_closed: boolean,
+       last_updated: string,
+       alert_status: "normal" | "warning" | "critical"
+     }
+   }
+
+❌ GET /api/driver-status/history
+   Mục đích: Lịch sử trạng thái tài xế
+   Query Params: driver_id?, from_date?, to_date?, limit=100
+   Response: {
+     success: boolean,
+     history: [{
+       timestamp: string,
+       fatigue_level: number,
+       distraction_level: number,
+       alert_triggered: boolean
+     }]
+   }
+
+
+IX. CÁC API CẦN IMPLEMENT - AI ASSISTANT (LOW PRIORITY 🟢)
+================================================================================
+
+❌ POST /api/ai-chat
+   Mục đích: Chat với AI assistant
+   Request: {
+     message: string,
+     session_id?: string,
+     context?: any
+   }
+   Response: {
+     success: boolean,
+     message: string,
+     response: string,
+     timestamp: string,
+     session_id: string
+   }
+
+❌ GET /api/ai-chat/history
+   Mục đích: Lấy lịch sử chat
+   Query Params: session_id?, limit=50
+   Response: {
+     success: boolean,
+     messages: [{
+       id: number,
+       role: "user" | "assistant",
+       content: string,
+       timestamp: string
+     }]
+   }
+
+❌ DELETE /api/ai-chat/session/{id}
+   Mục đích: Xóa session chat
+   Response: { success: boolean }
+
+
+X. REAL-TIME APIs - THAY THẾ WEBSOCKET BẰNG HTTP POLLING/SSE
+================================================================================
+
+🔄 KHÔNG DÙNG WEBSOCKET - Dùng HTTP Polling hoặc Server-Sent Events (SSE)
+
+❌ POST /api/stream/start
+   Mục đích: Bắt đầu session streaming (thay WebSocket)
+   Request: {
+     source: "webcam" | "video",
+     model_id: "yolo11n",
+     video_id?: number,
+     config?: any
+   }
+   Response: {
+     success: boolean,
+     session_id: string,
+     polling_url: "/api/stream/poll/{session_id}"
+   }
+
+❌ GET /api/stream/poll/{session_id}
+   Mục đích: Lấy kết quả detection (polling mỗi 100-200ms)
+   Response: {
+     success: boolean,
+     detections: [{
+       class_name: string,
+       confidence: number,
+       bbox: [x1, y1, x2, y2]
+     }],
+     fps: number,
+     latency_ms: number,
+     frame_id: number,
+     status: "processing" | "stopped" | "error"
+   }
+
+❌ POST /api/stream/frame
+   Mục đích: Gửi frame từ webcam lên để detect
+   Request: FormData {
+     session_id: string,
+     frame: base64 string or binary,
+     timestamp: number
+   }
+   Response: {
+     success: boolean,
+     detections: [...],
+     latency_ms: number
+   }
+
+❌ POST /api/stream/stop
+   Mục đích: Dừng streaming session
+   Request: { session_id: string }
+   Response: { success: boolean }
+
+❌ GET /api/video/{id}/process-status
+   Mục đích: Polling progress khi process video (thay ws/inference/video)
+   Response: {
+     success: boolean,
+     progress: number,        // 0-100
+     current_frame: number,
+     total_frames: number,
+     status: "processing" | "completed" | "error",
+     detections_count: number,
+     estimated_time_remaining_seconds?: number
+   }
+
+❌ POST /api/driver-monitor/analyze
+   Mục đích: Analyze driver face frame (thay ws/driver-monitor)
+   Request: FormData {
+     frame: base64 image,
+     camera_id: string
+   }
+   Response: {
+     success: boolean,
+     fatigue_level: number,
+     distraction_level: number,
+     eyes_closed: boolean,
+     head_pose: { yaw: number, pitch: number, roll: number },
+     alert_triggered: boolean,
+     recommendations?: string[]
+   }
+
+💡 Alternative cho Real-time Updates:
+   - Server-Sent Events (SSE): GET /api/events/stream
+     Cho live updates của alerts, events mới
+   - Short Polling: Frontend poll mỗi 1-2 giây cho updates
+   - Long Polling: Request giữ connection đến khi có data mới
+
+
+XI. CÁC API BỔ SUNG - VIDEO MANAGEMENT
+================================================================================
+
+❌ GET /api/videos/list
+   Mục đích: List tất cả videos đã upload
+   Query Params: limit=50, page=1, status?, processed?
+   Response: {
+     success: boolean,
+     videos: [{
+       id: number,
+       filename: string,
+       file_path: string,
+       thumbnail_url?: string,
+       duration_seconds: number,
+       uploaded_at: string,
+       processed: boolean,
+       detections_count: number,
+       status: "uploaded" | "processing" | "completed"
+     }],
+     total: number
+   }
+
+❌ GET /api/videos/{id}
+   Mục đích: Thông tin chi tiết video
+   Response: {
+     success: boolean,
+     video: {
+       id: number,
+       filename: string,
+       file_path: string,
+       video_url: string,
+       thumbnail_url?: string,
+       duration_seconds: number,
+       fps: number,
+       resolution: { width: number, height: number },
+       file_size_mb: number,
+       uploaded_at: string,
+       processed: boolean,
+       processing_time_seconds?: number,
+       detections: any[],
+       events: any[],
+       metadata?: any
+     }
+   }
+
+❌ DELETE /api/videos/{id}
+   Mục đích: Xóa video
+   Response: { success: boolean }
+
+❌ GET /api/videos/{id}/detections
+   Mục đích: Lấy tất cả detections của 1 video
+   Query Params: class_name?, min_confidence?
+   Response: {
+     success: boolean,
+     detections: [{
+       frame_number: number,
+       timestamp_seconds: number,
+       detections: [{
+         class_name: string,
+         confidence: number,
+         bbox: [x1, y1, x2, y2]
+       }]
+     }]
+   }
+
+❌ GET /api/videos/{id}/timeline
+   Mục đích: Timeline events của video (đã có ở /admin/video/{id}/timeline)
+   Có thể dùng lại endpoint /admin/video/{id}/timeline
+
+
+XII. CÁC API BỔ SUNG - STATISTICS & ANALYTICS
+================================================================================
+
+❌ GET /api/statistics/summary
+   Mục đích: Tổng hợp thống kê toàn hệ thống
+   Response: {
+     total_videos: number,
+     total_detections: number,
+     total_events: number,
+     total_trips: number,
+     total_storage_gb: number,
+     active_cameras: number,
+     last_24h: {
+       videos: number,
+       detections: number,
+       events: number
+     }
+   }
+
+❌ GET /api/statistics/detections-by-class
+   Mục đích: Thống kê detections theo class
+   Query Params: from_date?, to_date?
+   Response: {
+     classes: [{
+       class_name: string,
+       count: number,
+       percentage: number,
+       avg_confidence: number
+     }]
+   }
+
+❌ GET /api/statistics/events-by-type
+   Mục đích: Thống kê events theo type
+   Response: {
+     types: [{
+       type: string,
+       count: number,
+       percentage: number,
+       last_occurrence: string
+     }]
+   }
+
+❌ GET /api/statistics/performance
+   Mục đích: Performance metrics hệ thống
+   Response: {
+     avg_inference_time_ms: number,
+     avg_fps: number,
+     total_frames_processed: number,
+     models_loaded: string[],
+     gpu_usage?: number,
+     cpu_usage?: number,
+     memory_usage_mb: number
+   }
+
+
+XIII. CÁC API BỔ SUNG - SETTINGS & CONFIGURATION
+================================================================================
+
+❌ GET /api/settings
+   Mục đích: Lấy settings hệ thống
+   Response: {
+     detection: {
+       confidence_threshold: number,
+       nms_threshold: number,
+       max_detections: number
+     },
+     alerts: {
+       enabled: boolean,
+       sound_enabled: boolean,
+       severity_filter: string[]
+     },
+     video: {
+       auto_process: boolean,
+       save_processed_video: boolean,
+       max_file_size_mb: number
+     }
+   }
+
+❌ PUT /api/settings
+   Mục đích: Cập nhật settings
+   Request: { ... same structure as GET response ... }
+   Response: { success: boolean, message: string }
+
+❌ GET /api/settings/cameras
+   Mục đích: List cameras đã config
+   Response: {
+     cameras: [{
+       id: string,
+       name: string,
+       location: string,
+       status: "active" | "inactive",
+       stream_url?: string
+     }]
+   }
+
+❌ POST /api/settings/cameras
+   Mục đích: Thêm camera mới
+   Request: { name: string, location: string, stream_url?: string }
+   Response: { success: boolean, camera_id: string }
+
+
+XIV. CÁC API BỔ SUNG - AUTHENTICATION & USERS (Optional)
+================================================================================
+
+🟣 POST /api/auth/login
+   Request: { username: string, password: string }
+   Response: { 
+     success: boolean, 
+     token: string, 
+     user: { id: string, username: string, role: string } 
+   }
+
+🟣 POST /api/auth/logout
+   Response: { success: boolean }
+
+🟣 GET /api/auth/me
+   Headers: { Authorization: "Bearer {token}" }
+   Response: { user: { id: string, username: string, role: string } }
+
+🟣 GET /api/users/list
+   Response: { 
+     users: [{ id: string, username: string, role: string, created_at: string }] 
+   }
+
+
+XV. CÁC API BỔ SUNG - FILE UPLOAD & STORAGE
+================================================================================
+
+❌ POST /api/upload/image
+   Mục đích: Upload ảnh đơn (không phải dataset)
+   Request: FormData { file: File }
+   Response: { 
+     success: boolean, 
+     file_path: string, 
+     url: string 
+   }
+
+❌ POST /api/upload/batch
+   Mục đích: Upload nhiều files cùng lúc
+   Request: FormData { files: File[] }
+   Response: { 
+     success: boolean, 
+     uploaded: [{ filename: string, url: string, id: number }],
+     failed: [{ filename: string, error: string }]
+   }
+
+❌ GET /api/storage/info
+   Mục đích: Thông tin storage
+   Response: {
+     total_gb: number,
+     used_gb: number,
+     available_gb: number,
+     files_count: number,
+     videos_count: number,
+     images_count: number
+   }
+
+
+XVI. TỔNG HỢP THEO PRIORITY CHO BACKEND DEVELOPER
+================================================================================
+
+🔴 PHASE 1 - CRITICAL (Làm ngay, cần cho demo):
+   ✅ GET  /health
+   ✅ GET  /admin/overview
+   ✅ GET  /admin/statistics
+   ✅ POST /vision/video
+   ❌ GET  /api/dataset
+   ❌ POST /api/dataset
+   ❌ DELETE /api/dataset/{id}
+   ❌ POST /api/detections/save
+   ❌ GET  /api/detections/recent
+   ❌ POST /api/stream/start
+   ❌ GET  /api/stream/poll/{session_id}
+   ❌ POST /api/stream/frame
+   ❌ POST /api/stream/stop
+   ❌ GET  /api/models/available
+   ❌ POST /api/models/download/{id}
+
+   Tổng: 5/16 done, còn 11 APIs (KHÔNG dùng WebSocket)
+
+
+🟡 PHASE 2 - HIGH PRIORITY (Cần cho production):
+   ❌ GET  /api/dataset/{id}
+   ❌ POST /api/events
+   ❌ GET  /api/events/list
+   ❌ DELETE /api/events/{id}
+   ❌ GET  /api/alerts/latest
+   ❌ GET  /api/alerts/stats
+   ❌ PUT  /api/alerts/{id}/played
+   ❌ GET  /api/models/info/{id}
+   ❌ DELETE /api/models/delete/{id}
+   ❌ GET  /api/videos/list
+   ❌ GET  /api/videos/{id}
+   ❌ GET  /api/videos/{id}/detections
+   ❌ GET  /api/video/{id}/process-status
+   ❌ POST /api/driver-monitor/analyze
+
+   Tổng: 14 APIs (KHÔNG dùng WebSocket)
+
+
+🟢 PHASE 3 - MEDIUM PRIORITY (Cho full features):
+   ❌ POST /api/trips
+   ❌ GET  /api/trips/list
+   ❌ GET  /api/trips/{id}
+   ❌ PUT  /api/trips/{id}/complete
+   ❌ GET  /api/trips/analytics
+   ❌ POST /api/driver-status
+   ❌ GET  /api/driver-status
+   ❌ GET  /api/driver-status/history
+   ❌ GET  /api/statistics/summary
+   ❌ GET  /api/statistics/detections-by-class
+   ❌ GET  /api/statistics/events-by-type
+   ❌ GET  /api/statistics/performance
+   ❌ DELETE /api/videos/{id}
+   ❌ GET  /api/events/stream (SSE - optional)
+
+   Tổng: 13 APIs + 1 SSE endpoint (optional)
+
+
+⚪ PHASE 4 - LOW PRIORITY (Nice to have):
+   ❌ POST /api/ai-chat
+   ❌ GET  /api/ai-chat/history
+   ❌ DELETE /api/ai-chat/session/{id}
+   ❌ GET  /api/settings
+   ❌ PUT  /api/settings
+   ❌ GET  /api/settings/cameras
+   ❌ POST /api/settings/cameras
+   ❌ POST /api/upload/image
+   ❌ POST /api/upload/batch
+   ❌ GET  /api/storage/info
+   ❌ POST /api/models/download-all
+   ❌ PUT  /api/events/{id}/acknowledge
+
+   Tổng: 12 APIs (KHÔNG dùng WebSocket)
+
+
+🟣 PHASE 5 - OPTIONAL (Nếu cần authentication):
+   ❌ POST /api/auth/login
+   ❌ POST /api/auth/logout
+   ❌ GET  /api/auth/me
+   ❌ GET  /api/users/list
+
+   Tổng: 4 APIs
+
+
+================================================================================
+TỔNG KẾT TOÀN BỘ
+================================================================================
+
+📊 Thống kê APIs:
+   - Đã có (✅):        5 APIs
+   - Cần làm (❌):      63 APIs
+   - Tổng cộng:         68 APIs
+
+📊 WebSockets:
+   - ❌ KHÔNG DÙNG WEBSOCKET
+   - ✅ Thay bằng HTTP Polling + SSE
+
+📊 Theo Priority:
+   - 🔴 CRITICAL:       11 APIs (bao gồm streaming APIs)
+   - 🟡 HIGH:           14 APIs
+   - 🟢 MEDIUM:         13 APIs
+   - ⚪ LOW:            12 APIs
+   - 🟣 OPTIONAL:       4 APIs
+
+
+================================================================================
+CHECKLIST CHO BACKEND DEVELOPER
+================================================================================
+
+[ ] PHASE 1 - BẮT ĐẦU TỪ ĐÂY:
+    [ ] Setup database schemas (videos, detections, events, trips, models, alerts)
+    [ ] Implement /api/dataset endpoints (GET, POST, DELETE)
+    [ ] Implement /api/detections endpoints (save, recent)
+    [ ] Implement /api/models endpoints (available, download)
+    [ ] Implement WebSocket /ws/stream cho real-time detection
+    [ ] Test với Frontend đã có
+
+[ ] PHASE 2 - PRODUCTION READY:
+    [ ] Complete video management APIs
+    [ ] Complete events & alerts system
+    [ ] Complete models management
+    [ ] Add more WebSocket endpoints
+    [ ] Performance optimization
+
+[ ] PHASE 3 - FULL FEATURES:
+    [ ] Trips management system
+    [ ] Driver monitoring system
+    [ ] Advanced statistics & analytics
+    [ ] System settings & configuration
+
+[ ] PHASE 4 - ENHANCEMENTS:
+    [ ] AI Chat integration (OpenAI/Claude/Llama)
+    [ ] Advanced file upload
+    [ ] Storage management
+    [ ] Additional WebSockets
+
+[ ] PHASE 5 - SECURITY (Optional):
+    [ ] Authentication system
+    [ ] User management
+    [ ] Role-based access control
+
+
+================================================================================
+GHI CHÚ QUAN TRỌNG CHO BACKEND DEVELOPER
+================================================================================
+
+⚠️  Response Format Standards:
+    - Luôn trả về JSON với structure nhất quán
+    - Success response: { success: true, data: {...}, message?: string }
+    - Error response: { success: false, error: string, details?: any }
+    - List response: { success: true, data: [...], total: number, page?: number, limit?: number }
+
+⚠️  CORS Configuration:
+    - Frontend URL: https://adas.aiotlab.edu.vn
+    - Local dev: http://localhost:3000
+    - Cần enable CORS cho HTTP requests (KHÔNG cần WebSocket CORS)
+
+⚠️  File Upload:
+    - Max file size: 500MB (configurable)
+    - Supported formats: mp4, avi, mov, mkv (video), jpg, png (image)
+    - Store path convention: /storage/videos/{year}/{month}/{filename}
+    - Generate thumbnails cho videos
+
+⚠️  HTTP Polling/Streaming Requirements (Thay WebSocket):
+    - Polling interval: 100-200ms cho real-time detection
+    - Long polling timeout: 30 seconds
+    - Session management: auto cleanup sau 5 phút inactive
+    - Optional: Server-Sent Events (SSE) cho live updates
+    - Rate limiting: max 10 requests/second per client
+    - Keep-alive connections để giảm overhead
+
+⚠️  Database Considerations:
+    - Detections table sẽ rất lớn → cần indexing tốt
+    - Consider partitioning by date
+    - Cleanup policy cho old data (> 3 months)
+    - Backup strategy
+
+⚠️  Performance Requirements:
+    - Detection API response time: < 100ms
+    - Video upload: streaming upload, không đợi full file
+    - WebSocket latency: < 50ms
+    - Support concurrent connections: ít nhất 50 clients
+
+⚠️  Model Management:
+    - Models store tại: /models/{model_id}/
+    - Support lazy loading
+    - Cache inference results
+    - GPU memory management
+
+⚠️  Real-time Features (KHÔNG dùng WebSocket):
+    - Events/Alerts: HTTP Polling mỗi 2-5s, hoặc SSE cho push updates
+    - Dashboard stats: Cache (Redis), polling mỗi 5s
+    - Live camera/webcam: HTTP Polling với POST frame → GET detection
+    - Video processing progress: Polling mỗi 500ms-1s
+
+
+================================================================================
+API TESTING CHECKLIST
+================================================================================
+
+Sau khi implement mỗi API, test với:
+
+1. ✅ Swagger/OpenAPI documentation
+2. ✅ Postman collection
+3. ✅ Unit tests
+4. ✅ Integration tests với Frontend
+5. ✅ Load testing cho critical endpoints
+6. ✅ Error handling (400, 404, 500, etc.)
+7. ✅ Validation cho request body/params
+8. ✅ Authentication/Authorization (nếu có)
+
+
+================================================================================
+LIÊN HỆ & SUPPORT
+================================================================================
+
+Frontend codebase: /Users/chuong/Desktop/AI/ADAS/FrontEnd
+API endpoints config: lib/api-endpoints.ts
+API proxy routes: app/api/*/route.ts
+
+Nếu cần thay đổi request/response format, vui lòng thông báo để 
+Frontend team update accordingly.
+
+Mọi thắc mắc về API specs, hãy xem comment trong các file:
+- lib/api-endpoints.ts (endpoint paths)
+- app/api/*/route.ts (expected request/response format)
+- components/ và app/ pages (usage examples)
+
+
+================================================================================
+VERSION & UPDATE LOG
+================================================================================
+
+v1.0 - 21/12/2025: Initial API specification
+- Tổng hợp tất cả APIs cần thiết
+- Phân chia theo priority
+- Thêm request/response format chi tiết
+
+
+================================================================================
+KẾT LUẬN
+================================================================================
+
+Frontend ADAS đã sẵn sàng, nhưng cần Backend implement ~63 APIs 
+
+            HDPE thì ngon luôn hẹ hẹ hẹ
