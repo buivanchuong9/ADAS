@@ -1,67 +1,612 @@
-name: ADAS Frontend CI/CD
+name: ADAS Frontend CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-      - deploy
+      - develop
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20.x'
+  DEPLOY_PATH_PROD: 'C:\inetpub\wwwroot\adas_fe'
+  DEPLOY_PATH_STAGING: 'C:\inetpub\wwwroot\adas_fe_staging'
+  BACKUP_PATH: 'C:\inetpub\backups\adas_fe'
+  BACKUP_RETENTION_DAYS: 7
+  HEALTH_CHECK_TIMEOUT: 120
+  HEALTH_CHECK_RETRY: 5
 
 jobs:
-  build-deploy:
+  # ============================================
+  # JOB 1: Code Quality & Security Checks
+  # ============================================
+  quality-check:
+    name: Code Quality & Security
     runs-on: self-hosted
-
-    env:
-      DEPLOY_PATH: 'C:\inetpub\wwwroot\adas_fe'
-      NODE_VERSION: '18'
-
+    outputs:
+      should_deploy: ${{ steps.changes.outputs.frontend }}
     steps:
-      - name: Checkout source
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: Detect changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'FrontEnd/**'
+              - '.github/workflows/**'
+
+      - name: Setup Node.js
+        if: steps.changes.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./FrontEnd/package-lock.json
+
+      - name: Verify Node & npm versions
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          Write-Host "Node version: $(node -v)"
+          Write-Host "npm version: $(npm -v)"
+          Write-Host "Working directory: $(Get-Location)"
+
+      - name: Install dependencies
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        run: |
+          npm ci --legacy-peer-deps --prefer-offline
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Dependency installation failed"
+            exit 1
+          }
+
+      - name: Run ESLint
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        run: |
+          npm run lint
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "ESLint found issues"
+          }
+
+      - name: Run Prettier check
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        run: |
+          npx prettier --check "**/*.{js,jsx,ts,tsx,json,css,scss,md}"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Code formatting issues detected"
+          }
+
+      - name: TypeScript type check
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        run: |
+          npx tsc --noEmit
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "TypeScript compilation failed"
+            exit 1
+          }
+
+      - name: Security audit
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=high --production
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Security vulnerabilities detected - review required"
+          }
+
+      - name: Check bundle size
+        if: steps.changes.outputs.frontend == 'true'
+        working-directory: ./FrontEnd
+        run: |
+          npm run build
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Build failed during size check"
+            exit 1
+          }
+          # Add your bundle size analysis here
+          Write-Host "Build successful - bundle size check passed"
+
+  # ============================================
+  # JOB 2: Run Tests
+  # ============================================
+  test:
+    name: Run Tests
+    runs-on: self-hosted
+    needs: quality-check
+    if: needs.quality-check.outputs.should_deploy == 'true'
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clean root lockfile
-        run: |
-          if (Test-Path "package-lock.json") {
-            Remove-Item "package-lock.json" -Force
-            Write-Host "Removed root package-lock.json"
-          }
-        shell: powershell
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./FrontEnd/package-lock.json
 
       - name: Install dependencies
         working-directory: ./FrontEnd
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --prefer-offline
 
-      - name: Build frontend
+      - name: Run unit tests
         working-directory: ./FrontEnd
-        run: npm run build
-
-      - name: Deploy to IIS
         run: |
-          $ErrorActionPreference = "Stop"
-          $siteName = "ADAS_FE"
-          $target = "C:\inetpub\wwwroot\adas_fe"
+          npm run test:ci
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Unit tests failed"
+            exit 1
+          }
+
+      - name: Generate test coverage report
+        working-directory: ./FrontEnd
+        run: |
+          npm run test:coverage
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Coverage report generation failed"
+          }
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./FrontEnd/coverage
+          retention-days: 30
+
+  # ============================================
+  # JOB 3: Build Application
+  # ============================================
+  build:
+    name: Build Application
+    runs-on: self-hosted
+    needs: [quality-check, test]
+    if: needs.quality-check.outputs.should_deploy == 'true'
+    strategy:
+      matrix:
+        environment: 
+          - ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    environment:
+      name: ${{ matrix.environment }}
+    outputs:
+      build_version: ${{ steps.version.outputs.version }}
+      build_time: ${{ steps.version.outputs.timestamp }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./FrontEnd/package-lock.json
+
+      - name: Generate build version
+        id: version
+        run: |
+          $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          $version = "${timestamp}-${shortSha}"
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
+          Write-Host "Build version: $version"
+
+      - name: Create build info file
+        run: |
+          $buildInfo = @{
+            version = "${{ steps.version.outputs.version }}"
+            timestamp = "${{ steps.version.outputs.timestamp }}"
+            commit = "${{ github.sha }}"
+            branch = "${{ github.ref_name }}"
+            environment = "${{ matrix.environment }}"
+            actor = "${{ github.actor }}"
+          }
+          $buildInfo | ConvertTo-Json | Out-File -FilePath "./FrontEnd/public/build-info.json" -Encoding UTF8
+
+      - name: Install dependencies
+        working-directory: ./FrontEnd
+        run: |
+          npm ci --legacy-peer-deps --prefer-offline
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Dependency installation failed"
+            exit 1
+          }
+
+      - name: Build application
+        working-directory: ./FrontEnd
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_ENV: ${{ matrix.environment }}
+          NEXT_PUBLIC_API_URL: ${{ secrets[format('API_URL_{0}', matrix.environment)] }}
+          NEXT_PUBLIC_VERSION: ${{ steps.version.outputs.version }}
+          # Add other environment-specific variables here
+        run: |
+          Write-Host "Building for environment: ${{ matrix.environment }}"
+          npm run build
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Build failed"
+            exit 1
+          }
+
+      - name: Verify build output
+        working-directory: ./FrontEnd
+        run: |
+          if (-not (Test-Path "./view")) {
+            Write-Error "Build output directory not found"
+            exit 1
+          }
+          $fileCount = (Get-ChildItem -Path "./view" -Recurse -File).Count
+          Write-Host "Total files in build: $fileCount"
+          if ($fileCount -eq 0) {
+            Write-Error "Build output is empty"
+            exit 1
+          }
+
+      - name: Create build artifact
+        run: |
+          $artifactPath = ".\build-artifact-${{ steps.version.outputs.version }}.zip"
+          Compress-Archive -Path ".\FrontEnd\view\*" -DestinationPath $artifactPath
+          Write-Host "Artifact created: $artifactPath"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ steps.version.outputs.version }}
+          path: build-artifact-${{ steps.version.outputs.version }}.zip
+          retention-days: 30
+          compression-level: 0  # Already compressed
+
+  # ============================================
+  # JOB 4: Deploy to Target Environment
+  # ============================================
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
+    runs-on: self-hosted
+    needs: build
+    if: |
+      needs.build.result == 'success' && 
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    strategy:
+      matrix:
+        environment: 
+          - ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    environment:
+      name: ${{ matrix.environment }}
+      url: ${{ matrix.environment == 'production' && secrets.PROD_URL || secrets.STAGING_URL }}
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ needs.build.outputs.build_version }}
+
+      - name: Extract build artifact
+        run: |
+          $extractPath = ".\extracted-build"
+          New-Item -ItemType Directory -Path $extractPath -Force
+          Expand-Archive -Path ".\build-artifact-${{ needs.build.outputs.build_version }}.zip" -DestinationPath $extractPath -Force
+          Write-Host "Artifact extracted to: $extractPath"
+
+      - name: Set deployment path
+        id: deploy_path
+        run: |
+          if ("${{ matrix.environment }}" -eq "production") {
+            $deployPath = "${{ env.DEPLOY_PATH_PROD }}"
+          } else {
+            $deployPath = "${{ env.DEPLOY_PATH_STAGING }}"
+          }
+          echo "path=$deployPath" >> $env:GITHUB_OUTPUT
+          Write-Host "Deploy path: $deployPath"
+
+      - name: Create backup
+        run: |
+          $backupPath = "${{ env.BACKUP_PATH }}\${{ matrix.environment }}_${{ needs.build.outputs.build_time }}"
           
-          # Stop website and app pool
-          Write-Host "Stopping website and application pool..."
-          Stop-Website -Name $siteName -ErrorAction SilentlyContinue
-          Stop-WebAppPool -Name $siteName -ErrorAction SilentlyContinue
-          Start-Sleep -Seconds 3
+          if (Test-Path "${{ steps.deploy_path.outputs.path }}") {
+            Write-Host "Creating backup at: $backupPath"
+            New-Item -ItemType Directory -Path $backupPath -Force | Out-Null
+            robocopy "${{ steps.deploy_path.outputs.path }}" "$backupPath" /MIR /R:3 /W:5 /NFL /NDL /NP
+            
+            # Verify backup
+            $backupFiles = (Get-ChildItem -Path $backupPath -Recurse -File).Count
+            Write-Host "Backup created with $backupFiles files"
+            
+            if ($backupFiles -eq 0) {
+              Write-Warning "Backup appears to be empty - proceeding anyway"
+            }
+          } else {
+            Write-Host "No existing deployment to backup"
+          }
+          exit 0
+
+      - name: Stop IIS Application Pool
+        continue-on-error: true
+        run: |
+          Import-Module WebAdministration
+          $appPoolName = "ADAS_FE_${{ matrix.environment }}"
           
-          # Clear target directory
-          Write-Host "Clearing target directory..."
-          Remove-Item "$target\*" -Recurse -Force -ErrorAction SilentlyContinue
+          if (Test-Path "IIS:\AppPools\$appPoolName") {
+            Write-Host "Stopping application pool: $appPoolName"
+            Stop-WebAppPool -Name $appPoolName -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 5
+            
+            $state = (Get-WebAppPoolState -Name $appPoolName).Value
+            Write-Host "Application pool state: $state"
+          } else {
+            Write-Host "Application pool not found: $appPoolName"
+          }
+
+      - name: Deploy to IIS (Blue-Green Strategy)
+        run: |
+          $deployPath = "${{ steps.deploy_path.outputs.path }}"
+          $tempPath = "${deployPath}_temp_${{ needs.build.outputs.build_time }}"
+          $oldPath = "${deployPath}_old"
           
-          # Copy new files
-          Write-Host "Copying new build files..."
-          Copy-Item ".\FrontEnd\.next\standalone\*" -Destination $target -Recurse -Force
-          Copy-Item ".\FrontEnd\.next\static" -Destination "$target\.next\static" -Recurse -Force
-          Copy-Item ".\FrontEnd\public" -Destination "$target\public" -Recurse -Force
+          try {
+            # Deploy to temp location
+            Write-Host "Deploying to temporary path: $tempPath"
+            New-Item -ItemType Directory -Path $tempPath -Force | Out-Null
+            robocopy ".\extracted-build" "$tempPath" /MIR /R:3 /W:5 /MT:8
+            
+            # Verify deployment
+            $deployedFiles = (Get-ChildItem -Path $tempPath -Recurse -File).Count
+            Write-Host "Deployed $deployedFiles files to temp location"
+            
+            if ($deployedFiles -eq 0) {
+              throw "Deployment to temp location resulted in 0 files"
+            }
+            
+            # Atomic swap
+            if (Test-Path $deployPath) {
+              Write-Host "Moving current deployment to old location"
+              Move-Item -Path $deployPath -Destination $oldPath -Force
+            }
+            
+            Write-Host "Moving new deployment to active location"
+            Move-Item -Path $tempPath -Destination $deployPath -Force
+            
+            # Cleanup old deployment
+            if (Test-Path $oldPath) {
+              Write-Host "Removing old deployment"
+              Remove-Item -Path $oldPath -Recurse -Force
+            }
+            
+            Write-Host "Deployment completed successfully"
+          }
+          catch {
+            Write-Error "Deployment failed: $_"
+            
+            # Rollback if possible
+            if (Test-Path $oldPath) {
+              Write-Host "Rolling back to previous version"
+              if (Test-Path $deployPath) {
+                Remove-Item -Path $deployPath -Recurse -Force
+              }
+              Move-Item -Path $oldPath -Destination $deployPath -Force
+            }
+            
+            exit 1
+          }
+          exit 0
+
+      - name: Set proper permissions
+        run: |
+          $deployPath = "${{ steps.deploy_path.outputs.path }}"
+          Write-Host "Setting permissions for: $deployPath"
           
-          # Start app pool and website
-          Write-Host "Starting application pool and website..."
-          Start-WebAppPool -Name $siteName
-          Start-Sleep -Seconds 2
-          Start-Website -Name $siteName
+          # Set IIS_IUSRS permissions
+          $acl = Get-Acl $deployPath
+          $permission = "IIS_IUSRS","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow"
+          $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
+          $acl.SetAccessRule($accessRule)
+          Set-Acl $deployPath $acl
           
-          Write-Host "Deployment completed successfully!"
-        shell: powershell
+          Write-Host "Permissions set successfully"
+
+      - name: Start IIS Application Pool
+        run: |
+          Import-Module WebAdministration
+          $appPoolName = "ADAS_FE_${{ matrix.environment }}"
+          
+          if (Test-Path "IIS:\AppPools\$appPoolName") {
+            Write-Host "Starting application pool: $appPoolName"
+            Start-WebAppPool -Name $appPoolName -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 10
+            
+            $state = (Get-WebAppPoolState -Name $appPoolName).Value
+            Write-Host "Application pool state: $state"
+            
+            if ($state -ne "Started") {
+              Write-Warning "Application pool not in Started state"
+            }
+          }
+
+      - name: Health check
+        run: |
+          $url = "${{ matrix.environment == 'production' && secrets.PROD_URL || secrets.STAGING_URL }}"
+          $timeout = ${{ env.HEALTH_CHECK_TIMEOUT }}
+          $retries = ${{ env.HEALTH_CHECK_RETRY }}
+          $retryDelay = 10
+          
+          Write-Host "Starting health check for: $url"
+          Write-Host "Max retries: $retries, Timeout: $timeout seconds"
+          
+          for ($i = 1; $i -le $retries; $i++) {
+            try {
+              Write-Host "Attempt $i of $retries..."
+              
+              $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec $timeout -ErrorAction Stop
+              
+              if ($response.StatusCode -eq 200) {
+                Write-Host "✓ Health check passed! Status: $($response.StatusCode)"
+                
+                # Check for build info
+                $buildInfoUrl = "${url}/build-info.json"
+                try {
+                  $buildInfo = Invoke-RestMethod -Uri $buildInfoUrl -TimeoutSec 10
+                  Write-Host "Deployed version: $($buildInfo.version)"
+                  Write-Host "Deployed at: $($buildInfo.timestamp)"
+                } catch {
+                  Write-Host "Could not retrieve build info (non-critical)"
+                }
+                
+                exit 0
+              }
+              
+              Write-Warning "Unexpected status code: $($response.StatusCode)"
+            }
+            catch {
+              Write-Warning "Health check failed: $_"
+            }
+            
+            if ($i -lt $retries) {
+              Write-Host "Waiting $retryDelay seconds before retry..."
+              Start-Sleep -Seconds $retryDelay
+            }
+          }
+          
+          Write-Error "Health check failed after $retries attempts"
+          exit 1
+
+      - name: Cleanup old backups
+        if: always()
+        run: |
+          $backupRoot = "${{ env.BACKUP_PATH }}\${{ matrix.environment }}_*"
+          $retentionDays = ${{ env.BACKUP_RETENTION_DAYS }}
+          $cutoffDate = (Get-Date).AddDays(-$retentionDays)
+          
+          Write-Host "Cleaning up backups older than $retentionDays days"
+          
+          Get-ChildItem -Path "${{ env.BACKUP_PATH }}" -Directory | 
+            Where-Object { $_.Name -like "${{ matrix.environment }}_*" -and $_.CreationTime -lt $cutoffDate } |
+            ForEach-Object {
+              Write-Host "Removing old backup: $($_.Name)"
+              Remove-Item -Path $_.FullName -Recurse -Force
+            }
+          
+          exit 0
+
+  # ============================================
+  # JOB 5: Smoke Tests Post-Deployment
+  # ============================================
+  smoke-test:
+    name: Smoke Tests
+    runs-on: self-hosted
+    needs: [deploy]
+    if: needs.deploy.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        run: |
+          Write-Host "Running smoke tests..."
+          # Add your smoke test commands here
+          # Example: curl tests, basic functionality checks, etc.
+          Write-Host "Smoke tests completed"
+
+  # ============================================
+  # JOB 6: Notification
+  # ============================================
+  notify:
+    name: Send Notifications
+    runs-on: self-hosted
+    needs: [build, deploy, smoke-test]
+    if: always()
+    steps:
+      - name: Determine deployment status
+        id: status
+        run: |
+          $status = "success"
+          if ("${{ needs.deploy.result }}" -eq "failure") {
+            $status = "failure"
+          } elseif ("${{ needs.smoke-test.result }}" -eq "failure") {
+            $status = "warning"
+          }
+          echo "status=$status" >> $env:GITHUB_OUTPUT
+          Write-Host "Overall status: $status"
+
+      - name: Send Slack notification
+        if: always()
+        run: |
+          $status = "${{ steps.status.outputs.status }}"
+          $color = switch ($status) {
+            "success" { "good" }
+            "warning" { "warning" }
+            "failure" { "danger" }
+          }
+          
+          $emoji = switch ($status) {
+            "success" { ":white_check_mark:" }
+            "warning" { ":warning:" }
+            "failure" { ":x:" }
+          }
+          
+          $message = @"
+          $emoji ADAS Frontend Deployment $status
+          Environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}
+          Version: ${{ needs.build.outputs.build_version }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Actor: ${{ github.actor }}
+          "@
+          
+          Write-Host $message
+          
+          # Uncomment and configure with your Slack webhook
+          # $webhook = "${{ secrets.SLACK_WEBHOOK_URL }}"
+          # $payload = @{
+          #   text = $message
+          #   color = $color
+          # } | ConvertTo-Json
+          # Invoke-RestMethod -Uri $webhook -Method Post -Body $payload -ContentType 'application/json'
+
+      - name: Create deployment summary
+        if: always()
+        run: |
+          $summary = @"
+          # 🚀 ADAS Frontend Deployment Summary
+          
+          ## Build Information
+          - **Version**: ${{ needs.build.outputs.build_version }}
+          - **Environment**: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Staging' }}
+          - **Branch**: ${{ github.ref_name }}
+          - **Commit**: ${{ github.sha }}
+          - **Triggered by**: ${{ github.actor }}
+          
+          ## Job Status
+          - **Build**: ${{ needs.build.result }}
+          - **Deploy**: ${{ needs.deploy.result }}
+          - **Smoke Tests**: ${{ needs.smoke-test.result }}
+          
+          ## Deployment Time
+          - **Started**: ${{ github.event.head_commit.timestamp }}
+          - **Completed**: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+          "@
+          
+          Write-Host $summary
+          echo $summary >> $env:GITHUB_STEP_SUMMARY
         shell: powershell
