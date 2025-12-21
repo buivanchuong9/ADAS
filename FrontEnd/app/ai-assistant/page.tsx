@@ -1,103 +1,65 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
 import { Sidebar } from "@/components/sidebar"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Send, Loader } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: string
-}
-
-const mockResponses = [
-  "Dựa trên dữ liệu lái xe của bạn, tôi khuyên bạn nên tăng khoảng cách an toàn với xe phía trước.",
-  "Bạn đã lái xe an toàn trong 5 ngày liên tiếp. Hãy tiếp tục duy trì thói quen tốt này!",
-  "Tôi phát hiện bạn thường phân tán vào lúc 2-3 chiều. Hãy cân nhắc nghỉ ngơi vào thời gian này.",
-  "Tốc độ trung bình của bạn là 55km/h, nằm trong giới hạn an toàn. Tuyệt vời!",
-  "Bạn có thể cải thiện kỹ năng lái xe bằng cách tập trung hơn vào đường phía trước.",
-]
+// TODO: Integrate with real AI backend
+// Needed:
+// - POST /api/ai-chat - for chat completions
+// - WebSocket /ws/ai-chat - for streaming responses
+// - GET /api/ai-chat/history - for chat history
 
 export default function AIAssistant() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "Xin chào! Tôi là trợ lý AI của ADAS. Tôi có thể giúp bạn cải thiện kỹ năng lái xe và cung cấp lời khuyên về an toàn giao thông. Bạn có câu hỏi gì không?",
-      timestamp: new Date().toLocaleTimeString("vi-VN"),
-    },
-  ])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const handleSendMessage = async () => {
-    if (!input.trim()) return
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date().toLocaleTimeString("vi-VN"),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    // Simulate AI response delay
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: mockResponses[Math.floor(Math.random() * mockResponses.length)],
-        timestamp: new Date().toLocaleTimeString("vi-VN"),
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-      setIsLoading(false)
-    }, 1000)
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
-
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <Sidebar />
 
-      <main className="flex-1 overflow-auto flex flex-col">
-        <div className="p-8 pb-4">
-          <div className="mb-4">
+      <main className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">Trợ Lý AI</h1>
             <p className="text-foreground/60">Nhận lời khuyên và hỗ trợ từ trợ lý AI thông minh</p>
           </div>
-        </div>
 
-        <div className="flex-1 overflow-auto px-8">
-          <div className="space-y-4 max-w-2xl">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <Card
-                  className={`max-w-md p-4 ${
-                    message.role === "user"
+          {/* Warning about missing real API */}
+          <Alert className="mb-6 border-yellow-300 bg-yellow-50">
+            <Info className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800 font-semibold">Cần tích hợp AI Backend</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              <p className="mb-2">Tính năng này cần tích hợp với AI model (GPT/Claude/Llama):</p>
+              <ul className="list-disc list-inside text-sm space-y-1">
+                <li><code className="bg-yellow-100 px-1 rounded">POST /api/ai-chat</code> - Gửi message và nhận response</li>
+                <li><code className="bg-yellow-100 px-1 rounded">WebSocket /ws/ai-chat</code> - Streaming responses</li>
+                <li><code className="bg-yellow-100 px-1 rounded">GET /api/ai-chat/history</code> - Lịch sử chat</li>
+              </ul>
+              <p className="mt-3 text-xs">Có thể dùng: OpenAI API, Anthropic Claude, hoặc local LLM (Llama, Mistral)</p>
+            </AlertDescription>
+          </Alert>
+
+          {/* Placeholder */}
+          <Card className="border-indigo-200 bg-indigo-50/30">
+            <CardHeader>
+              <CardTitle className="text-indigo-700">Chờ AI Integration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-indigo-600">
+                Tính năng AI Assistant sẽ cung cấp:
+              </p>
+              <ul className="list-disc list-inside text-sm text-indigo-600 space-y-1">
+                <li>Phân tích hành vi lái xe và đưa ra lời khuyên</li>
+                <li>Giải thích các cảnh báo an toàn</li>
+                <li>Đề xuất cải thiện kỹ năng lái xe</li>
+                <li>Trả lời câu hỏi về ADAS features</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card border-border text-foreground"
                   }`}

@@ -112,14 +112,14 @@ export default function EventsDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
         <div className="p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Nhật Ký Sự Kiện</h1>
-            <p className="text-foreground/60">Xem lịch sử các sự kiện và cảnh báo trong quá trình lái xe</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nhật Ký Sự Kiện</h1>
+            <p className="text-gray-600">Xem lịch sử các sự kiện và cảnh báo trong quá trình lái xe</p>
           </div>
 
           <div className="mb-6">

@@ -65,7 +65,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
