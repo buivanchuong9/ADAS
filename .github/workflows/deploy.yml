@@ -52,9 +52,7 @@ jobs:
           
           # Copy new files
           Write-Host "Copying new build files..."
-          Copy-Item ".\FrontEnd\.next\standalone\*" -Destination $target -Recurse -Force
-          Copy-Item ".\FrontEnd\.next\static" -Destination "$target\.next\static" -Recurse -Force
-          Copy-Item ".\FrontEnd\public" -Destination "$target\public" -Recurse -Force
+          Copy-Item ".\FrontEnd\out\*" -Destination $target -Recurse -Force
           
           # Start app pool and website
           Write-Host "Starting application pool and website..."
@@ -63,5 +61,4 @@ jobs:
           Start-Website -Name $siteName
           
           Write-Host "Deployment completed successfully!"
-        shell: powershell
         shell: powershell
