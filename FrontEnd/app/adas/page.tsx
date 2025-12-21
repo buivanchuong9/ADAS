@@ -96,44 +96,47 @@ export default function ADASPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-900">
-      <header className="flex items-center justify-between p-5 border-b border-white/5 bg-card/70 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      <header className="flex items-center justify-between p-3 sm:p-5 border-b border-white/5 bg-card/70 backdrop-blur-xl">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/">
             <Button variant="ghost" size="icon" className="text-muted-foreground">
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </Link>
           <div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="gap-1">
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <Badge variant="outline" className="gap-1 text-xs">
                 <Sparkles className="w-3 h-3 text-primary" />
-                Realtime AI
+                <span className="hidden sm:inline">Realtime AI</span>
+                <span className="sm:hidden">AI</span>
               </Badge>
-              <Badge variant="outline" className="gap-1">
+              <Badge variant="outline" className="gap-1 text-xs">
                 <ShieldCheck className="w-3 h-3 text-success" />
-                Saved to dataset
+                <span className="hidden sm:inline">Saved to dataset</span>
+                <span className="sm:hidden">Saved</span>
               </Badge>
             </div>
-            <h1 className="text-2xl font-bold flex items-center gap-2 mt-2">
-              <Film className="w-5 h-5 text-primary" />
-              ADAS Video Analysis
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 mt-1 sm:mt-2">
+              <Film className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <span className="hidden sm:inline">ADAS Video Analysis</span>
+              <span className="sm:hidden">ADAS Analysis</span>
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Upload hoặc dùng video mẫu, AI phân tích và lưu vào dataset.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">Backend: /vision/video</Badge>
-          <Badge variant="secondary" className="gap-1">
+        <div className="hidden lg:flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">Backend: /vision/video</Badge>
+          <Badge variant="secondary" className="gap-1 text-xs">
             <Database className="w-3 h-3" />
             Dataset ready
           </Badge>
         </div>
       </header>
 
-      <main className="flex-1 p-6">
-        <div className="grid gap-6 xl:grid-cols-3">
+      <main className="flex-1 p-3 sm:p-4 lg:p-6">
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-3">
           {stage === "input" ? (
             <div className="space-y-4 xl:col-span-1">
               <Card className="border-blue-300 shadow-lg bg-white">
@@ -152,14 +155,16 @@ export default function ADASPage() {
                     disabled={uploading}
                     className="cursor-pointer border-blue-200 bg-blue-50/50 hover:bg-blue-50"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button className="w-full" onClick={uploadAndAnalyze} disabled={uploading || (!file && !previewUrl)}>
                       {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-                      Phân tích video
+                      <span className="hidden sm:inline">Phân tích video</span>
+                      <span className="sm:hidden">Phân tích</span>
                     </Button>
-                    <Button variant="secondary" onClick={useSampleVideo} disabled={sampleLoading}>
+                    <Button variant="secondary" onClick={useSampleVideo} disabled={sampleLoading} className="w-full sm:w-auto">
                       {sampleLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
-                      Video mẫu
+                      <span className="hidden sm:inline">Video mẫu</span>
+                      <span className="sm:hidden">Mẫu</span>
                     </Button>
                   </div>
 

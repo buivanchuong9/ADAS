@@ -1,6 +1,7 @@
 "use client"
 
 import { Sidebar } from "@/components/sidebar"
+import { MobileNav } from "@/components/mobile-nav"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Info } from "lucide-react"
@@ -14,13 +15,14 @@ import { Info } from "lucide-react"
 export default function AIAssistant() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <MobileNav />
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Trợ Lý AI</h1>
-            <p className="text-foreground/60">Nhận lời khuyên và hỗ trợ từ trợ lý AI thông minh</p>
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Trợ Lý AI</h1>
+            <p className="text-sm sm:text-base text-foreground/60">Nhận lời khuyên và hỗ trợ từ trợ lý AI thông minh</p>
           </div>
 
           {/* Warning about missing real API */}

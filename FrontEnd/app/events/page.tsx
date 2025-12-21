@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
+import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { AlertTriangle, AlertCircle, Eye, Zap, Trash2 } from "lucide-react"
@@ -113,16 +114,17 @@ export default function EventsDashboard() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <MobileNav />
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Nhật Ký Sự Kiện</h1>
-            <p className="text-gray-600">Xem lịch sử các sự kiện và cảnh báo trong quá trình lái xe</p>
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Nhật Ký Sự Kiện</h1>
+            <p className="text-sm sm:text-base text-gray-600">Xem lịch sử các sự kiện và cảnh báo trong quá trình lái xe</p>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="flex gap-2 flex-wrap">
               <Button
                 onClick={() => setFilter("all")}

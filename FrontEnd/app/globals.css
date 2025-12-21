@@ -45,6 +45,19 @@ body {
   overflow-x: hidden;
 }
 
+/* Mobile Responsive Base */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  body {
+    font-size: 15px;
+  }
+}
+
 /* ===== LINKS ===== */
 a {
   text-decoration: none;
@@ -68,6 +81,14 @@ button:hover {
   color: white;
 }
 
+/* Mobile Responsive Buttons */
+@media (max-width: 640px) {
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
 /* ===== CARD (Ô NHỎ) ===== */
 .card {
   background: white;
@@ -84,6 +105,24 @@ button:hover {
   background: black;
   color: white;
   transform: translateY(-4px);
+}
+
+/* Mobile Responsive Cards */
+@media (max-width: 640px) {
+  .card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card {
+    padding: 1.25rem;
+  }
 }
 
 /* Force all text inside card to white on hover */
@@ -138,6 +177,21 @@ select:focus {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+/* Mobile Responsive Grid */
+@media (max-width: 640px) {
+  .grid-auto {
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .grid-auto {
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
 /* ===== CONTAINER ===== */
 .container {
   max-width: 1400px;
@@ -146,9 +200,15 @@ select:focus {
 }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .container {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container {
+    padding: 1.5rem;
   }
 }
 /* ============================================
