@@ -114,21 +114,26 @@ export function MobileNav() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-white/95 backdrop-blur-xl border-r border-gray-200 shadow-2xl z-50 overflow-y-auto"
+            className="lg:hidden fixed left-0 top-0 bottom-0 w-72 glass-panel border-r border-white/10 shadow-2xl z-50 overflow-y-auto scan-lines"
           >
             {/* Logo Section */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-white/10">
               <Link
                 href="/"
-                className="flex items-center gap-3"
+                className="flex flex-col items-center gap-3"
                 onClick={() => setIsOpen(false)}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                  <Car className="w-6 h-6 text-white" />
+                <div className="w-24 h-24 rounded-xl overflow-hidden shadow-xl ring-2 ring-neon-cyan/30 glow-pulse-cyan">
+                  <img
+                    src="/adas-logo.jpg"
+                    alt="ADAS Logo"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div>
-                  <h1 className="font-bold text-lg">ADAS Platform</h1>
-                  <p className="text-xs text-gray-500">v3.0 Pro</p>
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-neon-cyan">
+                    ADAS Platform <span className="text-fg-secondary">• v3.0</span>
+                  </p>
                 </div>
               </Link>
             </div>
@@ -147,8 +152,8 @@ export function MobileNav() {
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                       isActive
-                        ? "bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 border border-purple-200"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50"
+                        : "glass-card border-transparent hover:border-neon-cyan/30 hover:text-neon-cyan"
                     )}
                   >
                     <Icon className={cn("w-5 h-5", isActive && "text-purple-600")} />

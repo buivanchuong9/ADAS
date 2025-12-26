@@ -1,32 +1,74 @@
 @import "tailwindcss";
 
 /* ============================================
-   LIGHT MODE – CLEAN VERSION
+   DARK SCI-FI AUTOMOTIVE HMI THEME
    ============================================ */
 
-/* ===== GLOBAL RESET TEXT COLOR ===== */
-body,
-h1, h2, h3, h4, h5, h6,
-p, span, a, li, label,
-button, input, textarea, select {
-  color: black !important;
-}
-
-/* Disable gradient text everywhere */
-h1, h2, h3, h4, h5, h6 {
-  background: none !important;
-  -webkit-text-fill-color: black !important;
-}
-
-/* ===== ROOT VARIABLES ===== */
+/* ===== ROOT VARIABLES - DARK SCI-FI PALETTE ===== */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-  --border: 0 0% 85%;
+  /* Background Colors */
+  --bg-primary: #050B14;
+  --bg-secondary: #0A1628;
+  --bg-tertiary: #0F1F3A;
+
+  /* Foreground Colors - BRIGHTENED for better readability */
+  --fg-primary: #FFFFFF;
+  /* Pure white for maximum contrast */
+  --fg-secondary: #E0F2FE;
+  /* Very bright cyan-white */
+  --fg-muted: #BAE6FD;
+  /* Bright cyan, no longer dim */
+
+  /* Neon Accent Colors */
+  --neon-cyan: #00E5FF;
+  --neon-red: #FF3B3B;
+  --neon-green: #00FFA3;
+  --neon-yellow: #FFD700;
+  --neon-purple: #B794F6;
+
+  /* Glass Effect */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 12px;
+
+  /* Shadows */
+  --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.5);
+  --shadow-glow-red: 0 0 20px rgba(255, 59, 59, 0.5);
+  --shadow-glow-green: 0 0 20px rgba(0, 255, 163, 0.5);
+
+  /* Border Radius */
   --radius: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
 }
 
-/* ===== BASE ===== */
+/* Tailwind CSS Variables for shadcn/ui - BRIGHTENED */
+:root {
+  --background: 5 11 20;
+  --foreground: 255 255 255;
+  --card: 10 22 40;
+  --card-foreground: 255 255 255;
+  --popover: 10 22 40;
+  --popover-foreground: 255 255 255;
+  --primary: 0 229 255;
+  --primary-foreground: 5 11 20;
+  --secondary: 15 31 58;
+  --secondary-foreground: 224 242 254;
+  --muted: 15 31 58;
+  --muted-foreground: 224 242 254;
+  --accent: 0 229 255;
+  --accent-foreground: 5 11 20;
+  --destructive: 255 59 59;
+  --destructive-foreground: 255 255 255;
+  --border: 255 255 255 / 0.1;
+  --input: 255 255 255 / 0.1;
+  --ring: 0 229 255;
+  --success: 0 255 163;
+  --warning: 255 215 0;
+  --info: 0 229 255;
+}
+
+/* ===== BASE STYLES ===== */
 * {
   box-sizing: border-box;
 }
@@ -36,19 +78,386 @@ html {
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Arial, sans-serif;
-  background: white;
-  color: black;
-  line-height: 1.6;
-  font-size: 16px;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  line-height: 1.7;
+  /* Increased from 1.6 for better readability */
+  font-size: 15px;
+  /* Optimized for Inter font */
   overflow-x: hidden;
+  font-weight: 400;
+  /* Inter's regular weight is more readable */
+  letter-spacing: -0.01em;
+  /* Slight tightening for Inter */
 }
 
-/* Mobile Responsive Base */
+/* Headings use Orbitron for futuristic feel */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-orbitron), sans-serif;
+  font-weight: 700;
+  color: var(--fg-primary);
+  letter-spacing: 0.05em;
+}
+
+/* ===== GLASSMORPHISM UTILITIES ===== */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel {
+  background: rgba(10, 22, 40, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+}
+
+.glass-overlay {
+  background: rgba(5, 11, 20, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ===== NEON GLOW UTILITIES ===== */
+.glow-cyan {
+  box-shadow: var(--shadow-glow-cyan);
+  border-color: var(--neon-cyan);
+}
+
+.glow-red {
+  box-shadow: var(--shadow-glow-red);
+  border-color: var(--neon-red);
+}
+
+.glow-green {
+  box-shadow: var(--shadow-glow-green);
+  border-color: var(--neon-green);
+}
+
+.glow-pulse-cyan {
+  animation: pulse-cyan 2s ease-in-out infinite;
+}
+
+.glow-pulse-red {
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes pulse-cyan {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.8);
+  }
+}
+
+@keyframes pulse-red {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 59, 59, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(255, 59, 59, 0.8);
+  }
+}
+
+/* ===== NEON TEXT ===== */
+.text-neon-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+}
+
+.text-neon-red {
+  color: var(--neon-red);
+  text-shadow: 0 0 10px rgba(255, 59, 59, 0.5);
+}
+
+.text-neon-green {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px rgba(0, 255, 163, 0.5);
+}
+
+/* ===== DIGITAL/MONOSPACE NUMBERS ===== */
+.digital-number {
+  font-family: var(--font-orbitron), monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  /* Semi-bold for buttons */
+  transition: all 0.3s ease;
+  font-size: 0.95em;
+  /* Slightly smaller for Inter */
+  letter-spacing: -0.01em;
+}
+
+.btn-neon {
+  background: var(--glass-bg);
+  color: var(--neon-cyan);
+  border: 2px solid var(--neon-cyan);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.btn-neon:hover {
+  background: var(--neon-cyan);
+  color: var(--bg-primary);
+  box-shadow: var(--shadow-glow-cyan);
+  transform: translateY(-2px);
+}
+
+.btn-neon-red {
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+}
+
+.btn-neon-red:hover {
+  background: var(--neon-red);
+  box-shadow: var(--shadow-glow-red);
+}
+
+/* ===== CARDS ===== */
+.card-hud {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-hud::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  opacity: 0.5;
+}
+
+.card-hud:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: var(--shadow-glow-cyan);
+  transform: translateY(-4px);
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea,
+select {
+  background: var(--glass-bg);
+  color: var(--fg-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 500;
+  /* Medium weight for inputs */
+  font-size: 0.95em;
+  /* Slightly smaller for Inter */
+  transition: all 0.3s ease;
+  letter-spacing: -0.01em;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--fg-muted);
+  opacity: 0.8;
+  /* Increased from 0.5 for better visibility */
+  font-weight: 500;
+}
+
+/* ===== PROGRESS BARS ===== */
+.progress-neon {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-neon-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease, background-color 0.3s ease;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.progress-neon-fill.safe {
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+}
+
+.progress-neon-fill.warning {
+  background: linear-gradient(90deg, var(--neon-yellow), var(--neon-cyan));
+}
+
+.progress-neon-fill.danger {
+  background: linear-gradient(90deg, var(--neon-red), var(--neon-yellow));
+}
+
+/* ===== SCAN LINES EFFECT ===== */
+.scan-lines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-lines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(0deg,
+      rgba(0, 229, 255, 0.03) 0px,
+      rgba(0, 229, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 2px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.scan-lines::after {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(0, 229, 255, 0.1) 50%,
+      transparent 100%);
+  animation: scan 4s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes scan {
+  0% {
+    top: -100%;
+  }
+
+  100% {
+    top: 100%;
+  }
+}
+
+/* ===== GRID OVERLAY ===== */
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+/* ===== CORNER BRACKETS (CYBERPUNK FRAME) ===== */
+.cyberpunk-frame {
+  position: relative;
+  padding: 1rem;
+}
+
+.cyberpunk-frame::before,
+.cyberpunk-frame::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--neon-cyan);
+}
+
+.cyberpunk-frame::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.cyberpunk-frame::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   body {
     font-size: 14px;
+  }
+
+  .card-hud {
+    padding: 1rem;
   }
 }
 
@@ -58,262 +467,62 @@ body {
   }
 }
 
-/* ===== LINKS ===== */
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.backdrop-blur-strong {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.text-shadow-glow {
+  text-shadow: 0 0 20px currentColor;
+}
+
+/* ===== OVERRIDE ANY REMAINING LIGHT MODE ===== */
+body,
+body * {
+  color: var(--fg-primary);
+}
+
 a {
+  color: var(--neon-cyan);
   text-decoration: none;
-  color: black;
-}
-
-/* ===== BUTTONS ===== */
-button {
-  background: white;
-  color: black;
-  border: 1px solid #ccc;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.25s ease;
-}
-
-button:hover {
-  background: black;
-  color: white;
-}
-
-/* Mobile Responsive Buttons */
-@media (max-width: 640px) {
-  button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-}
-
-/* ===== CARD (Ô NHỎ) ===== */
-.card {
-  background: white;
-  color: black;
-  border-radius: 1.25rem;
-  border: 1px solid #e5e5e5;
-  padding: 1.5rem;
   transition: all 0.3s ease;
-  position: relative;
 }
 
-/* Card hover: nền đen – chữ trắng */
-.card:hover {
-  background: black;
-  color: white;
-  transform: translateY(-4px);
-}
-
-/* Mobile Responsive Cards */
-@media (max-width: 640px) {
-  .card {
-    padding: 1rem;
-    border-radius: 1rem;
-  }
-  
-  .card:hover {
-    transform: translateY(-2px);
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .card {
-    padding: 1.25rem;
-  }
-}
-
-/* Force all text inside card to white on hover */
-.card:hover *,
-.card:hover h1,
-.card:hover h2,
-.card:hover h3,
-.card:hover h4,
-.card:hover h5,
-.card:hover h6,
-.card:hover p,
-.card:hover span,
-.card:hover a,
-.card:hover button {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-}
-
-/* Button inside card */
-.card button {
-  background: white;
-  color: black;
-}
-
-.card:hover button {
-  background: white;
-  color: black;
-}
-
-/* ===== INPUTS ===== */
-input,
-textarea,
-select {
-  background: white;
-  color: black;
-  border: 1px solid #ccc;
-  border-radius: 0.75rem;
-  padding: 0.6rem 1rem;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: black;
-}
-
-/* ===== GRID ===== */
-.grid-auto {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
-/* Mobile Responsive Grid */
-@media (max-width: 640px) {
-  .grid-auto {
-    gap: 1rem;
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .grid-auto {
-    gap: 1.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  }
-}
-
-/* ===== CONTAINER ===== */
-.container {
-  max-width: 1400px;
-  margin: auto;
-  padding: 2rem;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 640px) {
-  .container {
-    padding: 0.75rem;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  .container {
-    padding: 1.5rem;
-  }
-}
-/* ============================================
-   FINAL OVERRIDE – DO NOT REMOVE
-   RULES:
-   - Normal: all text BLACK
-   - Card: white background
-   - Card hover: black background + white text
-   - Button hover: black background + white text
-   ============================================ */
-
-/* 1️⃣ Ép TOÀN BỘ chữ về màu đen khi bình thường */
-body *,
-h1, h2, h3, h4, h5, h6,
-p, span, a, li, label,
-button, input, textarea, select {
-  color: black !important;
-}
-
-/* 2️⃣ TẮT toàn bộ gradient text (kể cả đã khai báo trước đó) */
-h1, h2, h3, h4, h5, h6,
-.text-gradient {
-  background: none !important;
-  -webkit-text-fill-color: black !important;
-}
-
-/* 3️⃣ Card mặc định: nền trắng */
-.card {
-  background: white !important;
-  color: black !important;
-}
-
-/* 4️⃣ Hover card → nền đen + chữ trắng */
-.card:hover {
-  background: black !important;
-  color: white !important;
-}
-
-/* 5️⃣ Ép TẤT CẢ chữ bên trong card thành trắng khi hover */
-.card:hover *,
-.card:hover h1,
-.card:hover h2,
-.card:hover h3,
-.card:hover h4,
-.card:hover h5,
-.card:hover h6,
-.card:hover p,
-.card:hover span,
-.card:hover a,
-.card:hover li,
-.card:hover label {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-}
-
-/* 6️⃣ Button: mặc định trắng / đen */
-button {
-  background: white !important;
-  color: black !important;
-}
-
-/* 7️⃣ Button hover → đen / trắng */
-button:hover {
-  background: black !important;
-  color: white !important;
-}
-
-/* 8️⃣ Button trong card hover vẫn rõ chữ */
-.card:hover button {
-  background: white !important;
-  color: black !important;
-}
-/* ============================================
-   SIDEBAR – BLUE MODE
-   ============================================ */
-
-/* Nền sidebar */
-aside.w-64 {
-  background: #2563eb !important; /* xanh biển */
-  color: white !important;
-}
-
-/* Toàn bộ chữ trong sidebar */
-aside.w-64 *,
-aside.w-64 h1,
-aside.w-64 h2,
-aside.w-64 h3,
-aside.w-64 p,
-aside.w-64 span,
-aside.w-64 a {
-  color: white !important;
-  -webkit-text-fill-color: white !important;
-}
-
-/* Hover menu item */
-aside.w-64 a:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-/* Item đang active (đang chọn) */
-aside.w-64 a.bg-gradient-to-r {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Border sidebar */
-aside.w-64 {
-  border-right-color: rgba(255, 255, 255, 0.2) !important;
+a:hover {
+  color: var(--fg-primary);
+  text-shadow: 0 0 10px var(--neon-cyan);
 }
