@@ -79,7 +79,7 @@ html {
 }
 
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif !important;
   background: var(--bg-primary);
   color: var(--fg-primary);
   line-height: 1.7;
@@ -570,4 +570,22 @@ a:hover {
 /* Placeholder của riêng input login */
 input.login-input-field::placeholder {
   color: #000000 !important;
+}
+
+/* Canh dọc chữ trong input chọn video */
+input[type="file"].video-file-input {
+  height: 2.75rem;                  /* chỉnh cao/thấp tùy ý (≈44px) */
+  padding: 0 1rem !important;       /* bỏ padding dọc, chỉ còn ngang */
+  line-height: 2.75rem !important;  /* = height => text nằm giữa dọc */
+}
+
+/* Style nút "Chọn tệp" cho đồng bộ */
+input[type="file"].video-file-input::file-selector-button,
+input[type="file"].video-file-input::-webkit-file-upload-button {
+  height: 100%;
+  padding: 0 1rem;
+  margin-right: 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }

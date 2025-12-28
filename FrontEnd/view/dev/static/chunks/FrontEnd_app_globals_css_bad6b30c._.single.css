@@ -5200,7 +5200,6 @@ html {
 }
 
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   background: var(--bg-primary);
   color: var(--fg-primary);
   letter-spacing: -.01em;
@@ -5208,6 +5207,7 @@ body {
   font-weight: 400;
   line-height: 1.7;
   overflow-x: hidden;
+  font-family: Be Vietnam Pro, system-ui, -apple-system, sans-serif !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -5630,6 +5630,30 @@ a:hover {
 
 input.login-input-field::placeholder {
   color: #000 !important;
+}
+
+input[type="file"].video-file-input {
+  height: 2.75rem;
+  padding: 0 1rem !important;
+  line-height: 2.75rem !important;
+}
+
+input[type="file"].video-file-input::file-selector-button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  height: 100%;
+  margin-right: .75rem;
+  padding: 0 1rem;
+}
+
+input[type="file"].video-file-input::-webkit-file-upload-button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  height: 100%;
+  margin-right: .75rem;
+  padding: 0 1rem;
 }
 
 @property --tw-translate-x {
