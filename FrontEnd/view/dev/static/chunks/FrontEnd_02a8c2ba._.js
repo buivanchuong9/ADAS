@@ -117,7 +117,11 @@ function Sidebar() {
                 1
             ]
         },
+<<<<<<< HEAD
         className: "hidden lg:flex w-64 bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 flex-col relative overflow-hidden rounded-2xl",
+=======
+        className: "hidden lg:flex w-64 glass-panel border-r border-white/10 flex-col relative overflow-hidden rounded-2xl scan-lines",
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent pointer-events-none"
@@ -141,6 +145,7 @@ function Sidebar() {
                 className: "p-6 border-b border-sidebar-border/50 relative z-10",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                     href: "/",
+<<<<<<< HEAD
                     className: "flex items-center gap-3 group",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -148,13 +153,28 @@ function Sidebar() {
                             whileHover: {
                                 scale: 1.05,
                                 rotate: 5
+=======
+                    className: "flex flex-col items-center gap-3 group",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
+                            className: "w-32 h-32 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-neon-cyan/30 glow-pulse-cyan",
+                            whileHover: {
+                                scale: 1.05
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             },
                             transition: {
                                 type: "spring",
                                 stiffness: 400
                             },
+<<<<<<< HEAD
                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$car$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Car$3e$__["Car"], {
                                 className: "w-7 h-7 text-white"
+=======
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                src: "/adas-logo.jpg",
+                                alt: "ADAS Logo",
+                                className: "w-full h-full object-cover"
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             }, void 0, false, {
                                 fileName: "[project]/FrontEnd/components/sidebar.tsx",
                                 lineNumber: 96,
@@ -166,6 +186,7 @@ function Sidebar() {
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+<<<<<<< HEAD
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                                     className: "font-bold text-sidebar-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent",
@@ -190,6 +211,30 @@ function Sidebar() {
                         }, void 0, true, {
                             fileName: "[project]/FrontEnd/components/sidebar.tsx",
                             lineNumber: 98,
+=======
+                            className: "text-center",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-xs font-semibold text-neon-cyan tracking-wide",
+                                children: [
+                                    "ADAS Platform ",
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-fg-secondary",
+                                        children: "• v3.0"
+                                    }, void 0, false, {
+                                        fileName: "[project]/FrontEnd/components/sidebar.tsx",
+                                        lineNumber: 104,
+                                        columnNumber: 29
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/FrontEnd/components/sidebar.tsx",
+                                lineNumber: 103,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/FrontEnd/components/sidebar.tsx",
+                            lineNumber: 102,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             columnNumber: 11
                         }, this)
                     ]
@@ -222,7 +267,11 @@ function Sidebar() {
                         },
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                             href: item.href,
+<<<<<<< HEAD
                             className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden", isActive ? "bg-gradient-to-r from-primary/20 to-primary/10 text-sidebar-primary-foreground shadow-lg shadow-primary/20 border border-primary/30" : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:border border-transparent hover:border-white/10"),
+=======
+                            className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden", isActive ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50" : "glass-card border-transparent hover:border-neon-cyan/30 hover:glow-cyan text-fg-primary hover:text-neon-cyan"),
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             children: [
                                 isActive && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
                                     className: "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-gradient-to-b from-primary to-accent rounded-r-full",
@@ -344,12 +393,20 @@ function Sidebar() {
                         transition: {
                             delay: 0.8
                         },
+<<<<<<< HEAD
                         className: "mt-4 px-4 py-3 rounded-xl bg-success/10 border border-success/30 backdrop-blur-sm",
+=======
+                        className: "mt-4 px-4 py-3 rounded-xl glass-card border-neon-green/30 glow-green",
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex items-center gap-2",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
+<<<<<<< HEAD
                                     className: "w-2 h-2 rounded-full bg-success",
+=======
+                                    className: "w-2 h-2 rounded-full bg-neon-green",
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     animate: {
                                         scale: [
                                             1,
@@ -365,6 +422,12 @@ function Sidebar() {
                                     transition: {
                                         duration: 2,
                                         repeat: Infinity
+<<<<<<< HEAD
+=======
+                                    },
+                                    style: {
+                                        boxShadow: '0 0 10px var(--neon-green)'
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/FrontEnd/components/sidebar.tsx",
@@ -372,11 +435,19 @@ function Sidebar() {
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+<<<<<<< HEAD
                                     className: "text-xs font-semibold text-success",
                                     children: "Hệ Thống Trực Tuyến"
                                 }, void 0, false, {
                                     fileName: "[project]/FrontEnd/components/sidebar.tsx",
                                     lineNumber: 200,
+=======
+                                    className: "text-xs font-semibold text-neon-green",
+                                    children: "Hệ Thống Trực Tuyến"
+                                }, void 0, false, {
+                                    fileName: "[project]/FrontEnd/components/sidebar.tsx",
+                                    lineNumber: 201,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     columnNumber: 13
                                 }, this)
                             ]
@@ -757,6 +828,7 @@ function MobileNav() {
                         stiffness: 300,
                         damping: 30
                     },
+<<<<<<< HEAD
                     className: "lg:hidden fixed left-0 top-0 bottom-0 w-72 bg-white/95 backdrop-blur-xl border-r border-gray-200 shadow-2xl z-50 overflow-y-auto",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -770,6 +842,23 @@ function MobileNav() {
                                         className: "w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$car$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Car$3e$__["Car"], {
                                             className: "w-6 h-6 text-white"
+=======
+                    className: "lg:hidden fixed left-0 top-0 bottom-0 w-72 glass-panel border-r border-white/10 shadow-2xl z-50 overflow-y-auto scan-lines",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "p-6 border-b border-white/10",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                href: "/",
+                                className: "flex flex-col items-center gap-3",
+                                onClick: ()=>setIsOpen(false),
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-24 h-24 rounded-xl overflow-hidden shadow-xl ring-2 ring-neon-cyan/30 glow-pulse-cyan",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                            src: "/adas-logo.jpg",
+                                            alt: "ADAS Logo",
+                                            className: "w-full h-full object-cover"
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                         }, void 0, false, {
                                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
                                             lineNumber: 127,
@@ -781,6 +870,7 @@ function MobileNav() {
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+<<<<<<< HEAD
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                                                 className: "font-bold text-lg",
@@ -802,6 +892,30 @@ function MobileNav() {
                                     }, void 0, true, {
                                         fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
                                         lineNumber: 129,
+=======
+                                        className: "text-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                            className: "text-xs font-semibold text-neon-cyan",
+                                            children: [
+                                                "ADAS Platform ",
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "text-fg-secondary",
+                                                    children: "• v3.0"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+                                                    lineNumber: 135,
+                                                    columnNumber: 35
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+                                            lineNumber: 134,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+                                        lineNumber: 133,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                         columnNumber: 17
                                     }, this)
                                 ]
@@ -823,13 +937,21 @@ function MobileNav() {
                                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                     href: item.href,
                                     onClick: ()=>setIsOpen(false),
+<<<<<<< HEAD
                                     className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200", isActive ? "bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 border border-purple-200" : "text-gray-700 hover:bg-gray-50"),
+=======
+                                    className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200", isActive ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50" : "glass-card border-transparent hover:border-neon-cyan/30 hover:text-neon-cyan"),
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Icon, {
                                             className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("w-5 h-5", isActive && "text-purple-600")
                                         }, void 0, false, {
                                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                             lineNumber: 154,
+=======
+                                            lineNumber: 159,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                             columnNumber: 21
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -840,7 +962,11 @@ function MobileNav() {
                                                     children: item.name
                                                 }, void 0, false, {
                                                     fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                                     lineNumber: 156,
+=======
+                                                    lineNumber: 161,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                                     columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -848,25 +974,41 @@ function MobileNav() {
                                                     children: item.description
                                                 }, void 0, false, {
                                                     fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                                     lineNumber: 157,
+=======
+                                                    lineNumber: 162,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                                     columnNumber: 23
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                             lineNumber: 155,
+=======
+                                            lineNumber: 160,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                             columnNumber: 21
                                         }, this)
                                     ]
                                 }, item.name, true, {
                                     fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                     lineNumber: 143,
+=======
+                                    lineNumber: 148,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     columnNumber: 19
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                             lineNumber: 137,
+=======
+                            lineNumber: 142,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -881,7 +1023,11 @@ function MobileNav() {
                                             className: "w-5 h-5"
                                         }, void 0, false, {
                                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                             lineNumber: 171,
+=======
+                                            lineNumber: 176,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -889,13 +1035,21 @@ function MobileNav() {
                                             children: "Cài Đặt"
                                         }, void 0, false, {
                                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                             lineNumber: 172,
+=======
+                                            lineNumber: 177,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                     lineNumber: 166,
+=======
+                                    lineNumber: 171,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -907,7 +1061,11 @@ function MobileNav() {
                                                 className: "w-2 h-2 rounded-full bg-green-500"
                                             }, void 0, false, {
                                                 fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                                 lineNumber: 177,
+=======
+                                                lineNumber: 182,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -915,24 +1073,40 @@ function MobileNav() {
                                                 children: "System Online"
                                             }, void 0, false, {
                                                 fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                                 lineNumber: 178,
+=======
+                                                lineNumber: 183,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                         lineNumber: 176,
+=======
+                                        lineNumber: 181,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                                     lineNumber: 175,
+=======
+                                    lineNumber: 180,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/FrontEnd/components/mobile-nav.tsx",
+<<<<<<< HEAD
                             lineNumber: 165,
+=======
+                            lineNumber: 170,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                             columnNumber: 13
                         }, this)
                     ]
@@ -1731,6 +1905,7 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
+<<<<<<< HEAD
 "[project]/FrontEnd/app/page.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
@@ -2755,6 +2930,13 @@ __turbopack_context__.k.register(_c, "HomePage");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
+=======
+"[project]/FrontEnd/app/page.tsx [app-client] (ecmascript)", ((__turbopack_context__, module, exports) => {
+
+const e = new Error("Could not parse module '[project]/FrontEnd/app/page.tsx'\n\nUnexpected token. Did you mean `{'}'}` or `&rbrace;`?");
+e.code = 'MODULE_UNPARSABLE';
+throw e;
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 }),
 ]);
 

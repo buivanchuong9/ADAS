@@ -800,7 +800,11 @@ const _addbasepath = __turbopack_context__.r("[project]/FrontEnd/node_modules/ne
 const _warnonce = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/shared/lib/utils/warn-once.js [app-client] (ecmascript)");
 const _links = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/client/components/links.js [app-client] (ecmascript)");
 const _islocalurl = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/shared/lib/router/utils/is-local-url.js [app-client] (ecmascript)");
+<<<<<<< HEAD
 const _segmentcache = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/client/components/segment-cache.js [app-client] (ecmascript)");
+=======
+const _types = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/client/components/segment-cache/types.js [app-client] (ecmascript)");
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 const _erroronce = __turbopack_context__.r("[project]/FrontEnd/node_modules/next/dist/shared/lib/utils/error-once.js [app-client] (ecmascript)");
 function isModifiedEvent(event) {
     const eventTarget = event.currentTarget;
@@ -864,7 +868,11 @@ function LinkComponent(props) {
     }
     const router = _react.default.useContext(_approutercontextsharedruntime.AppRouterContext);
     const prefetchEnabled = prefetchProp !== false;
+<<<<<<< HEAD
     const fetchStrategy = prefetchProp !== false ? getFetchStrategyFromPrefetchProp(prefetchProp) : _segmentcache.FetchStrategy.PPR;
+=======
+    const fetchStrategy = prefetchProp !== false ? getFetchStrategyFromPrefetchProp(prefetchProp) : _types.FetchStrategy.PPR;
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
     if ("TURBOPACK compile-time truthy", 1) {
         function createPropError(args) {
             return Object.defineProperty(new Error(`Failed prop type: The prop \`${args.key}\` expects a ${args.expected} in \`<Link>\`, but got \`${args.actual}\` instead.` + (typeof window !== 'undefined' ? "\nOpen your browser's console to view the Component stack trace." : '')), "__NEXT_ERROR_CODE", {
@@ -935,10 +943,17 @@ function LinkComponent(props) {
                     });
                 }
             } else if (key === 'prefetch') {
+<<<<<<< HEAD
                 if (props[key] != null && valType !== 'boolean' && props[key] !== 'auto' && props[key] !== 'unstable_forceStale') {
                     throw createPropError({
                         key,
                         expected: '`boolean | "auto" | "unstable_forceStale"`',
+=======
+                if (props[key] != null && valType !== 'boolean' && props[key] !== 'auto') {
+                    throw createPropError({
+                        key,
+                        expected: '`boolean | "auto"`',
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                         actual: valType
                     });
                 }
@@ -1149,8 +1164,13 @@ function getFetchStrategyFromPrefetchProp(prefetchProp) {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
     else {
+<<<<<<< HEAD
         return prefetchProp === null || prefetchProp === 'auto' ? _segmentcache.FetchStrategy.PPR : // (although invalid values should've been filtered out by prop validation in dev)
         _segmentcache.FetchStrategy.Full;
+=======
+        return prefetchProp === null || prefetchProp === 'auto' ? _types.FetchStrategy.PPR : // (although invalid values should've been filtered out by prop validation in dev)
+        _types.FetchStrategy.Full;
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
     }
 }
 if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {

@@ -1,3 +1,8 @@
 {
+<<<<<<< HEAD
+=======
+  "/adas/page": "app/adas/page.js",
+  "/driver-monitor/page": "app/driver-monitor/page.js",
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
   "/page": "app/page.js"
 }

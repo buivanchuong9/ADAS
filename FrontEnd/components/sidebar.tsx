@@ -75,7 +75,7 @@ export function Sidebar() {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      className="hidden lg:flex w-64 bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 flex-col relative overflow-hidden rounded-2xl"
+      className="hidden lg:flex w-64 glass-panel border-r border-white/10 flex-col relative overflow-hidden rounded-2xl scan-lines"
     >
       {/* Glassmorphism overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent pointer-events-none" />
@@ -87,22 +87,22 @@ export function Sidebar() {
         transition={{ delay: 0.2 }}
         className="p-6 border-b border-sidebar-border/50 relative z-10"
       >
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex flex-col items-center gap-3 group">
           <motion.div
-            className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-accent flex items-center justify-center shadow-lg shadow-primary/30"
-            whileHover={{ scale: 1.05, rotate: 5 }}
+            className="w-32 h-32 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-neon-cyan/30 glow-pulse-cyan"
+            whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400 }}
           >
-            <Car className="w-7 h-7 text-white" />
+            <img
+              src="/adas-logo.jpg"
+              alt="ADAS Logo"
+              className="w-full h-full object-cover"
+            />
           </motion.div>
-          <div>
-            <h1
-              className="font-bold text-sidebar-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent"
-              style={{ fontSize: "2.5rem" }}
-            >
-              ADAS Platform
-            </h1>
-            <p className="text-xs text-muted-foreground">v3.0 Chuyên Nghiệp</p>
+          <div className="text-center">
+            <p className="text-xs font-semibold text-neon-cyan tracking-wide">
+              ADAS Platform <span className="text-fg-secondary">• v3.0</span>
+            </p>
           </div>
         </Link>
       </motion.div>
@@ -125,8 +125,8 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
                   isActive
-                    ? "bg-gradient-to-r from-primary/20 to-primary/10 text-sidebar-primary-foreground shadow-lg shadow-primary/20 border border-primary/30"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:border border-transparent hover:border-white/10"
+                    ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50"
+                    : "glass-card border-transparent hover:border-neon-cyan/30 hover:glow-cyan text-fg-primary hover:text-neon-cyan"
                 )}
               >
                 {/* Active indicator */}
@@ -189,15 +189,16 @@ export function Sidebar() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="mt-4 px-4 py-3 rounded-xl bg-success/10 border border-success/30 backdrop-blur-sm"
+          className="mt-4 px-4 py-3 rounded-xl glass-card border-neon-green/30 glow-green"
         >
           <div className="flex items-center gap-2">
             <motion.div
-              className="w-2 h-2 rounded-full bg-success"
+              className="w-2 h-2 rounded-full bg-neon-green"
               animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
+              style={{ boxShadow: '0 0 10px var(--neon-green)' }}
             />
-            <span className="text-xs font-semibold text-success">
+            <span className="text-xs font-semibold text-neon-green">
               Hệ Thống Trực Tuyến
             </span>
           </div>

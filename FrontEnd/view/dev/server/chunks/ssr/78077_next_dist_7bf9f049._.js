@@ -5490,7 +5490,10 @@ const PrefetchSchema = __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$
     ]).optional(),
     /**
    * How this segment should be prefetched.
+<<<<<<< HEAD
    * (only applicable when `clientSegmentCache` is enabled)
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
    */ unstable_prefetch: PrefetchSchema.optional(),
     /**
    * The preferred region for the page.
@@ -5744,27 +5747,46 @@ function getSegmentParam(segment) {
     }
     if (segment.startsWith('[...') && segment.endsWith(']')) {
         return {
+<<<<<<< HEAD
             type: interceptionMarker ? 'catchall-intercepted' : 'catchall',
+=======
+            type: interceptionMarker ? `catchall-intercepted-${interceptionMarker}` : 'catchall',
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             param: segment.slice(4, -1)
         };
     }
     if (segment.startsWith('[') && segment.endsWith(']')) {
         return {
+<<<<<<< HEAD
             type: interceptionMarker ? 'dynamic-intercepted' : 'dynamic',
+=======
+            type: interceptionMarker ? `dynamic-intercepted-${interceptionMarker}` : 'dynamic',
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             param: segment.slice(1, -1)
         };
     }
     return null;
 }
 function isCatchAll(type) {
+<<<<<<< HEAD
     return type === 'catchall' || type === 'catchall-intercepted' || type === 'optional-catchall';
+=======
+    return type === 'catchall' || type === 'catchall-intercepted-(..)(..)' || type === 'catchall-intercepted-(.)' || type === 'catchall-intercepted-(..)' || type === 'catchall-intercepted-(...)' || type === 'optional-catchall';
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 }
 function getParamProperties(paramType) {
     let repeat = false;
     let optional = false;
     switch(paramType){
         case 'catchall':
+<<<<<<< HEAD
         case 'catchall-intercepted':
+=======
+        case 'catchall-intercepted-(..)(..)':
+        case 'catchall-intercepted-(.)':
+        case 'catchall-intercepted-(..)':
+        case 'catchall-intercepted-(...)':
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             repeat = true;
             break;
         case 'optional-catchall':
@@ -5772,7 +5794,14 @@ function getParamProperties(paramType) {
             optional = true;
             break;
         case 'dynamic':
+<<<<<<< HEAD
         case 'dynamic-intercepted':
+=======
+        case 'dynamic-intercepted-(..)(..)':
+        case 'dynamic-intercepted-(.)':
+        case 'dynamic-intercepted-(..)':
+        case 'dynamic-intercepted-(...)':
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             break;
         default:
             paramType;
@@ -6950,7 +6979,14 @@ function interpolateParallelRouteParams(loaderTree, params, pagePath, fallbackRo
             switch(segmentParam.type){
                 case 'catchall':
                 case 'optional-catchall':
+<<<<<<< HEAD
                 case 'catchall-intercepted':
+=======
+                case 'catchall-intercepted-(..)(..)':
+                case 'catchall-intercepted-(.)':
+                case 'catchall-intercepted-(..)':
+                case 'catchall-intercepted-(...)':
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                     // For catchall parameters, take all remaining segments from this depth
                     const remainingSegments = pathSegments.slice(depth);
                     // Process each segment to handle any dynamic params
@@ -6968,7 +7004,14 @@ function interpolateParallelRouteParams(loaderTree, params, pagePath, fallbackRo
                     }
                     break;
                 case 'dynamic':
+<<<<<<< HEAD
                 case 'dynamic-intercepted':
+=======
+                case 'dynamic-intercepted-(..)(..)':
+                case 'dynamic-intercepted-(.)':
+                case 'dynamic-intercepted-(..)':
+                case 'dynamic-intercepted-(...)':
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                     // For regular dynamic parameters, take the segment at this depth
                     if (depth < pathSegments.length) {
                         const pathSegment = pathSegments[depth];
@@ -7310,10 +7353,23 @@ __turbopack_context__.s([
 ]);
 const dynamicParamTypes = {
     catchall: 'c',
+<<<<<<< HEAD
     'catchall-intercepted': 'ci',
     'optional-catchall': 'oc',
     dynamic: 'd',
     'dynamic-intercepted': 'di'
+=======
+    'catchall-intercepted-(..)(..)': 'ci(..)(..)',
+    'catchall-intercepted-(.)': 'ci(.)',
+    'catchall-intercepted-(..)': 'ci(..)',
+    'catchall-intercepted-(...)': 'ci(...)',
+    'optional-catchall': 'oc',
+    dynamic: 'd',
+    'dynamic-intercepted-(..)(..)': 'di(..)(..)',
+    'dynamic-intercepted-(.)': 'di(.)',
+    'dynamic-intercepted-(..)': 'di(..)',
+    'dynamic-intercepted-(...)': 'di(...)'
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 }; //# sourceMappingURL=get-short-dynamic-param-type.js.map
 }),
 "[project]/FrontEnd/node_modules/next/dist/esm/server/request/fallback-params.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
@@ -8353,7 +8409,17 @@ async function handler(req, res, ctx) {
     // If PPR is enabled, and this is a RSC request (but not a prefetch), then
     // we can use this fact to only generate the flight data for the request
     // because we can't cache the HTML (as it's also dynamic).
+<<<<<<< HEAD
     const isDynamicRSCRequest = isRoutePPREnabled && isRSCRequest && !isPrefetchRSCRequest;
+=======
+    let isDynamicRSCRequest = isRoutePPREnabled && isRSCRequest && !isPrefetchRSCRequest;
+    // During a PPR revalidation, the RSC request is not dynamic if we do not have the postponed data.
+    // We only attach the postponed data during a resume. If there's no postponed data, then it must be a revalidation.
+    // This is to ensure that we don't bypass the cache during a revalidation.
+    if (isMinimalMode) {
+        isDynamicRSCRequest = isDynamicRSCRequest && !!minimalPostponed;
+    }
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
     // Need to read this before it's stripped by stripFlightHeaders. We don't
     // need to transfer it to the request meta because it's only read
     // within this function; the static segment data should have already been
@@ -8533,7 +8599,10 @@ async function handler(req, res, ctx) {
                         isRoutePPREnabled,
                         expireTime: nextConfig.expireTime,
                         staleTimes: nextConfig.experimental.staleTimes,
+<<<<<<< HEAD
                         clientSegmentCache: Boolean(nextConfig.experimental.clientSegmentCache),
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
                         dynamicOnHover: Boolean(nextConfig.experimental.dynamicOnHover),
                         inlineCss: Boolean(nextConfig.experimental.inlineCss),
                         authInterrupts: Boolean(nextConfig.experimental.authInterrupts),

@@ -389,6 +389,11 @@ function dispatchAppRouterAction(action) {
     }
     dispatch(action);
 }
+<<<<<<< HEAD
+=======
+const __DEV__ = ("TURBOPACK compile-time value", "development") !== 'production';
+const promisesWithDebugInfo = ("TURBOPACK compile-time truthy", 1) ? new WeakMap() : "TURBOPACK unreachable";
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 function useActionQueue(actionQueue) {
     const [state, setState] = __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].useState(actionQueue.state);
     // Because of a known issue that requires to decode Flight streams inside the
@@ -415,6 +420,7 @@ function useActionQueue(actionQueue) {
     // passed to React (via `use`) so that the latency is accurately represented
     // in the React DevTools.
     const stateWithDebugInfo = (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
+<<<<<<< HEAD
         if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$shared$2f$lib$2f$is$2d$thenable$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["isThenable"])(state)) {
             const debugInfo = [];
             const promiseWithDebugInfo = Promise.resolve(state).then((asyncState)=>{
@@ -424,6 +430,25 @@ function useActionQueue(actionQueue) {
                 return asyncState;
             });
             promiseWithDebugInfo._debugInfo = debugInfo;
+=======
+        if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+        ;
+        if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$shared$2f$lib$2f$is$2d$thenable$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["isThenable"])(state)) {
+            // useMemo can't be used to cache a Promise since the memoized value is thrown
+            // away when we suspend. So we use a WeakMap to cache the Promise with debug info.
+            let promiseWithDebugInfo = promisesWithDebugInfo.get(state);
+            if (promiseWithDebugInfo === undefined) {
+                const debugInfo = [];
+                promiseWithDebugInfo = Promise.resolve(state).then((asyncState)=>{
+                    if (asyncState.debugInfo !== null) {
+                        debugInfo.push(...asyncState.debugInfo);
+                    }
+                    return asyncState;
+                });
+                promiseWithDebugInfo._debugInfo = debugInfo;
+                promisesWithDebugInfo.set(state, promiseWithDebugInfo);
+            }
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             return promiseWithDebugInfo;
         }
         return state;
@@ -563,25 +588,39 @@ const DEFAULT_SEGMENT_KEY = '__DEFAULT__'; //# sourceMappingURL=segment.js.map
 "use strict";
 
 __turbopack_context__.s([
+<<<<<<< HEAD
     "ROOT_SEGMENT_CACHE_KEY",
     ()=>ROOT_SEGMENT_CACHE_KEY,
     "ROOT_SEGMENT_REQUEST_KEY",
     ()=>ROOT_SEGMENT_REQUEST_KEY,
     "appendSegmentCacheKeyPart",
     ()=>appendSegmentCacheKeyPart,
+=======
+    "HEAD_REQUEST_KEY",
+    ()=>HEAD_REQUEST_KEY,
+    "ROOT_SEGMENT_REQUEST_KEY",
+    ()=>ROOT_SEGMENT_REQUEST_KEY,
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
     "appendSegmentRequestKeyPart",
     ()=>appendSegmentRequestKeyPart,
     "convertSegmentPathToStaticExportFilename",
     ()=>convertSegmentPathToStaticExportFilename,
+<<<<<<< HEAD
     "createSegmentCacheKeyPart",
     ()=>createSegmentCacheKeyPart,
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
     "createSegmentRequestKeyPart",
     ()=>createSegmentRequestKeyPart
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$shared$2f$lib$2f$segment$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/FrontEnd/node_modules/next/dist/esm/shared/lib/segment.js [app-ssr] (ecmascript)");
 ;
 const ROOT_SEGMENT_REQUEST_KEY = '';
+<<<<<<< HEAD
 const ROOT_SEGMENT_CACHE_KEY = '';
+=======
+const HEAD_REQUEST_KEY = '/_head';
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 function createSegmentRequestKeyPart(segment) {
     if (typeof segment === 'string') {
         if (segment.startsWith(__TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$shared$2f$lib$2f$segment$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["PAGE_SEGMENT_KEY"])) {
@@ -620,6 +659,7 @@ function appendSegmentRequestKeyPart(parentRequestKey, parallelRouteKey, childRe
     const slotKey = parallelRouteKey === 'children' ? childRequestKeyPart : `@${encodeToFilesystemAndURLSafeString(parallelRouteKey)}/${childRequestKeyPart}`;
     return parentRequestKey + '/' + slotKey;
 }
+<<<<<<< HEAD
 function createSegmentCacheKeyPart(requestKeyPart, segment) {
     if (typeof segment === 'string') {
         return requestKeyPart;
@@ -632,6 +672,8 @@ function appendSegmentCacheKeyPart(parentSegmentKey, parallelRouteKey, childCach
     const slotKey = parallelRouteKey === 'children' ? childCacheKeyPart : `@${encodeToFilesystemAndURLSafeString(parallelRouteKey)}/${childCacheKeyPart}`;
     return parentSegmentKey + '/' + slotKey;
 }
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 // Define a regex pattern to match the most common characters found in a route
 // param. It excludes anything that might not be cross-platform filesystem
 // compatible, like |. It does not need to be precise because the fallback is to
@@ -705,12 +747,32 @@ function parseDynamicParamFromURLPart(paramType, pathnameParts, partIndex) {
     switch(paramType){
         // Catchalls
         case 'c':
+<<<<<<< HEAD
         case 'ci':
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             {
                 // Catchalls receive all the remaining URL parts. If there are no
                 // remaining pathname parts, return an empty array.
                 return partIndex < pathnameParts.length ? pathnameParts.slice(partIndex).map((s)=>encodeURIComponent(s)) : [];
             }
+<<<<<<< HEAD
+=======
+        // Catchall intercepted
+        case 'ci(..)(..)':
+        case 'ci(.)':
+        case 'ci(..)':
+        case 'ci(...)':
+            {
+                const prefix = paramType.length - 2;
+                return partIndex < pathnameParts.length ? pathnameParts.slice(partIndex).map((s, i)=>{
+                    if (i === 0) {
+                        return encodeURIComponent(s.slice(prefix));
+                    }
+                    return encodeURIComponent(s);
+                }) : [];
+            }
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         // Optional catchalls
         case 'oc':
             {
@@ -720,7 +782,10 @@ function parseDynamicParamFromURLPart(paramType, pathnameParts, partIndex) {
             }
         // Dynamic
         case 'd':
+<<<<<<< HEAD
         case 'di':
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             {
                 if (partIndex >= pathnameParts.length) {
                     // The route tree expected there to be more parts in the URL than there
@@ -734,6 +799,28 @@ function parseDynamicParamFromURLPart(paramType, pathnameParts, partIndex) {
                 }
                 return encodeURIComponent(pathnameParts[partIndex]);
             }
+<<<<<<< HEAD
+=======
+        // Dynamic intercepted
+        case 'di(..)(..)':
+        case 'di(.)':
+        case 'di(..)':
+        case 'di(...)':
+            {
+                const prefix = paramType.length - 2;
+                if (partIndex >= pathnameParts.length) {
+                    // The route tree expected there to be more parts in the URL than there
+                    // actually are. This could happen if the x-nextjs-rewritten-path header
+                    // is incorrectly set, or potentially due to bug in Next.js. TODO:
+                    // Should this be a hard error? During a prefetch, we can just abort.
+                    // During a client navigation, we could trigger a hard refresh. But if
+                    // it happens during initial render, we don't really have any
+                    // recovery options.
+                    return '';
+                }
+                return encodeURIComponent(pathnameParts[partIndex].slice(prefix));
+            }
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         default:
             paramType;
             return '';
@@ -915,7 +1002,10 @@ function createInitialRSCPayloadFromFallbackPrerender(response, fallbackInitialR
         ],
         m: fallbackInitialRSCPayload.m,
         G: fallbackInitialRSCPayload.G,
+<<<<<<< HEAD
         s: fallbackInitialRSCPayload.s,
+=======
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         S: fallbackInitialRSCPayload.S
     };
 }
@@ -1186,7 +1276,11 @@ if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
 function doMpaNavigation(url) {
     return (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$client$2f$route$2d$params$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["urlToUrlWithoutFlightMarker"])(new URL(url, location.origin)).toString();
 }
+<<<<<<< HEAD
 let abortController = new AbortController();
+=======
+let isPageUnloading = false;
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
 if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
 ;
 async function fetchServerResponse(url, options) {
@@ -1227,7 +1321,11 @@ async function fetchServerResponse(url, options) {
         // TODO: Remove this check once the old PPR flag is removed
         const isLegacyPPR = ("TURBOPACK compile-time value", false) && !("TURBOPACK compile-time value", false);
         const shouldImmediatelyDecode = !isLegacyPPR;
+<<<<<<< HEAD
         const res = await createFetch(url, headers, fetchPriority, shouldImmediatelyDecode, abortController.signal);
+=======
+        const res = await createFetch(url, headers, fetchPriority, shouldImmediatelyDecode);
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         const responseUrl = (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$client$2f$route$2d$params$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["urlToUrlWithoutFlightMarker"])(new URL(res.url));
         const canonicalUrl = res.redirected ? responseUrl : originalUrl;
         const contentType = res.headers.get('content-type') || '';
@@ -1285,7 +1383,11 @@ async function fetchServerResponse(url, options) {
             debugInfo: flightResponsePromise._debugInfo ?? null
         };
     } catch (err) {
+<<<<<<< HEAD
         if (!abortController.signal.aborted) {
+=======
+        if (!isPageUnloading) {
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             console.error(`Failed to fetch RSC payload for ${originalUrl}. Falling back to browser navigation.`, err);
         }
         // If fetch fails handle it like a mpa navigation
@@ -3423,6 +3525,18 @@ class RedirectErrorBoundary extends __TURBOPACK__imported__module__$5b$project$5
         if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$client$2f$components$2f$redirect$2d$error$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["isRedirectError"])(error)) {
             const url = (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$client$2f$components$2f$redirect$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getURLFromRedirectError"])(error);
             const redirectType = (0, __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$next$2f$dist$2f$esm$2f$client$2f$components$2f$redirect$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getRedirectTypeFromError"])(error);
+<<<<<<< HEAD
+=======
+            if ('handled' in error) {
+                // The redirect was already handled. We'll still catch the redirect error
+                // so that we can remount the subtree, but we don't actually need to trigger the
+                // router.push.
+                return {
+                    redirect: null,
+                    redirectType: null
+                };
+            }
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
             return {
                 redirect: url,
                 redirectType
@@ -3762,7 +3876,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$FrontEnd$2f$node_modules$2f$
 ;
 function hasInterceptionRouteInCurrentTree([segment, parallelRoutes]) {
     // If we have a dynamic segment, it's marked as an interception route by the presence of the `i` suffix.
+<<<<<<< HEAD
     if (Array.isArray(segment) && (segment[2] === 'di' || segment[2] === 'ci')) {
+=======
+    if (Array.isArray(segment) && (segment[2] === 'di(..)(..)' || segment[2] === 'ci(..)(..)' || segment[2] === 'di(.)' || segment[2] === 'ci(.)' || segment[2] === 'di(..)' || segment[2] === 'ci(..)' || segment[2] === 'di(...)' || segment[2] === 'ci(...)')) {
+>>>>>>> bfccc78bed109966df1a2dee48e155ae1dc22fe0
         return true;
     }
     // If segment is not an array, apply the existing string-based check
