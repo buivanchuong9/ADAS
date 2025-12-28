@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Orbitron, Rajdhani, Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
 
 const orbitron = Orbitron({
@@ -71,9 +72,11 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}>
       <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`}>
-        <div className="min-h-screen h-full w-full">
-          {children}
-        </div>
+        <AuthProvider>
+          <div className="min-h-screen h-full w-full">
+            {children}
+          </div>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>
