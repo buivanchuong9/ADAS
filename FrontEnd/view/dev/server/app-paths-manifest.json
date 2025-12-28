@@ -1,3 +1,17 @@
 {
+<<<<<<< HEAD
   "/page": "app/page.js"
+=======
+  "/_not-found/page": "app/_not-found/page.js",
+  "/adas/page": "app/adas/page.js",
+  "/ai-assistant/page": "app/ai-assistant/page.js",
+  "/analytics/page": "app/analytics/page.js",
+  "/api/ai-chat/route": "app/api/ai-chat/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/data-collection/page": "app/data-collection/page.js",
+  "/driver-monitor/page": "app/driver-monitor/page.js",
+  "/events/page": "app/events/page.js",
+  "/page": "app/page.js",
+  "/settings/page": "app/settings/page.js"
+>>>>>>> 4f0859408d1fab3e3f849d4f25f00b5d452492e3
 }
