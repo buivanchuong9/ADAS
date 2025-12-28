@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -105,11 +106,13 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex h-screen bg-bg-primary overflow-hidden">
-      <MobileNav />
-      <Sidebar />
+    <div className="flex flex-col h-screen bg-bg-primary overflow-hidden">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        <MobileNav />
+        <Sidebar />
 
-      <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto">
         <motion.div
           className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8"
           variants={containerVariants}
@@ -462,37 +465,46 @@ export default function HomePage() {
                       time: "2 phút trước",
                       color: "primary",
                     },
-                  ].map((activity, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 1 + index * 0.1 }}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
-                    >
-                      <activity.icon
-                        className={`w-5 h-5 text-${activity.color || "muted-foreground"
-                          }`}
-                      />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-foreground">
-                          {activity.text}
+                  ].map((activity, index) => {
+                    const iconColorClass = 
+                      activity.color === "success"
+                        ? "text-success"
+                        : activity.color === "primary"
+                        ? "text-primary"
+                        : "text-muted-foreground";
+                    
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1 + index * 0.1 }}
+                        className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
+                      >
+                        <activity.icon
+                          className={`w-5 h-5 ${iconColorClass}`}
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">
+                            {activity.text}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {activity.subtext}
+                          </div>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {activity.subtext}
+                          {activity.time}
                         </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {activity.time}
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

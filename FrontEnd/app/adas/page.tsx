@@ -148,31 +148,34 @@ export default function ADASPage() {
                   <p className="text-xs text-fg-secondary mt-1">Upload video hoặc dùng video mẫu từ dataset</p>
                 </div>
                 <div className="space-y-4">
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => handleFile(e.target.files?.[0] || null)}
-                    disabled={uploading}
-                    className="cursor-pointer glass-card border-neon-cyan/30 text-fg-primary file:text-neon-cyan"
-                  />
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFile(e.target.files?.[0] || null)}
+                  disabled={uploading}
+                  className="
+                    cursor-pointer glass-card border-neon-cyan/30
+                    text-fg-primary file:text-neon-cyan
+                    video-file-input
+                  "
+                />
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
-                      onClick={uploadAndAnalyze}
-                      disabled={uploading || (!file && !previewUrl)}
-                    >
-                      {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-                      <span className="hidden sm:inline">Phân tích video</span>
-                      <span className="sm:hidden">Phân tích</span>
-                    </Button>
                     <Button
                       onClick={useSampleVideo}
                       disabled={sampleLoading}
                       className="flex-1 glass-card border-2 border-neon-cyan/50 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20 font-semibold"
                     >
-                      {sampleLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
-                      <span className="hidden sm:inline">Video mẫu</span>
-                      <span className="sm:hidden">Mẫu</span>
+                      {/* Bọc nội dung trong 1 khối flex hàng ngang */}
+                      <span className="flex items-center justify-center gap-2">
+                        {sampleLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <PlayCircle className="h-4 w-4" />
+                        )}
+
+                        <span className="hidden sm:inline">Video mẫu</span>
+                        <span className="sm:hidden">Mẫu</span>
+                      </span>
                     </Button>
                   </div>
 

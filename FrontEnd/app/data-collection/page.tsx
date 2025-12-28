@@ -412,13 +412,17 @@ export default function DataCollectionPage() {
                 <div>
                   <Label htmlFor="file" className="text-fg-primary">Ảnh hoặc Video</Label>
                   <div className="relative mt-2">
-                    <Input
-                      id="file"
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={handleFileChange}
-                      className="cursor-pointer glass-card border-neon-cyan/30 text-fg-primary file:text-neon-cyan"
-                    />
+                  <Input
+                    id="file"
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    className="
+                      cursor-pointer glass-card border-neon-cyan/30
+                      text-fg-primary file:text-neon-cyan
+                      video-file-input
+                    "
+                  />
                     {file && (
                       <div className="mt-2 flex items-center gap-2 text-sm text-fg-secondary">
                         {isVideo ? <Video className="h-4 w-4 text-neon-cyan" /> : <ImageIcon className="h-4 w-4 text-neon-cyan" />}

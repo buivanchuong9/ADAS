@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /* ============================================
@@ -78,7 +79,7 @@ html {
 }
 
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif !important;
   background: var(--bg-primary);
   color: var(--fg-primary);
   line-height: 1.7;
@@ -99,7 +100,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-orbitron), sans-serif;
+  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   font-weight: 700;
   color: var(--fg-primary);
   letter-spacing: 0.05em;
@@ -124,9 +125,9 @@ h6 {
 }
 
 .glass-overlay {
-  background: rgba(5, 11, 20, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 /* ===== NEON GLOW UTILITIES ===== */
@@ -525,4 +526,66 @@ a {
 a:hover {
   color: var(--fg-primary);
   text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Khung lớn: bo tròn, viền, neon khi focus */
+.login-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border-radius: 9999px;             /* bo tròn như pill */
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;                  /* cắt góc của 2 phần con */
+}
+
+.login-input-wrapper:focus-within {
+  border-color: var(--neon-cyan);    /* viền neon khi focus */
+  box-shadow: 0 0 0 2px var(--neon-cyan);
+}
+
+/* Phần bên trái chứa logo */
+.login-input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.1); /* đường kẻ thẳng dọc */
+}
+
+/* Phần input bên phải – chỉ thẳng, KHÔNG bo góc */
+.login-input-field {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  outline: none;
+  background: #eef4ff;               /* nền trắng hơi xanh như hình của bạn */
+  color: #000;
+  border-radius: 0 !important;       /* QUAN TRỌNG: xoá bo góc global của input */
+}
+
+/* Placeholder của riêng input login */
+input.login-input-field::placeholder {
+  color: #000000 !important;
+}
+
+/* Canh dọc chữ trong input chọn video */
+input[type="file"].video-file-input {
+  height: 2.75rem;                  /* chỉnh cao/thấp tùy ý (≈44px) */
+  padding: 0 1rem !important;       /* bỏ padding dọc, chỉ còn ngang */
+  line-height: 2.75rem !important;  /* = height => text nằm giữa dọc */
+}
+
+/* Style nút "Chọn tệp" cho đồng bộ */
+input[type="file"].video-file-input::file-selector-button,
+input[type="file"].video-file-input::-webkit-file-upload-button {
+  height: 100%;
+  padding: 0 1rem;
+  margin-right: 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
