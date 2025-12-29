@@ -86,64 +86,141 @@ export default function SettingsPage() {
     }
 
     // Highcharts configurations
-    const systemPerformanceOptions = {
+    const systemPerformanceOptions: Highcharts.Options = {
         chart: {
-            type: 'pie',
-            backgroundColor: 'transparent',
-            height: 280
+          type: "pie",
+          backgroundColor: "transparent",
+          height: 280,
+          spacingBottom: 50, // chừa chỗ để chữ "Hiệu suất" nằm dưới vòng tròn
+          events: {
+            render: function () {
+              const chart = this as Highcharts.Chart;
+      
+              const series = chart.series?.[0] as Highcharts.Series | undefined;
+              if (!series) return;
+      
+              // Pie series có center = [x, y, diameter] nhưng typings không expose -> cast any
+              const center = (series as any).center as [number, number, number] | undefined;
+              if (!center) return;
+      
+              const [cx, cy, diameter] = center;
+      
+              const centerX = chart.plotLeft + cx;
+              const centerY = chart.plotTop + cy;
+      
+              const value =
+                (series.points?.[0] as any)?.y ??
+                ((series.options as any)?.data?.[0] as any)?.y ??
+                0;
+      
+              const anyChart = chart as any;
+              if (!anyChart.__perfTexts) anyChart.__perfTexts = {};
+      
+              // 85% ở giữa vòng tròn
+              if (!anyChart.__perfTexts.percent) {
+                anyChart.__perfTexts.percent = chart.renderer
+                  .text("", 0, 0)
+                  .css({
+                    fontSize: "32px",
+                    fontWeight: "700",
+                    fontFamily: "var(--font-orbitron)",
+                    color: "#00E5FF",
+                    textOutline: "none",
+                  })
+                  .attr({
+                    zIndex: 10,
+                    "text-anchor": "middle",
+                  })
+                  .add();
+              }
+      
+              anyChart.__perfTexts.percent.attr({
+                text: `${value}%`,
+                x: centerX,
+                y: centerY + 12, // canh giữa theo mắt
+              });
+      
+              // "Hiệu suất" nằm dưới vòng tròn (ngoài ring)
+              const labelY = centerY + diameter / 2 + 26;
+      
+              if (!anyChart.__perfTexts.label) {
+                anyChart.__perfTexts.label = chart.renderer
+                  .text("Hiệu suất", 0, 0)
+                  .css({
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    fontFamily: "var(--font-inter)",
+                    color: "#BAE6FD",
+                    textOutline: "none",
+                  })
+                  .attr({
+                    zIndex: 10,
+                    "text-anchor": "middle",
+                  })
+                  .add();
+              }
+      
+              anyChart.__perfTexts.label.attr({
+                x: centerX,
+                y: labelY,
+              });
+            },
+          },
         },
+      
         title: {
-            text: 'Hiệu Suất Hệ Thống',
-            style: {
-                color: '#00E5FF',
-                fontFamily: 'var(--font-inter)',
-                fontSize: '16px',
-                fontWeight: '600'
-            }
+          text: "Hiệu Suất Hệ Thống",
+          style: {
+            color: "#00E5FF",
+            fontFamily: "var(--font-inter)",
+            fontSize: "16px",
+            fontWeight: "600",
+          },
         },
+      
         tooltip: {
-            pointFormat: '<b>{point.percentage:.1f}%</b>',
-            backgroundColor: 'rgba(10, 22, 40, 0.95)',
-            borderColor: '#00E5FF',
-            borderRadius: 8,
-            style: {
-                color: '#FFFFFF',
-                fontFamily: 'var(--font-inter)',
-                fontSize: '12px'
-            }
+          pointFormat: "<b>{point.percentage:.1f}%</b>",
+          backgroundColor: "rgba(10, 22, 40, 0.95)",
+          borderColor: "#00E5FF",
+          borderRadius: 8,
+          style: {
+            color: "#FFFFFF",
+            fontFamily: "var(--font-inter)",
+            fontSize: "12px",
+          },
         },
+      
         plotOptions: {
-            pie: {
-                innerSize: '70%',
-                dataLabels: {
-                    enabled: true,
-                    format: '<div style="text-align:center"><span style="font-size:32px;color:#00E5FF;font-family:var(--font-orbitron);font-weight:700">{point.y}%</span><br/><span style="font-size:12px;color:#BAE6FD;font-family:var(--font-inter)">Hiệu suất</span></div>',
-                    distance: -50,
-                    style: {
-                        textOutline: 'none'
-                    }
-                },
-                borderWidth: 0,
-                states: {
-                    hover: {
-                        enabled: false
-                    }
-                }
-            }
+          pie: {
+            innerSize: "70%",
+            borderWidth: 0,
+            dataLabels: {
+              enabled: false, // tắt để không vẽ chữ trong chart nữa
+            },
+            states: {
+              hover: { enabled: false },
+            },
+            // Đẩy donut lên chút để có chỗ cho chữ ở dưới
+            center: ["50%", "45%"],
+          },
         },
-        series: [{
-            name: 'Performance',
+      
+        series: [
+          {
+            type: "pie",
+            name: "Performance",
             data: [
-                { y: 85, color: '#00FFA3' },
-                { y: 15, color: 'rgba(255, 255, 255, 0.05)' }
+              { y: 85, color: "#00FFA3" },
+              { y: 15, color: "rgba(255, 255, 255, 0.05)" },
             ],
-            enableMouseTracking: false
-        }],
+            enableMouseTracking: false,
+          },
+        ],
+      
         credits: {
-            enabled: false
-        }
-    }
-
+          enabled: false,
+        },
+    };
     const detectionStatsOptions = {
         chart: {
             type: 'area',
