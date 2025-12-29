@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Orbitron, Rajdhani, Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/contexts/auth-context"
+import OnboardingWrapper from "@/components/onboarding/OnboardingWrapper"
 import "./globals.css"
 
 const orbitron = Orbitron({
@@ -71,11 +72,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}>
-      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`}>
+      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`} suppressHydrationWarning>
         <AuthProvider>
-          <div className="min-h-screen h-full w-full">
-            {children}
-          </div>
+          <OnboardingWrapper>
+            <div className="min-h-screen h-full w-full">
+              {children}
+            </div>
+          </OnboardingWrapper>
         </AuthProvider>
         <Analytics />
       </body>
