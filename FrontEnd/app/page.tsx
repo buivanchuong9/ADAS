@@ -65,27 +65,48 @@ export default function HomePage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const statusRes = await fetch(getApiUrl(API_ENDPOINTS.HEALTH))
-        const statusData = await statusRes.json()
+        // Fetch health status with timeout
+        const statusRes = await fetch(getApiUrl(API_ENDPOINTS.HEALTH), {
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        }).catch(() => null);
 
-        const alertsRes = await fetch(getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS))
-        const alertsData = await alertsRes.json()
+        let systemStatus = "ngoại tuyến";
+        if (statusRes && statusRes.ok) {
+          const statusData = await statusRes.json().catch(() => ({}));
+          systemStatus = statusData.status === "success" ? "hoạt động" : "ngoại tuyến";
+        }
+
+        // Fetch alerts statistics with timeout
+        const alertsRes = await fetch(getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS), {
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        }).catch(() => null);
+
+        let alertsToday = 0;
+        if (alertsRes && alertsRes.ok) {
+          const alertsData = await alertsRes.json().catch(() => ({}));
+          alertsToday = alertsData.data?.total_alerts || alertsData.total_alerts || 0;
+        }
 
         setStats({
-          systemStatus:
-            statusData.status === "success" ? "hoạt động" : "ngoại tuyến",
-          activeCameras: 1,
+          systemStatus,
+          activeCameras: systemStatus === "hoạt động" ? 1 : 0,
           totalDetections: 0,
-          alertsToday:
-            alertsData.data?.total_alerts || alertsData.total_alerts || 0,
+          alertsToday,
         });
       } catch (err) {
-        console.error("Failed to fetch stats:", err);
+        // Silently handle errors - backend may not be running
+        // Set offline state without logging errors
+        setStats({
+          systemStatus: "ngoại tuyến",
+          activeCameras: 0,
+          totalDetections: 0,
+          alertsToday: 0,
+        });
       }
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    const interval = setInterval(fetchStats, 30000); // Check every 30 seconds instead of 5
     return () => clearInterval(interval);
   }, []);
 
@@ -113,396 +134,396 @@ export default function HomePage() {
         <Sidebar />
 
         <main className="flex-1 overflow-auto">
-        <motion.div
-          className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Hero Section - Dark Sci-Fi */}
           <motion.div
-            variants={itemVariants}
-            className="relative overflow-hidden rounded-3xl glass-card scan-lines p-8 lg:p-10"
+            className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            {/* Animated gradient orbs */}
+            {/* Hero Section - Dark Sci-Fi */}
             <motion.div
-              className="absolute top-0 right-0 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-0 left-0 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"
-              animate={{
-                scale: [1, 1.3, 1],
-                opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            <div className="relative z-10">
+              variants={itemVariants}
+              className="relative overflow-hidden rounded-3xl glass-card scan-lines p-8 lg:p-10"
+            >
+              {/* Animated gradient orbs */}
               <motion.div
-                className="flex items-center gap-3 mb-6"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <Badge
-                  variant="outline"
-                  className="border-neon-cyan/50 text-neon-cyan glass-card"
+                className="absolute top-0 right-0 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div
+                className="absolute bottom-0 left-0 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                }}
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+
+              <div className="relative z-10">
+                <motion.div
+                  className="flex items-center gap-3 mb-6"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
                 >
-                  v3.0 Professional
-                </Badge>
-              </motion.div>
-
-              <motion.h1
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-neon-cyan"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                Advanced Driver Assistance System
-              </motion.h1>
-
-              <motion.p
-                className="text-base sm:text-lg lg:text-xl text-fg-secondary max-w-3xl mb-8 leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                Real-time AI-powered safety monitoring with WebSocket streaming,
-                automatic data collection, and intelligent alerts.
-              </motion.p>
-
-              <motion.div
-                className="flex flex-wrap gap-3 sm:gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Link href="/adas">
-                  <button
-                    className="btn-neon w-full sm:w-auto"
-                  >
-                    <Zap className="w-5 h-5 mr-2 inline" />
-                    START DETECTION
-                  </button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button
-                    size="lg"
-                    className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto"
-                  >
-                    View Dashboard
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* System Status Cards - Premium Grid */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-          >
-            {[
-              {
-                title: "Trạng Thái Hệ Thống",
-                value: stats.systemStatus,
-                icon: Activity,
-                color: "success",
-                description: "Tất cả hệ thống trực tuyến",
-              },
-              {
-                title: "Camera Hoạt Động",
-                value: stats.activeCameras.toString(),
-                icon: Car,
-                color: "primary",
-                description: "Giám sát thời gian thực",
-              },
-              {
-                title: "Total Detections",
-                value: stats.totalDetections.toLocaleString(),
-                icon: Eye,
-                color: "info",
-                description: "+12% so với tuần trước",
-                trend: true,
-              },
-              {
-                title: "Alerts Today",
-                value: stats.alertsToday.toString(),
-                icon: AlertTriangle,
-                color: "warning",
-                description: "Cảnh báo an toàn đã phát",
-              },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Card
-                  glass
-                  className="border-border/50 hover:border-primary/30 transition-all duration-300"
-                >
-                  <CardHeader className="pb-6">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        {stat.title}
-                      </CardTitle>
-                      <stat.icon className={`w-5 h-5 text-${stat.color}`} />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-8">
-                    <div className="flex items-center gap-2 mb-2">
-                      {stat.title === "Trạng Thái Hệ Thống" && (
-                        <motion.div
-                          className="w-2 h-2 rounded-full bg-success"
-                          animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        />
-                      )}
-                      <span className="text-xl font-bold text-foreground capitalize">
-                        {stat.value}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      {stat.trend && (
-                        <TrendingUp className="w-3 h-3 text-success" />
-                      )}
-                      {stat.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Charts Section */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
-          >
-            <HighchartsChart
-              title="Detection Distribution"
-              description="Current detection breakdown"
-              type="pie"
-              data={detectionChartData}
-              height={300}
-              className="sm:pl-8"
-            />
-            <HighchartsChart
-              title="System Performance"
-              description="Performance over time"
-              type="line"
-              data={performanceChartData}
-              height={300}
-            />
-          </motion.div>
-
-          {/* Quick Actions & Features */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
-          >
-            <Card glass>
-              <CardHeader>
-                <CardTitle className="text-xl">Thao Tác Nhanh</CardTitle>
-                <CardDescription>
-                  Các tác vụ và phím tắt thường dùng
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  {
-                    href: "/adas",
-                    icon: Zap,
-                    title: "Bắt Đầu Phát Hiện Trực Tiếp",
-                    description: "Giám sát ADAS thời gian thực",
-                    gradient: "from-primary to-primary/80",
-                  },
-                  {
-                    href: "/driver-monitor",
-                    icon: Eye,
-                    title: "Giám Sát Tài Xế",
-                    description: "Theo dõi hành vi tài xế",
-                    gradient: "from-accent to-accent/80",
-                  },
-                  {
-                    href: "/analytics",
-                    icon: TrendingUp,
-                    title: "Xem Phân Tích",
-                    description: "Thông tin chi tiết hiệu suất",
-                    gradient: "from-info to-info/80",
-                  },
-                ].map((action) => (
-                  <motion.div
-                    key={action.href}
-                    whileHover={{ x: 4 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <Link
-                      href={action.href}
-                      className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-white/5 to-white/0 border border-white/10 hover:border-primary/50 hover:from-white/10 hover:to-white/5 transition-all duration-300 group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
-                        >
-                          <action.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {action.title}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {action.description}
-                          </div>
-                        </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </Link>
-                  </motion.div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card glass>
-              <CardHeader>
-                <CardTitle className="text-xl">Tính Năng Hệ Thống</CardTitle>
-                <CardDescription>
-                  Điều làm nên sức mạnh của ADAS
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[
-                  "Phát Trực Tiếp WebSocket Thời Gian Thực",
-                  "Phát Hiện AI YOLOv11",
-                  "Thu Thập Dữ Liệu Tự Động",
-                  "Cảnh Báo Thông Minh",
-                  "Triển Khai Docker",
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + index * 0.1 }}
-                    className="flex items-start gap-3"
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-medium text-foreground">
-                        {feature}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {index === 0 && "Xử lý video độ trễ thấp"}
-                        {index === 1 && "Nhận dạng đối tượng hiện đại nhất"}
-                        {index === 2 && "Cải thiện mô hình liên tục"}
-                        {index === 3 && "Cảnh báo bằng giọng nói và hình ảnh"}
-                        {index === 4 && "Cài đặt một lệnh"}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div variants={itemVariants}>
-            <Card glass>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">Hoạt Động Gần Đây</CardTitle>
-                    <CardDescription>
-                      Sự kiện và phát hiện mới nhất của hệ thống
-                    </CardDescription>
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+                    <Shield className="w-6 h-6 text-white" />
                   </div>
-                  <Link href="/events">
-                    <Button variant="glass" size="sm">
-                      Xem Tất Cả
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                  <Badge
+                    variant="outline"
+                    className="border-neon-cyan/50 text-neon-cyan glass-card"
+                  >
+                    v3.0 Professional
+                  </Badge>
+                </motion.div>
+
+                <motion.h1
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-neon-cyan"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Advanced Driver Assistance System
+                </motion.h1>
+
+                <motion.p
+                  className="text-base sm:text-lg lg:text-xl text-fg-secondary max-w-3xl mb-8 leading-relaxed"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Real-time AI-powered safety monitoring with WebSocket streaming,
+                  automatic data collection, and intelligent alerts.
+                </motion.p>
+
+                <motion.div
+                  className="flex flex-wrap gap-3 sm:gap-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <Link href="/adas">
+                    <button
+                      className="btn-neon w-full sm:w-auto"
+                    >
+                      <Zap className="w-5 h-5 mr-2 inline" />
+                      START DETECTION
+                    </button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button
+                      size="lg"
+                      className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto"
+                    >
+                      View Dashboard
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                     </Button>
                   </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* System Status Cards - Premium Grid */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+            >
+              {[
+                {
+                  title: "Trạng Thái Hệ Thống",
+                  value: stats.systemStatus,
+                  icon: Activity,
+                  color: "success",
+                  description: "Tất cả hệ thống trực tuyến",
+                },
+                {
+                  title: "Camera Hoạt Động",
+                  value: stats.activeCameras.toString(),
+                  icon: Car,
+                  color: "primary",
+                  description: "Giám sát thời gian thực",
+                },
+                {
+                  title: "Total Detections",
+                  value: stats.totalDetections.toLocaleString(),
+                  icon: Eye,
+                  color: "info",
+                  description: "+12% so với tuần trước",
+                  trend: true,
+                },
+                {
+                  title: "Alerts Today",
+                  value: stats.alertsToday.toString(),
+                  icon: AlertTriangle,
+                  color: "warning",
+                  description: "Cảnh báo an toàn đã phát",
+                },
+              ].map((stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  variants={itemVariants}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Card
+                    glass
+                    className="border-border/50 hover:border-primary/30 transition-all duration-300"
+                  >
+                    <CardHeader className="pb-6">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                          {stat.title}
+                        </CardTitle>
+                        <stat.icon className={`w-5 h-5 text-${stat.color}`} />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-8">
+                      <div className="flex items-center gap-2 mb-2">
+                        {stat.title === "Trạng Thái Hệ Thống" && (
+                          <motion.div
+                            className="w-2 h-2 rounded-full bg-success"
+                            animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                        )}
+                        <span className="text-xl font-bold text-foreground capitalize">
+                          {stat.value}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        {stat.trend && (
+                          <TrendingUp className="w-3 h-3 text-success" />
+                        )}
+                        {stat.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Charts Section */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
+            >
+              <HighchartsChart
+                title="Detection Distribution"
+                description="Current detection breakdown"
+                type="pie"
+                data={detectionChartData}
+                height={300}
+                className="sm:pl-8"
+              />
+              <HighchartsChart
+                title="System Performance"
+                description="Performance over time"
+                type="line"
+                data={performanceChartData}
+                height={300}
+              />
+            </motion.div>
+
+            {/* Quick Actions & Features */}
+            <motion.div
+              variants={itemVariants}
+              className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
+            >
+              <Card glass>
+                <CardHeader>
+                  <CardTitle className="text-xl">Thao Tác Nhanh</CardTitle>
+                  <CardDescription>
+                    Các tác vụ và phím tắt thường dùng
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
                   {[
                     {
-                      icon: Clock,
-                      text: "Hệ thống khởi động thành công",
-                      subtext: "Tất cả dịch vụ hoạt động",
-                      time: "Vừa xong",
+                      href: "/adas",
+                      icon: Zap,
+                      title: "Bắt Đầu Phát Hiện Trực Tiếp",
+                      description: "Giám sát ADAS thời gian thực",
+                      gradient: "from-primary to-primary/80",
                     },
                     {
-                      icon: CheckCircle2,
-                      text: "Kết nối cơ sở dữ liệu thành công",
-                      subtext: "SQLite sẵn sàng",
-                      time: "1 phút trước",
-                      color: "success",
+                      href: "/driver-monitor",
+                      icon: Eye,
+                      title: "Giám Sát Tài Xế",
+                      description: "Theo dõi hành vi tài xế",
+                      gradient: "from-accent to-accent/80",
                     },
                     {
-                      icon: Activity,
-                      text: "Backend API trực tuyến",
-                      subtext: "Cổng 8000 đang lắng nghe",
-                      time: "2 phút trước",
-                      color: "primary",
+                      href: "/analytics",
+                      icon: TrendingUp,
+                      title: "Xem Phân Tích",
+                      description: "Thông tin chi tiết hiệu suất",
+                      gradient: "from-info to-info/80",
                     },
-                  ].map((activity, index) => {
-                    const iconColorClass = 
-                      activity.color === "success"
-                        ? "text-success"
-                        : activity.color === "primary"
-                        ? "text-primary"
-                        : "text-muted-foreground";
-                    
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1 + index * 0.1 }}
-                        className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
+                  ].map((action) => (
+                    <motion.div
+                      key={action.href}
+                      whileHover={{ x: 4 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
+                      <Link
+                        href={action.href}
+                        className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-white/5 to-white/0 border border-white/10 hover:border-primary/50 hover:from-white/10 hover:to-white/5 transition-all duration-300 group"
                       >
-                        <activity.icon
-                          className={`w-5 h-5 ${iconColorClass}`}
-                        />
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-foreground">
-                            {activity.text}
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                          >
+                            <action.icon className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {action.title}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {action.description}
+                            </div>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      </Link>
+                    </motion.div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card glass>
+                <CardHeader>
+                  <CardTitle className="text-xl">Tính Năng Hệ Thống</CardTitle>
+                  <CardDescription>
+                    Điều làm nên sức mạnh của ADAS
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    "Phát Trực Tiếp WebSocket Thời Gian Thực",
+                    "Phát Hiện AI YOLOv11",
+                    "Thu Thập Dữ Liệu Tự Động",
+                    "Cảnh Báo Thông Minh",
+                    "Triển Khai Docker",
+                  ].map((feature, index) => (
+                    <motion.div
+                      key={feature}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.7 + index * 0.1 }}
+                      className="flex items-start gap-3"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="font-medium text-foreground">
+                          {feature}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {index === 0 && "Xử lý video độ trễ thấp"}
+                          {index === 1 && "Nhận dạng đối tượng hiện đại nhất"}
+                          {index === 2 && "Cải thiện mô hình liên tục"}
+                          {index === 3 && "Cảnh báo bằng giọng nói và hình ảnh"}
+                          {index === 4 && "Cài đặt một lệnh"}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Recent Activity */}
+            <motion.div variants={itemVariants}>
+              <Card glass>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl">Hoạt Động Gần Đây</CardTitle>
+                      <CardDescription>
+                        Sự kiện và phát hiện mới nhất của hệ thống
+                      </CardDescription>
+                    </div>
+                    <Link href="/events">
+                      <Button variant="glass" size="sm">
+                        Xem Tất Cả
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        icon: Clock,
+                        text: "Hệ thống khởi động thành công",
+                        subtext: "Tất cả dịch vụ hoạt động",
+                        time: "Vừa xong",
+                      },
+                      {
+                        icon: CheckCircle2,
+                        text: "Kết nối cơ sở dữ liệu thành công",
+                        subtext: "SQLite sẵn sàng",
+                        time: "1 phút trước",
+                        color: "success",
+                      },
+                      {
+                        icon: Activity,
+                        text: "Backend API trực tuyến",
+                        subtext: "Cổng 8000 đang lắng nghe",
+                        time: "2 phút trước",
+                        color: "primary",
+                      },
+                    ].map((activity, index) => {
+                      const iconColorClass =
+                        activity.color === "success"
+                          ? "text-success"
+                          : activity.color === "primary"
+                            ? "text-primary"
+                            : "text-muted-foreground";
+
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 1 + index * 0.1 }}
+                          className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
+                        >
+                          <activity.icon
+                            className={`w-5 h-5 ${iconColorClass}`}
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-foreground">
+                              {activity.text}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {activity.subtext}
+                            </div>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {activity.subtext}
+                            {activity.time}
                           </div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {activity.time}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
-        </motion.div>
         </main>
       </div>
     </div>

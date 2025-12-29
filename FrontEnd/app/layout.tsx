@@ -1,9 +1,19 @@
+<<<<<<< HEAD
 import type React from "react";
 import type { Metadata, Viewport } from "next";
 import { Orbitron, Rajdhani, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/contexts/auth-context";
 import "./globals.css";
+=======
+import type React from "react"
+import type { Metadata, Viewport } from "next"
+import { Orbitron, Rajdhani, Inter } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { AuthProvider } from "@/contexts/auth-context"
+import OnboardingWrapper from "@/components/onboarding/OnboardingWrapper"
+import "./globals.css"
+>>>>>>> b140eedc8ea2f63d24f62af6513edf08243076b5
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -73,6 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+<<<<<<< HEAD
     <html
       lang="vi"
       className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}
@@ -82,6 +93,16 @@ export default function RootLayout({
       >
         <AuthProvider>
           <div className="min-h-screen h-full w-full">{children}</div>
+=======
+    <html lang="vi" className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}>
+      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`} suppressHydrationWarning>
+        <AuthProvider>
+          <OnboardingWrapper>
+            <div className="min-h-screen h-full w-full">
+              {children}
+            </div>
+          </OnboardingWrapper>
+>>>>>>> b140eedc8ea2f63d24f62af6513edf08243076b5
         </AuthProvider>
         <Analytics />
       </body>
