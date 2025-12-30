@@ -112,7 +112,7 @@ export default function ADASPage() {
               </Badge>
               <Badge className="gap-1 text-xs bg-neon-green/20 text-neon-green border-neon-green/50">
                 <ShieldCheck className="w-3 h-3" />
-                <span className="hidden sm:inline">Saved to dataset</span>
+                <span className="hidden sm:inline">Saved to system</span>
                 <span className="sm:hidden">Saved</span>
               </Badge>
             </div>
@@ -122,16 +122,11 @@ export default function ADASPage() {
               <span className="sm:hidden">ADAS ANALYSIS</span>
             </h1>
             <p className="text-xs sm:text-sm text-fg-secondary">
-              Upload hoặc dùng video mẫu, AI phân tích và lưu vào dataset.
+              Upload hoặc dùng video mẫu, AI phân tích và lưu vào hệ thống.
             </p>
           </div>
         </div>
         <div className="hidden lg:flex items-center gap-2">
-          <Badge className="text-xs glass-card border-neon-cyan/50 text-neon-cyan">Backend: /vision/video</Badge>
-          <Badge className="gap-1 text-xs bg-neon-green/20 text-neon-green border-neon-green/50">
-            <Database className="w-3 h-3" />
-            Dataset ready
-          </Badge>
         </div>
       </header>
 
@@ -145,7 +140,7 @@ export default function ADASPage() {
                     <Upload className="w-4 h-4" />
                     1) CHỌN VIDEO
                   </h3>
-                  <p className="text-xs text-fg-secondary mt-1">Upload video hoặc dùng video mẫu từ dataset</p>
+                  <p className="text-xs text-fg-secondary mt-1">Upload video hoặc dùng video mẫu từ hệ thống</p>
                 </div>
                 <div className="space-y-4">
                 <Input
@@ -184,16 +179,36 @@ export default function ADASPage() {
                         ? "border-neon-green/50"
                         : "border-neon-red/50"
                       }`}>
-                      <div className="text-xs text-fg-secondary font-medium">Trạng thái</div>
-                      <div className={`font-semibold flex items-center gap-2 digital-number ${uploading
-                          ? "text-neon-yellow"
-                          : (file || previewUrl)
-                            ? "text-neon-green"
-                            : "text-neon-red"
-                        }`}>
-                        <Loader2 className={`h-3.5 w-3.5 ${uploading ? "animate-spin" : "text-fg-muted"}`} />
-                        {uploading ? "Đang phân tích" : (file || previewUrl) ? "Sẵn sàng" : "Chưa sẵn sàng"}
-                      </div>
+                      <div className="text-xs text-fg-secondary font-medium tracking-wide">
+                          Trạng thái
+                        </div>
+
+                        <div
+                          className={`flex items-center gap-2 text-sm font-medium
+                            antialiased
+                            transition-colors duration-300
+                            ${uploading
+                              ? "text-neon-yellow drop-shadow-[0_0_6px_rgba(250,204,21,0.45)]"
+                              : (file || previewUrl)
+                                ? "text-neon-green drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
+                                : "text-neon-red drop-shadow-[0_0_6px_rgba(239,68,68,0.45)]"
+                            }
+                          `}
+                        >
+                          <Loader2
+                            className={`h-3.5 w-3.5
+                              ${uploading ? "animate-spin opacity-90" : "opacity-70"}
+                            `}
+                          />
+                          <span className="leading-none mt-[5px]">
+                            {uploading
+                              ? "Đang phân tích"
+                              : (file || previewUrl)
+                                ? "Sẵn sàng"
+                                : "Chưa sẵn sàng"}
+                          </span>
+                        </div>
+
                     </div>
                     <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
                       <div className="text-xs text-fg-secondary font-medium">Nguồn video</div>
@@ -228,20 +243,20 @@ export default function ADASPage() {
                     <ShieldCheck className="w-4 h-4" />
                     QUY TRÌNH LƯU TRỮ
                   </h3>
-                  <p className="text-xs text-fg-secondary mt-1">Video đã phân tích sẽ vào dataset và sẵn sàng cho bước kế tiếp.</p>
+                  <p className="text-xs text-fg-secondary mt-1">Video đã phân tích sẽ vào hệ thống và sẵn sàng cho bước kế tiếp.</p>
                 </div>
                 <div className="text-sm text-fg-secondary space-y-2">
                   <div className="flex items-center gap-2">
                     <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"><Upload className="w-3 h-3" />Upload</Badge>
-                    <span>Gửi video tới /vision/video</span>
+                    <span>Gửi video tới hệ thống</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50"><Sparkles className="w-3 h-3" />AI</Badge>
                     <span>AI phân tích nội dung video</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><Database className="w-3 h-3" />Dataset</Badge>
-                    <span>Lưu kết quả vào dataset và có thể lấy lại bằng "Video mẫu"</span>
+                    <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><Database className="w-3 h-3" />System</Badge>
+                    <span>Lưu kết quả vào hệ thống và có thể lấy lại bằng "Video mẫu"</span>
                   </div>
                 </div>
               </GlassCard>
@@ -252,13 +267,21 @@ export default function ADASPage() {
             <div className="mb-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-neon-green tracking-wide">2) XEM VIDEO ĐANG ĐƯỢC PHÂN TÍCH</h3>
-                <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50">
+                <Badge className="
+    gap-1
+    bg-red-500/10
+    text-red-400
+    border border-red-500/40
+    animate-pulse
+    [animation-duration:1s]
+    shadow-[0_0_12px_rgba(255,0,0,0.6)]
+  ">
                   <AlertTriangle className="h-3 w-3" />
-                  Lưu vào dataset tự động
+                  Dữ liệu đã được lưu mẫu
                 </Badge>
               </div>
               <p className="text-xs text-fg-secondary mt-1">
-                Video sẽ được gửi tới AI và lưu vào dataset. Bạn có thể dùng video mẫu để tránh upload lớn.
+                Video sẽ được gửi tới AI và lưu vào hệ thống. Bạn có thể dùng video mẫu để tránh upload lớn.
               </p>
             </div>
             <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
@@ -306,9 +329,21 @@ export default function ADASPage() {
               </div>
             ) : (
               <div className="mt-4 text-sm text-fg-secondary flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-neon-yellow" />
-                Dữ liệu sau phân tích sẽ được lưu vào dataset và có thể truy xuất ở bước "Video mẫu".
+                <AlertTriangle
+                    className="
+                    h-10 w-10
+                    text-red-500
+                    animate-pulse
+                    [animation-duration:0.8s]
+                    drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]
+                    drop-shadow-[0_0_16px_rgba(255,0,0,1)]
+                  "
+
+/>
+
+                Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy xuất ở bước "Video mẫu".
               </div>
+
             )}
           </GlassCard>
         </div>

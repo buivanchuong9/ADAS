@@ -461,7 +461,6 @@ export default function HomePage() {
                     {
                       icon: Activity,
                       text: "Backend API trực tuyến",
-                      subtext: "Cổng 8000 đang lắng nghe",
                       time: "2 phút trước",
                       color: "primary",
                     },

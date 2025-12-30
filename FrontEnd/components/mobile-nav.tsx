@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -73,6 +73,21 @@ const navigation = [
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+  if (isOpen) {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  } else {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  };
+}, [isOpen]);
+
   const pathname = usePathname();
 
   return (
@@ -84,13 +99,22 @@ export function MobileNav() {
         className="lg:hidden fixed top-4 left-4 z-50"
       >
         <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-white/90 backdrop-blur-md border-gray-200 shadow-lg"
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+  variant="ghost"
+  size="icon"
+  onClick={() => setIsOpen(!isOpen)}
+  className="
+    bg-transparent
+    border-none
+    shadow-none
+    hover:bg-white/5
+    active:bg-white/10
+    text-neon-cyan
+  "
+>
+  {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+  
+</Button>
+
       </motion.div>
 
       {/* Overlay */}
@@ -110,14 +134,26 @@ export function MobileNav() {
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="lg:hidden fixed left-0 top-0 bottom-0 w-72 glass-panel border-r border-white/10 shadow-2xl z-50 overflow-y-auto scan-lines"
-          >
+  initial={{ x: "-100%" }}
+  animate={{ x: 0 }}
+  exit={{ x: "-100%" }}
+  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+  className="
+    lg:hidden
+    fixed left-0 top-0
+    h-dvh
+    w-72
+    glass-panel
+    border-r border-white/10
+    shadow-2xl
+    z-50
+    flex flex-col
+    scan-lines
+  "
+>
+
             {/* Logo Section */}
-            <div className="p-6 border-b border-white/10">
+            <div className="p-6 border-b border-white/10 shrink-0">
               <Link
                 href="/"
                 className="flex flex-col items-center gap-3"
@@ -138,36 +174,47 @@ export function MobileNav() {
               </Link>
             </div>
 
-            {/* Navigation */}
-            <nav className="p-4 space-y-2">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
+            {/* Navigation (Scrollable) */}
+<div
+  className="
+    flex-1
+    overflow-y-auto
+    overscroll-contain
+    touch-pan-y
+    scroll-smooth
+  "
+>
+  <nav className="p-4 space-y-2">
+    {navigation.map((item) => {
+      const isActive = pathname === item.href;
+      const Icon = item.icon;
 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                      isActive
-                        ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50"
-                        : "glass-card border-transparent hover:border-neon-cyan/30 hover:text-neon-cyan"
-                    )}
-                  >
-                    <Icon className={cn("w-5 h-5", isActive && "text-purple-600")} />
-                    <div className="flex-1">
-                      <div className="font-semibold text-sm">{item.name}</div>
-                      <div className="text-xs opacity-60">{item.description}</div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
+      return (
+        <Link
+          key={item.name}
+          href={item.href}
+          onClick={() => setIsOpen(false)}
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+            isActive
+              ? "glass-card glow-cyan text-neon-cyan border-neon-cyan/50"
+              : "glass-card border-transparent hover:border-neon-cyan/30 hover:text-neon-cyan"
+          )}
+        >
+          <Icon className={cn("w-5 h-5", isActive && "text-purple-600")} />
+          <div className="flex-1">
+            <div className="font-semibold text-sm">{item.name}</div>
+            <div className="text-xs opacity-60">{item.description}</div>
+          </div>
+        </Link>
+      );
+    })}
+  </nav>
+</div>
+
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-200 mt-auto">
+            <div className="p-4 border-t border-gray-200 mt-auto shrink-0">
               <Link
                 href="/settings"
                 onClick={() => setIsOpen(false)}

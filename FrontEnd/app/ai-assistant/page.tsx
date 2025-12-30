@@ -229,13 +229,7 @@ export default function AIAssistant() {
             </button>
           </div>
 
-          {/* Info Note */}
-          <div className="mt-4 glass-card p-3 border-neon-green/30">
-            <p className="text-xs text-fg-secondary">
-              <span className="text-neon-green">✅ Đã kết nối:</span> AI Assistant đang hoạt động với 3 API keys fallback.
-              Trợ lý ảo sẽ không bao giờ tự giới thiệu model, chỉ xưng là trợ lý của ADAS.
-            </p>
-          </div>
+          
         </div>
       </main>
     </div>

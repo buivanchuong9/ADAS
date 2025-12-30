@@ -26,6 +26,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     if (isAuthenticated) onClose();
   }, [isAuthenticated, onClose]);
 
+  useEffect(() => {
+  setError("");
+}, [mode]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,20 +60,32 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         style={{ background: "#000000" }}
       >
         <motion.div
-          className="relative w-[90vw] h-[85vh] grid grid-cols-2 rounded-3xl overflow-hidden glass-card"
+          className="relative w-[95vw] h-[85vh] grid grid-cols-2 rounded-3xl overflow-hidden glass-card"
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
         >
           {/* LEFT - IMAGE */}
-          <div
-            className="hidden md:block bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "url(https://images.pexels.com/photos/35364379/pexels-photo-35364379.jpeg)",
-            }}
-          >
-            
-          </div>
+          <div className="hidden md:block relative overflow-hidden">
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={mode} // quan trọng: đổi mode là đổi ảnh
+      className="absolute inset-0 bg-cover bg-center"
+      style={{
+        backgroundImage:
+          mode === "login"
+            ? "url(/AnhDangNhap.jpg)"
+            : "url(/AnhDangKy.jpg)",
+      }}
+      initial={{ x: 80, opacity: 0 }}
+animate={{ x: 0, opacity: 1 }}
+exit={{ x: -80, opacity: 0 }}
+transition={{ duration: 0.6, ease: "easeOut" }}
+
+
+    />
+  </AnimatePresence>
+</div>
+
 
           {/* RIGHT - FORM */}
           <div className="relative flex items-center justify-center p-12">
@@ -83,41 +99,33 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <form
               onSubmit={handleSubmit}
               className="w-full max-w-md"
-            ><div className="w-full h-full  flex flex-col items-center justify-center text-center px-10">
-              <h1 className="text-4xl font-bold text-neon-cyan mb-3">
+            ><div className="w-full flex flex-col items-center text-center px-6 mb-4">
+
+              <h1 className="text-4xl font-bold text-neon-cyan">
                 ADAS SYSTEM
               </h1>
-              <p className="text-fg-secondary">
-                Advanced Driver Assistance System
-              </p>
+              
             </div>
               {/* TITLE */}
               <div className="text-center">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  {mode === "login" ? (
-                            <ShieldCheck className="w-7 h-7 text-white" />
-                          ) : (
-                            <UserPlus className="w-7 h-7 text-white" />
-                          )}
-
-                </div>
-                <h2 className="text-2xl font-bold text-neon-cyan">
+                
+                <h2 className="text-xl font-bold text-neon-cyan">
                   {mode === "login" ? "Đăng Nhập" : "Đăng Ký"}
                 </h2>
               </div>
 
               {/* ERROR */}
               {error && (
-                <div className="mt-6 px-6 py-3 rounded-full border border-red-500 text-red-400 text-sm text-center">
+                <div className="mt-2 rounded-full border border-red-500 text-red-400 text-sm text-center">
                   {error}
                 </div>
               )}
 
               {/* INPUTS */}
-              <div className="mt-8 space-y-6">
+              <div className="mt-4 space-y-6">
                 <input
                   placeholder="Tên đăng nhập"
-                  className="w-full h-12 px-6 rounded-full bg-white text-black focus:outline-none"
+                  className="w-full h-8 px-6 rounded-full bg-white text-black focus:outline-none"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -125,7 +133,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {mode === "register" && (
                   <input
                     placeholder="Email"
-                    className="w-full h-12 px-6 rounded-full bg-white text-black"
+                    className="w-full h-7 px-6 rounded-full bg-white text-black"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -134,7 +142,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <input
                   type="password"
                   placeholder="Mật khẩu"
-                  className="w-full h-12 px-6 rounded-full bg-white text-black"
+                  className="w-full h-8 px-6 rounded-full bg-white text-black"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -143,7 +151,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <input
                     type="password"
                     placeholder="Xác nhận mật khẩu"
-                    className="w-full h-12 px-6 rounded-full bg-white text-black"
+                    className="w-full h-8 px-6 rounded-full bg-white text-black"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                   />
@@ -151,7 +159,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
 
               {/* BUTTON */}
-              <button className="w-full mt-8 btn-neon py-3 rounded-full">
+              <button className="w-full mt-5 btn-neon py-1 rounded-full">
                 {loading
                   ? "Đang xử lý..."
                   : mode === "login"
@@ -159,63 +167,103 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   : "ĐĂNG KÝ"}
               </button>
 
-              {/* SWITCH */}
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setMode(mode === "login" ? "register" : "login")
-                  }
-                  className="text-neon-cyan text-sm"
-                >
-                  {mode === "login"
-                    ? "Chưa có tài khoản? Đăng ký"
-                    : "Đã có tài khoản? Đăng nhập"}
-                  <div className="my-6 flex items-center gap-3">
+              {/* SWITCH MODE */}
+                  <div className="mt-5 text-center">
+                    <button
+                    type="button"
+                    onClick={() =>
+                      
+                      setMode(mode === "login" ? "register" : "login")
+                      
+                    }
+                    className="text-sm"
+                  >
+                    {mode === "login" ? (
+                      <>
+                        <span>Chưa có tài khoản? </span>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            background: "linear-gradient(90deg, #00ffff, #00ff99, #00ffff)",
+                            backgroundSize: "200% auto",
+                            color: "transparent",
+                            WebkitBackgroundClip: "text",
+                            backgroundClip: "text",
+                            animation: "ledMove 2s linear infinite",
+                          }}
+                        >
+                          Đăng ký
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Đã có tài khoản? </span>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            background: "linear-gradient(90deg, #00ffff, #00ff99, #00ffff)",
+                            backgroundSize: "200% auto",
+                            color: "transparent",
+                            WebkitBackgroundClip: "text",
+                            backgroundClip: "text",
+                            animation: "ledMove 2s linear infinite",
+                          }}
+                        >
+                          Đăng nhập
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+
+
+</div>
+
+{/* DIVIDER */}
+<div className="my-3 flex items-center gap-3">
   <div className="flex-1 h-px bg-gray-600" />
   <span className="text-xs text-gray-400 whitespace-nowrap">HOẶC</span>
   <div className="flex-1 h-px bg-gray-600" />
 </div>
 
+{/* SOCIAL LOGIN */}
 <div className="grid grid-cols-3 gap-3">
-  {/* Google */}
   <button
     type="button"
-    className="flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
   >
     <img
-      src="https://www.svgrepo.com/show/475656/google-color.svg
-"
+      src="https://www.svgrepo.com/show/475656/google-color.svg"
       className="w-5 h-5"
+      alt="Google"
     />
   </button>
 
-  {/* Facebook */}
   <button
     type="button"
-    className="flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
   >
     <img
       src="https://www.svgrepo.com/show/475647/facebook-color.svg"
       className="w-5 h-5"
+      alt="Facebook"
     />
   </button>
 
- {/* Apple */}
-<button
-  type="button"
-  className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
->
-  <img
-    src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
-    alt="Apple"
-    className="w-5 h-5 invert"
-  />
-</button>
+  <button
+    type="button"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+  >
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+      className="w-5 h-5 invert"
+      alt="Apple"
+    />
+  </button>
 </div>
 
-                </button>
-              </div>
+
+
             </form>
           </div>
         </motion.div>
@@ -223,3 +271,4 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     </AnimatePresence>
   );
 }
+

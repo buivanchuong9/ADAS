@@ -35,8 +35,8 @@ const OBJECT_TYPES = [
   "bus"
 ]
 
-const WEATHER_CONDITIONS = ["sunny", "rainy", "foggy", "night"]
-const ROAD_TYPES = ["urban", "highway", "rural"]
+const WEATHER_CONDITIONS = ["Sunny", "Rainy", "Foggy", "Night"]
+const ROAD_TYPES = ["Urban", "Highway", "Rural"]
 
 const COLORS = [
   "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A",
@@ -52,8 +52,8 @@ export default function DataCollectionPage() {
   const [preview, setPreview] = useState<string>("")
   const [isVideo, setIsVideo] = useState(false)
   const [selectedLabels, setSelectedLabels] = useState<string[]>([])
-  const [weather, setWeather] = useState<string>("sunny")
-  const [roadType, setRoadType] = useState<string>("urban")
+  const [weather, setWeather] = useState<string>("Sunny")
+  const [roadType, setRoadType] = useState<string>("Urban")
   const [description, setDescription] = useState<string>("")
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([])
   const [isDrawing, setIsDrawing] = useState(false)
@@ -576,7 +576,7 @@ export default function DataCollectionPage() {
                     <SelectTrigger id="weather" className="glass-card border-neon-cyan/30 text-fg-primary">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="glass-card border-neon-cyan/30">
+                    <SelectContent className="bg-slate-900 border border-neon-cyan/40 text-fg-primary shadow-xl">
                       {WEATHER_CONDITIONS.map((condition) => (
                         <SelectItem key={condition} value={condition}>
                           {condition}
@@ -593,7 +593,7 @@ export default function DataCollectionPage() {
                     <SelectTrigger id="roadType" className="glass-card border-neon-cyan/30 text-fg-primary">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="glass-card border-neon-cyan/30">
+                    <SelectContent className="bg-slate-900 border border-neon-cyan/40 text-fg-primary shadow-xl">
                       {ROAD_TYPES.map((type) => (
                         <SelectItem key={type} value={type}>
                           {type}
