@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
-import { X, LogIn, UserPlus, Mail, Lock, User as UserIcon } from "lucide-react";
+import { X, UserPlus } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,382 +16,258 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  // Form states
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [registerUsername, setRegisterUsername] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
 
-  // Close modal if user becomes authenticated or if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      onClose();
-      setSuccess("Đăng nhập thành công!");
-      setTimeout(() => setSuccess(""), 3000);
-    }
+    if (isAuthenticated) onClose();
   }, [isAuthenticated, onClose]);
 
-  // Prevent modal from opening if already authenticated
   useEffect(() => {
-    if (isOpen && isAuthenticated) {
-      onClose();
-    }
-  }, [isOpen, isAuthenticated, onClose]);
-
-  // Reset form when switching modes
-  useEffect(() => {
-    setError("");
-    setSuccess("");
-    setLoginUsername("");
-    setLoginPassword("");
-    setRegisterUsername("");
-    setRegisterEmail("");
-    setRegisterPassword("");
-    setRegisterConfirmPassword("");
-  }, [mode]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!loginUsername || !loginPassword) {
-      setError("Vui lòng điền đầy đủ thông tin");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await login(loginUsername, loginPassword);
-      if (result.success) {
-        setSuccess(result.message);
-        setTimeout(() => {
-          onClose();
-        }, 1000);
-      } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!registerUsername || !registerEmail || !registerPassword || !registerConfirmPassword) {
-      setError("Vui lòng điền đầy đủ thông tin");
-      return;
-    }
-
-    if (registerPassword !== registerConfirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await register(registerUsername, registerEmail, registerPassword);
-      if (result.success) {
-        setSuccess(result.message);
-        setTimeout(() => {
-          onClose();
-        }, 1000);
-      } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setError("");
+}, [mode]);
 
   if (!isOpen) return null;
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (mode === "login") {
+      const res = await login(username, password);
+      if (!res.success) setError(res.message);
+    } else {
+      if (password !== confirm) {
+        setError("Mật khẩu xác nhận không khớp");
+        setLoading(false);
+        return;
+      }
+      const res = await register(username, email, password);
+      if (!res.success) setError(res.message);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-50 glass-overlay flex items-center justify-center p-4"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.95)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-            }}
-          >
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md glass-card scan-lines p-8 rounded-3xl border-neon-cyan/50 glow-cyan"
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ background: "#000000" }}
+      >
+        <motion.div
+          className="relative w-[95vw] h-[85vh] grid grid-cols-2 rounded-3xl overflow-hidden glass-card"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+        >
+          {/* LEFT - IMAGE */}
+          <div className="hidden md:block relative overflow-hidden">
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={mode} // quan trọng: đổi mode là đổi ảnh
+      className="absolute inset-0 bg-cover bg-center"
+      style={{
+        backgroundImage:
+          mode === "login"
+            ? "url(/AnhDangNhap.jpg)"
+            : "url(/AnhDangKy.jpg)",
+      }}
+      initial={{ x: 80, opacity: 0 }}
+animate={{ x: 0, opacity: 1 }}
+exit={{ x: -80, opacity: 0 }}
+transition={{ duration: 0.6, ease: "easeOut" }}
+
+
+    />
+  </AnimatePresence>
+</div>
+
+
+          {/* RIGHT - FORM */}
+          <div className="relative flex items-center justify-center p-12">
+            <button
+              onClick={onClose}
+              className="absolute top-6 right-6 w-9 h-9 rounded-full glass-card flex items-center justify-center"
             >
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg glass-card border border-white/10 hover:border-neon-cyan/50 text-fg-secondary hover:text-neon-cyan transition-all"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <X />
+            </button>
 
-              {/* Animated gradient orbs */}
-              <motion.div
-                className="absolute top-0 right-0 w-64 h-64 bg-neon-cyan/10 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+            <form
+              onSubmit={handleSubmit}
+              className="w-full max-w-md"
+            ><div className="w-full flex flex-col items-center text-center px-6 mb-4">
 
-              <div className="relative z-10">
-                {/* Header */}
-                <div className="text-center mb-8">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring" }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30"
-                  >
-                    {mode === "login" ? (
-                      <LogIn className="w-8 h-8 text-white" />
-                    ) : (
-                      <UserPlus className="w-8 h-8 text-white" />
-                    )}
-                  </motion.div>
-                  <h2 className="text-2xl font-bold text-neon-cyan mb-2">
-                    {mode === "login" ? "Đăng Nhập" : "Đăng Ký"}
-                  </h2>
-                  <p className="text-sm text-fg-secondary">
-                    {mode === "login"
-                      ? "Nhập thông tin để truy cập hệ thống"
-                      : "Tạo tài khoản mới để bắt đầu"}
-                  </p>
+              <h1 className="text-4xl font-bold text-neon-cyan">
+                ADAS SYSTEM
+              </h1>
+              
+            </div>
+              {/* TITLE */}
+              <div className="text-center">
+                
+                <h2 className="text-xl font-bold text-neon-cyan">
+                  {mode === "login" ? "Đăng Nhập" : "Đăng Ký"}
+                </h2>
+              </div>
+
+              {/* ERROR */}
+              {error && (
+                <div className="mt-2 rounded-full border border-red-500 text-red-400 text-sm text-center">
+                  {error}
                 </div>
+              )}
 
-                {/* Error/Success messages */}
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 p-3 rounded-xl glass-card border border-neon-red/50 text-neon-red text-sm"
-                  >
-                    {error}
-                  </motion.div>
+              {/* INPUTS */}
+              <div className="mt-4 space-y-6">
+                <input
+                  placeholder="Tên đăng nhập"
+                  className="w-full h-8 px-6 rounded-full bg-white text-black focus:outline-none"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+
+                {mode === "register" && (
+                  <input
+                    placeholder="Email"
+                    className="w-full h-7 px-6 rounded-full bg-white text-black"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 )}
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 p-3 rounded-xl glass-card border border-neon-green/50 text-neon-green text-sm"
-                  >
-                    {success}
-                  </motion.div>
-                )}
 
-                {/* Forms */}
-                {mode === "login" ? (
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-fg-secondary mb-2">
-                        Tên đăng nhập
-                      </label>
+                <input
+                  type="password"
+                  placeholder="Mật khẩu"
+                  className="w-full h-8 px-6 rounded-full bg-white text-black"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
 
-                      <div className="login-input-wrapper">
-                        <div className="login-input-icon">
-                          <UserIcon className="w-5 h-5 text-neon-cyan/50" />
-                        </div>
-
-                        <input
-                          type="text"
-                          value={loginUsername}
-                          onChange={(e) => setLoginUsername(e.target.value)}
-                          className="login-input-field"
-                          placeholder="Nhập tên đăng nhập"
-                          autoFocus
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-fg-secondary mb-2">
-                        Mật khẩu
-                      </label>
-
-                      <div className="login-input-wrapper">
-                        {/* phần bên trái chứa icon */}
-                        <div className="login-input-icon">
-                          <Lock className="w-5 h-5 text-neon-cyan/50" />
-                        </div>
-
-                        {/* phần bên phải là input */}
-                        <input
-                          type="password"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          className="login-input-field"
-                          placeholder="Nhập mật khẩu"
-                        />
-                      </div>
-                    </div>
-
-                    <motion.button
-                      type="submit"
-                      disabled={loading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full btn-neon py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? "Đang xử lý..." : "Đăng Nhập"}
-                    </motion.button>
-
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        onClick={() => setMode("register")}
-                        className="text-sm text-neon-cyan hover:text-neon-cyan/80 transition-colors"
-                      >
-                        Chưa có tài khoản? Đăng ký ngay
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <form onSubmit={handleRegister} className="space-y-4">
-                    {/* TÊN ĐĂNG KÝ */}
-<div>
-  <label className="block text-sm font-medium text-fg-secondary mb-2">
-    Tên đăng nhập
-  </label>
-  <div className="login-input-wrapper">
-    <div className="login-input-icon">
-      <UserIcon className="w-5 h-5 text-neon-cyan/50" />
-    </div>
-    <input
-      type="text"
-      value={registerUsername}
-      onChange={(e) => setRegisterUsername(e.target.value)}
-      className="login-input-field"
-      placeholder="Nhập tên đăng nhập"
-      autoFocus
-    />
-  </div>
-</div>
-
-{/* EMAIL */}
-<div>
-  <label className="block text-sm font-medium text-fg-secondary mb-2">
-    Email
-  </label>
-  <div className="login-input-wrapper">
-    <div className="login-input-icon">
-      <Mail className="w-5 h-5 text-neon-cyan/50" />
-    </div>
-    <input
-      type="email"
-      value={registerEmail}
-      onChange={(e) => setRegisterEmail(e.target.value)}
-      className="login-input-field"
-      placeholder="Nhập email"
-    />
-  </div>
-</div>
-
-{/* MẬT KHẨU */}
-<div>
-  <label className="block text-sm font-medium text-fg-secondary mb-2">
-    Mật khẩu
-  </label>
-  <div className="login-input-wrapper">
-    <div className="login-input-icon">
-      <Lock className="w-5 h-5 text-neon-cyan/50" />
-    </div>
-    <input
-      type="password"
-      value={registerPassword}
-      onChange={(e) => setRegisterPassword(e.target.value)}
-      className="login-input-field"
-      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
-    />
-  </div>
-</div>
-
-{/* XÁC NHẬN MẬT KHẨU */}
-<div>
-  <label className="block text-sm font-medium text-fg-secondary mb-2">
-    Xác nhận mật khẩu
-  </label>
-  <div className="login-input-wrapper">
-    <div className="login-input-icon">
-      <Lock className="w-5 h-5 text-neon-cyan/50" />
-    </div>
-    <input
-      type="password"
-      value={registerConfirmPassword}
-      onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-      className="login-input-field"
-      placeholder="Nhập lại mật khẩu"
-    />
-  </div>
-</div>
-
-                    <motion.button
-                      type="submit"
-                      disabled={loading}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full btn-neon py-3 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? "Đang xử lý..." : "Đăng Ký"}
-                    </motion.button>
-
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        onClick={() => setMode("login")}
-                        className="text-sm text-neon-cyan hover:text-neon-cyan/80 transition-colors"
-                      >
-                        Đã có tài khoản? Đăng nhập
-                      </button>
-                    </div>
-                  </form>
+                {mode === "register" && (
+                  <input
+                    type="password"
+                    placeholder="Xác nhận mật khẩu"
+                    className="w-full h-8 px-6 rounded-full bg-white text-black"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                  />
                 )}
               </div>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
+
+              {/* BUTTON */}
+              <button className="w-full mt-5 btn-neon py-1 rounded-full">
+                {loading
+                  ? "Đang xử lý..."
+                  : mode === "login"
+                  ? "ĐĂNG NHẬP"
+                  : "ĐĂNG KÝ"}
+              </button>
+
+              {/* SWITCH MODE */}
+                  <div className="mt-5 text-center">
+                    <button
+                    type="button"
+                    onClick={() =>
+                      
+                      setMode(mode === "login" ? "register" : "login")
+                      
+                    }
+                    className="text-sm"
+                  >
+                    {mode === "login" ? (
+                      <>
+                        <span>Chưa có tài khoản? </span>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            background: "linear-gradient(90deg, #00ffff, #00ff99, #00ffff)",
+                            backgroundSize: "200% auto",
+                            color: "transparent",
+                            WebkitBackgroundClip: "text",
+                            backgroundClip: "text",
+                            animation: "ledMove 2s linear infinite",
+                          }}
+                        >
+                          Đăng ký
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Đã có tài khoản? </span>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            background: "linear-gradient(90deg, #00ffff, #00ff99, #00ffff)",
+                            backgroundSize: "200% auto",
+                            color: "transparent",
+                            WebkitBackgroundClip: "text",
+                            backgroundClip: "text",
+                            animation: "ledMove 2s linear infinite",
+                          }}
+                        >
+                          Đăng nhập
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+
+
+</div>
+
+{/* DIVIDER */}
+<div className="my-3 flex items-center gap-3">
+  <div className="flex-1 h-px bg-gray-600" />
+  <span className="text-xs text-gray-400 whitespace-nowrap">HOẶC</span>
+  <div className="flex-1 h-px bg-gray-600" />
+</div>
+
+{/* SOCIAL LOGIN */}
+<div className="grid grid-cols-3 gap-3">
+  <button
+    type="button"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+  >
+    <img
+      src="https://www.svgrepo.com/show/475656/google-color.svg"
+      className="w-5 h-5"
+      alt="Google"
+    />
+  </button>
+
+  <button
+    type="button"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+  >
+    <img
+      src="https://www.svgrepo.com/show/475647/facebook-color.svg"
+      className="w-5 h-5"
+      alt="Facebook"
+    />
+  </button>
+
+  <button
+    type="button"
+    className="flex items-center justify-center py-3 rounded-xl border border-gray-600 hover:border-cyan-400 transition hover:bg-white/5"
+  >
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
+      className="w-5 h-5 invert"
+      alt="Apple"
+    />
+  </button>
+</div>
+
+
+
+            </form>
+          </div>
+        </motion.div>
+      </motion.div>
     </AnimatePresence>
   );
 }
