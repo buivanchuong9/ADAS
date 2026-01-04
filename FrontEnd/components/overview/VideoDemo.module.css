@@ -1,0 +1,80 @@
+.videoSection {
+    background: #111;
+    color: #fff;
+    padding: 80px 40px;
+}
+
+.videoContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.headerBar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.headerBar h2 {
+    color: #fff;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.liveIndicator {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+}
+
+.videoFrame {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.videoFrame video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.videoStatsBar {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #333;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.vStat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #888;
+}
+
+.vStat strong {
+    color: var(--accent);
+    margin-left: 5px;
+}
+
+@media (max-width: 768px) {
+    .headerBar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .videoStatsBar {
+        flex-direction: column;
+    }
+}

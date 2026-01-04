@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
 @import "tailwindcss";
 
 /* ============================================
@@ -41,6 +42,55 @@
   --radius: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
+
+  /* Overview Page - Light Theme Variables */
+  --bg-main: #f7fafc;
+  --bg-card: #ffffff;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --accent: #10b981;
+  --highlight: #f97316;
+  --border: #e2e8f0;
+}
+
+/* Dark Theme for Overview Page */
+.dark-theme {
+  /* Dark Background Colors */
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --accent: #34d399;
+  --highlight: #fb923c;
+  --border: #334155;
+
+  /* Dark mode specific shadows */
+  --shadow-light: 0 4px 24px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 30px rgba(52, 211, 153, 0.4);
+  --glow-highlight: 0 0 30px rgba(251, 146, 60, 0.4);
+}
+
+/* Smooth theme transition */
+:root,
+.dark-theme {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark-theme {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+/* Dark mode text improvements */
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4 {
+  color: #f1f5f9 !important;
+}
+
+.dark-theme p {
+  color: #cbd5e1 !important;
 }
 
 /* Tailwind CSS Variables for shadcn/ui - BRIGHTENED */
@@ -532,17 +582,20 @@ a:hover {
 .login-input-wrapper {
   display: flex;
   align-items: stretch;
-  border-radius: 9999px;             /* bo tròn như pill */
+  border-radius: 9999px;
+  /* bo tròn như pill */
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  overflow: hidden;                  /* cắt góc của 2 phần con */
+  overflow: hidden;
+  /* cắt góc của 2 phần con */
 }
 
 .login-input-wrapper:focus-within {
-  border-color: var(--neon-cyan);    /* viền neon khi focus */
+  border-color: var(--neon-cyan);
+  /* viền neon khi focus */
   box-shadow: 0 0 0 2px var(--neon-cyan);
 }
 
@@ -553,7 +606,8 @@ a:hover {
   justify-content: center;
   padding: 0 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border-right: 1px solid rgba(255, 255, 255, 0.1); /* đường kẻ thẳng dọc */
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  /* đường kẻ thẳng dọc */
 }
 
 /* Phần input bên phải – chỉ thẳng, KHÔNG bo góc */
@@ -562,9 +616,11 @@ a:hover {
   padding: 0.75rem 1rem;
   border: none;
   outline: none;
-  background: #eef4ff;               /* nền trắng hơi xanh như hình của bạn */
+  background: #eef4ff;
+  /* nền trắng hơi xanh như hình của bạn */
   color: #000;
-  border-radius: 0 !important;       /* QUAN TRỌNG: xoá bo góc global của input */
+  border-radius: 0 !important;
+  /* QUAN TRỌNG: xoá bo góc global của input */
 }
 
 /* Placeholder của riêng input login */
@@ -574,9 +630,12 @@ input.login-input-field::placeholder {
 
 /* Canh dọc chữ trong input chọn video */
 input[type="file"].video-file-input {
-  height: 2.75rem;                  /* chỉnh cao/thấp tùy ý (≈44px) */
-  padding: 0 1rem !important;       /* bỏ padding dọc, chỉ còn ngang */
-  line-height: 2.75rem !important;  /* = height => text nằm giữa dọc */
+  height: 2.75rem;
+  /* chỉnh cao/thấp tùy ý (≈44px) */
+  padding: 0 1rem !important;
+  /* bỏ padding dọc, chỉ còn ngang */
+  line-height: 2.75rem !important;
+  /* = height => text nằm giữa dọc */
 }
 
 /* Style nút "Chọn tệp" cho đồng bộ */

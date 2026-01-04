@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import IntroSlider from "./IntroSlider";
 
 const ONBOARDING_KEY = "adas_onboarding_completed";
 
 export default function OnboardingWrapper({ children }) {
     const [isOnboardingComplete, setIsOnboardingComplete] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         // Check if onboarding has been completed in this session
@@ -17,6 +19,8 @@ export default function OnboardingWrapper({ children }) {
     const handleOnboardingComplete = () => {
         sessionStorage.setItem(ONBOARDING_KEY, "true");
         setIsOnboardingComplete(true);
+        // Redirect to Overview page after intro
+        router.push("/overview");
     };
 
     // Show nothing while checking sessionStorage (prevents flash)
