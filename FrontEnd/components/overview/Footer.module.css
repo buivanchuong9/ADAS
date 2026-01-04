@@ -1,0 +1,22 @@
+.footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 40px;
+    background: #fff;
+    text-align: center;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.copyright {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #6b7280;
+}
