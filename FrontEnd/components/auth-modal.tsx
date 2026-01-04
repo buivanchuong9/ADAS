@@ -18,7 +18,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -41,7 +40,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setLoading(true);
 
     if (mode === "login") {
-      const res = await login(username, password);
+      const res = await login(email, password);
       if (!res.success) {
         setError(res.message);
       } else {
@@ -56,7 +55,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setLoading(false);
         return;
       }
-      const res = await register(username, email, password);
+      const res = await register(email, password);
       if (!res.success) {
         setError(res.message);
       } else {
@@ -65,9 +64,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setTimeout(() => {
           setMode("login");
           setSuccessMessage("");
-          setUsername("");
-          setPassword("");
           setEmail("");
+          setPassword("");
           setConfirm("");
         }, 1500);
       }
@@ -154,20 +152,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {/* INPUTS */}
               <div className="mt-4 space-y-6">
                 <input
-                  placeholder="Tên đăng nhập"
+                  type="email"
+                  placeholder="Email"
                   className="w-full h-8 px-6 rounded-full bg-white text-black focus:outline-none"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
-
-                {mode === "register" && (
-                  <input
-                    placeholder="Email"
-                    className="w-full h-7 px-6 rounded-full bg-white text-black"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                )}
 
                 <input
                   type="password"

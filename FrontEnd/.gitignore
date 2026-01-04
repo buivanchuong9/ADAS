@@ -27,7 +27,7 @@ lerna-debug.log*
 .env.docker
 
 # Allow .env.example to be committed (template without real keys)
-!.env.example
+.env.example
 
 # Python
 __pycache__/
