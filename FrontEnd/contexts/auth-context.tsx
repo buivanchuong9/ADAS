@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { authService, UserInfo } from "@/lib/auth/auth.service";
-import { supabase } from "@/lib/auth/supabase-client";
 
 interface AuthContextType {
   user: UserInfo | null;
