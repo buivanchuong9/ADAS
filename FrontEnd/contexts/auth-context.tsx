@@ -130,14 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     users.push(newUser);
     saveUsers(users);
 
-    // Auto login after registration
-    localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(newUser));
-    setUser(newUser);
-    setIsAuthenticated(true);
-
+    // NO AUTO-LOGIN - let user login manually
     return {
       success: true,
-      message: "Đăng ký thành công",
+      message: "Đăng ký thành công! Vui lòng đăng nhập",
     };
   };
 

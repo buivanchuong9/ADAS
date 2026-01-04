@@ -172,3 +172,155 @@
         0 0 0 1px rgba(255, 255, 255, 0.25) inset,
         0 0 40px rgba(251, 146, 60, 0.4);
 }
+
+/* Account Menu Styles */
+.accountWrapper {
+    position: relative;
+}
+
+.btnAccount {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--highlight), #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 4px 14px rgba(249, 115, 22, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.btnAccount:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 20px rgba(249, 115, 22, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+:global(.dark-theme) .btnAccount {
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    box-shadow:
+        0 4px 14px rgba(251, 146, 60, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 0 30px rgba(251, 146, 60, 0.3);
+}
+
+:global(.dark-theme) .btnAccount:hover {
+    box-shadow:
+        0 6px 24px rgba(251, 146, 60, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+        0 0 40px rgba(251, 146, 60, 0.4);
+}
+
+.accountMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+:global(.dark-theme) .accountMenu {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.menuHeader {
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(249, 115, 22, 0.1);
+    margin-bottom: 4px;
+}
+
+:global(.dark-theme) .menuHeader {
+    background: rgba(251, 146, 60, 0.15);
+}
+
+.menuUsername {
+    font-weight: 700;
+    font-size: 15px;
+    color: #1a202c;
+}
+
+:global(.dark-theme) .menuUsername {
+    color: #ffffff;
+}
+
+.menuEmail {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+:global(.dark-theme) .menuEmail {
+    color: #94a3b8;
+}
+
+.menuDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 8px 0;
+}
+
+:global(.dark-theme) .menuDivider {
+    background: rgba(148, 163, 184, 0.2);
+}
+
+.menuItem {
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a202c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.menuItem:hover {
+    background: rgba(249, 115, 22, 0.1);
+    color: #f97316;
+}
+
+:global(.dark-theme) .menuItem {
+    color: #e2e8f0;
+}
+
+:global(.dark-theme) .menuItem:hover {
+    background: rgba(251, 146, 60, 0.15);
+    color: #fbbf24;
+}
