@@ -1,4 +1,4 @@
-import { supabase } from './supabase-client'
+import { getSupabase } from './supabase-client'
 import { API_BASE_URL } from '../api-config'
 
 export interface UserInfo {
@@ -25,6 +25,14 @@ export const authService = {
      */
     async signUp(email: string, password: string): Promise<AuthResponse> {
         try {
+            const supabase = getSupabase()
+            if (!supabase) {
+                return {
+                    success: false,
+                    message: 'Supabase client not available',
+                }
+            }
+
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -55,6 +63,14 @@ export const authService = {
      */
     async signIn(email: string, password: string): Promise<AuthResponse> {
         try {
+            const supabase = getSupabase()
+            if (!supabase) {
+                return {
+                    success: false,
+                    message: 'Supabase client not available',
+                }
+            }
+
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -84,13 +100,19 @@ export const authService = {
      * Sign out the current user
      */
     async signOut(): Promise<void> {
-        await supabase.auth.signOut()
+        const supabase = getSupabase()
+        if (supabase) {
+            await supabase.auth.signOut()
+        }
     },
 
     /**
      * Get the current Supabase session
      */
     async getSession() {
+        const supabase = getSupabase()
+        if (!supabase) return null
+
         const { data } = await supabase.auth.getSession()
         return data.session
     },
@@ -129,6 +151,10 @@ export const authService = {
      * Listen to auth state changes
      */
     onAuthStateChange(callback: (event: string, session: any) => void) {
+        const supabase = getSupabase()
+        if (!supabase) {
+            return { data: { subscription: { unsubscribe: () => { } } } }
+        }
         return supabase.auth.onAuthStateChange(callback)
     },
 }
