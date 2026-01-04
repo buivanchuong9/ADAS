@@ -79,7 +79,7 @@ export default function RootLayout({
       className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
-      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`}>
+      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`} suppressHydrationWarning>
         <AuthProvider>
           <OnboardingWrapper>
             <div className="min-h-screen h-full w-full">{children}</div>

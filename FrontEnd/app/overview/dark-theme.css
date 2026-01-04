@@ -1,0 +1,116 @@
+/* Dark theme specific overrides for Overview page components */
+
+/* Navigation in dark mode */
+.dark-theme .nav {
+    background: rgba(17, 24, 39, 0.85) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 4px 24px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Hero section dark mode */
+.dark-theme .heroText h1 {
+    background: linear-gradient(135deg,
+            #f9fafb 0%,
+            #d1d5db 25%,
+            var(--highlight) 50%,
+            #d1d5db 75%,
+            #f9fafb 100%) !important;
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 8s ease infinite !important;
+}
+
+/* Cards in dark mode */
+.dark-theme [class*="Card"],
+.dark-theme [class*="card"] {
+    background: var(--bg-card) !important;
+    border-color: var(--border) !important;
+}
+
+/* Feature cards dark mode */
+.dark-theme .fCard {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border: 2px solid rgba(148, 163, 184, 0.3) !important;
+    backdrop-filter: blur(10px);
+}
+
+.dark-theme .fCard:hover {
+    border-color: var(--accent) !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), var(--glow-accent) !important;
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+.dark-theme .fCard h3 {
+    color: #f1f5f9 !important;
+    font-weight: 700;
+}
+
+.dark-theme .fCard p {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+}
+
+/* Icon boxes in dark mode */
+.dark-theme .iconBox {
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+/* SystemLog dark mode */
+.dark-theme .terminal {
+    background: #000 !important;
+    border-color: rgba(52, 211, 153, 0.3) !important;
+    box-shadow: 0 0 30px rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Video section dark mode */
+.dark-theme .videoSection {
+    background: #000 !important;
+}
+
+/* Buttons dark mode */
+.dark-theme .btnPrimary {
+    background: linear-gradient(135deg, var(--highlight), var(--accent)) !important;
+    box-shadow: 0 4px 16px rgba(251, 146, 60, 0.3) !important;
+}
+
+.dark-theme .btnPrimary:hover {
+    box-shadow: 0 6px 24px rgba(251, 146, 60, 0.4) !important;
+}
+
+.dark-theme .btnSecondary {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+.dark-theme .btnSecondary:hover {
+    background: rgba(52, 211, 153, 0.1) !important;
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.2) !important;
+}
+
+/* Gallery images dark mode */
+.dark-theme .galleryItem {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Footer dark mode */
+.dark-theme .footer {
+    background: #000 !important;
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Page background */
+.dark-theme .overviewPage {
+    background: var(--bg-main) !important;
+}
+
+/* Text selections in dark mode */
+.dark-theme ::selection {
+    background: rgba(52, 211, 153, 0.3);
+    color: #fff;
+}
