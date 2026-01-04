@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/auth/supabase-client'
+import { getSupabase } from '@/lib/auth/supabase-client'
 import { API_BASE_URL } from '../api-config'
 
 export interface ApiClientOptions extends RequestInit {
@@ -15,8 +15,11 @@ export async function apiClient(
 ): Promise<Response> {
     const { skipAuth = false, ...fetchOptions } = options
 
-    // Get current session
-    const { data: { session } } = await supabase.auth.getSession()
+    // Get Supabase client (null during build/SSR)
+    const supabase = getSupabase()
+
+    // Get current session (only if client exists)
+    const session = supabase ? (await supabase.auth.getSession()).data.session : null
 
     // Prepare headers
     const headers: Record<string, string> = {

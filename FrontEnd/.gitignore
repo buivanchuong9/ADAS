@@ -7,7 +7,7 @@ node_modules/
 out/
 build/
 dist/
-view/dev/
+view/
 .cache/
 npm-debug.log*
 yarn-debug.log*
@@ -15,6 +15,13 @@ yarn-error.log*
 lerna-debug.log*
 .pnp/
 .pnpm-store/
+
+# Next.js build artifacts
+_next*.txt
+__PAGE*.txt
+*.buildinfo.json
+.vercel/
+*.tsbuildinfo
 
 # pnpm store (local)
 .pnpm-store/
@@ -27,7 +34,8 @@ lerna-debug.log*
 .env.docker
 
 # Allow .env.example to be committed (template without real keys)
-.env.example
+!.env.example
+!.env.production
 
 # Python
 __pycache__/
