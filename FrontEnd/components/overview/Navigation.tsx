@@ -12,9 +12,10 @@ export default function Navigation() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showAccountMenu, setShowAccountMenu] = useState(false);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         setShowAccountMenu(false);
+        window.location.href = '/';
     };
 
     return (
@@ -48,8 +49,8 @@ export default function Navigation() {
                             {showAccountMenu && (
                                 <div className={styles.accountMenu}>
                                     <div className={styles.menuHeader}>
-                                        <div className={styles.menuUsername}>{user?.username}</div>
-                                        <div className={styles.menuEmail}>{user?.email}</div>
+                                        <div className={styles.menuUsername}>{user?.email}</div>
+                                        {user?.role && <div className={styles.menuEmail}>Vai trò: {user.role}</div>}
                                     </div>
                                     <div className={styles.menuDivider}></div>
                                     <button
