@@ -135,7 +135,7 @@ export default function Analytics() {
             </GlassCard>
 
             <GlassCard scanLines className="p-6">
-              <h3 className="text-xl font-bold text-neon-red mb-4 tracking-wide">MỨC MỆT MỎI THEO THỜI GIAN</h3>
+              <h3 className="text-xl font-bold text-neon-red mb-4 tracking-wide">DIỄN BIẾN TRẠNG THÁI MỆT MỎI</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={fatigueData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
