@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { AuthModal } from '@/components/auth-modal';
 import { User, LogOut } from 'lucide-react';
@@ -12,10 +12,22 @@ export default function Navigation() {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showAccountMenu, setShowAccountMenu] = useState(false);
 
+    // ✅ Auto-open login modal if URL has ?showLogin=true
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('showLogin') === 'true') {
+                setShowAuthModal(true);
+                // Clean up URL without reloading
+                window.history.replaceState({}, '', '/overview');
+            }
+        }
+    }, []);
+
     const handleLogout = async () => {
         await logout();
         setShowAccountMenu(false);
-        window.location.href = '/';
+        // logout() already handles redirect to /overview with ?showLogin=true
     };
 
     return (

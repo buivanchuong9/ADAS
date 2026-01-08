@@ -1,0 +1,42 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import IntroSlider from '@/components/onboarding/IntroSlider';
+
+const ONBOARDING_KEY = 'adas_onboarding_completed';
+
+export default function OnboardingPage() {
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const router = useRouter();
+
+    const handleComplete = () => {
+        setIsTransitioning(true);
+
+        // Mark onboarding as completed
+        sessionStorage.setItem(ONBOARDING_KEY, 'true');
+
+        // Wait for fade out animation before navigating
+        setTimeout(() => {
+            router.push('/overview');
+        }, 300);
+    };
+
+    // Show transitioning state
+    if (isTransitioning) {
+        return (
+            <div
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: '#000',
+                    opacity: 0,
+                    animation: 'fadeInSimple 300ms ease-in forwards',
+                    zIndex: 9999
+                }}
+            />
+        );
+    }
+
+    return <IntroSlider onComplete={handleComplete} />;
+}
