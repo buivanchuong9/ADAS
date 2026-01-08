@@ -45,7 +45,18 @@ export function getSupabase(): SupabaseClient | null {
                 autoRefreshToken: true,
                 persistSession: true,
                 detectSessionInUrl: true,
+                storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+                storageKey: 'adas-supabase-auth',
             },
+        })
+
+        // Add error listener for auth errors
+        supabaseInstance.auth.onAuthStateChange((event, session) => {
+            if (event === 'TOKEN_REFRESHED') {
+                console.log('✅ Token refreshed successfully')
+            } else if (event === 'SIGNED_OUT') {
+                console.log('🔵 User signed out')
+            }
         })
     }
 

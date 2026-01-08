@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
@@ -55,12 +56,21 @@ const itemVariants: Variants = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     systemStatus: "hoạt động",
     activeCameras: 0,
     totalDetections: 0,
     alertsToday: 0,
   });
+
+  // Check onboarding status
+  useEffect(() => {
+    const onboardingCompleted = sessionStorage.getItem('adas_onboarding_completed');
+    if (!onboardingCompleted) {
+      router.push('/onboarding');
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -416,7 +426,7 @@ export default function HomePage() {
                     "Phát Hiện AI YOLOv11",
                     "Thu Thập Dữ Liệu Tự Động",
                     "Cảnh Báo Thông Minh",
-                    "Triển Khai Docker",
+
                   ].map((feature, index) => (
                     <motion.div
                       key={feature}

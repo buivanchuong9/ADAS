@@ -26,9 +26,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     if (isAuthenticated) onClose();
   }, [isAuthenticated, onClose]);
 
+  // Clear messages when switching modes
   useEffect(() => {
     setError("");
-    setSuccessMessage("");
+    // Don't clear success message immediately to show transition message
+    if (mode === "register") {
+      setSuccessMessage("");
+    }
   }, [mode]);
 
   if (!isOpen) return null;
@@ -44,8 +48,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (!res.success) {
         setError(res.message);
       } else {
-        // Navigate to dashboard after successful login
-        window.location.href = "/dashboard";
+        setSuccessMessage("Đăng nhập thành công!");
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 500);
         return;
       }
     } else {
@@ -59,15 +65,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (!res.success) {
         setError(res.message);
       } else {
-        // Show success message and switch to login after delay
-        setSuccessMessage(res.message);
+        // ✅ Registration successful - switch to login mode
+        // ✅ Keep email and password so user can login immediately
+        setSuccessMessage("Đăng ký thành công! Đang chuyển sang đăng nhập...");
+        setConfirm(""); // Only clear confirm password
+
+        // ✅ Switch to login mode after short delay
         setTimeout(() => {
           setMode("login");
-          setSuccessMessage("");
-          setEmail("");
-          setPassword("");
-          setConfirm("");
-        }, 1500);
+          setSuccessMessage("Vui lòng đăng nhập với tài khoản vừa tạo");
+          setLoading(false);
+        }, 1000);
+        return;
       }
     }
 
