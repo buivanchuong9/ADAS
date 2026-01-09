@@ -1,0 +1,46 @@
+VẤN ĐỀ NÚT "VIDEO MẪU"
+
+HIỆN TRẠNG:
+- Đã upload nhiều videos lên hệ thống
+- Muốn xem list tất cả videos đã upload
+- Nút "Video mẫu" đang call: GET /api/videos/list
+- API này KHÔNG TỒN TẠI trong backend spec
+
+BACKEND SPEC HIỆN TẠI:
+✅ POST /api/video/upload - Upload video mới
+✅ GET /api/video/result/{job_id} - Get status của 1 job
+✅ GET /api/video/download/{job_id}/{filename} - Download video
+❌ GET /api/videos/list - KHÔNG CÓ
+
+CẦN HỎI BACKEND TEAM:
+
+"Làm sao để lấy danh sách TẤT CẢ videos đã upload?
+
+Cần 1 endpoint trả về list videos, ví dụ:
+
+GET /api/videos/list
+hoặc
+GET /api/videos?page=1&limit=20
+
+Response mong muốn:
+{
+  "items": [
+    {
+      "id": 16,
+      "job_id": "9d507862-f5ec-4c7e-a617-153528f5377d",
+      "video_filename": "project_video.mp4",
+      "status": "completed",
+      "created_at": "2026-01-09T00:36:23",
+      ...
+    },
+    ...
+  ],
+  "total": 50,
+  "page": 1,
+  "limit": 20
+}
+
+Có endpoint này chưa?"
+
+TẠM THỜI:
+Nút "Video mẫu" sẽ không hoạt động cho đến khi backend cung cấp endpoint list videos.
