@@ -26,6 +26,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Camera,
+  Cctv,
+  BookOpen,
+
 } from "lucide-react"
 import Link from "next/link"
 import { HighchartsChart } from "@/components/charts/highcharts-chart"
@@ -235,10 +239,12 @@ export default function HomePage() {
                   <Link href="/dashboard">
                     <Button
                       size="lg"
-                      className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto"
+                      className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap"
                     >
-                      View Dashboard
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                        View Dashboard
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                      </span>
                     </Button>
                   </Link>
                 </motion.div>
@@ -252,29 +258,29 @@ export default function HomePage() {
             >
               {[
                 {
-                  title: "Trạng Thái Hệ Thống",
+                  title: "Trạng thái hệ thống",
                   value: stats.systemStatus,
                   icon: Activity,
                   color: "success",
                   description: "Tất cả hệ thống trực tuyến",
                 },
                 {
-                  title: "Camera Hoạt Động",
+                  title: "Camera hoạt động",
                   value: stats.activeCameras.toString(),
-                  icon: Car,
+                  icon: Cctv,
                   color: "primary",
                   description: "Giám sát thời gian thực",
                 },
                 {
-                  title: "Total Detections",
+                  title: "Tổng số lần phát hiện",
                   value: stats.totalDetections.toLocaleString(),
-                  icon: Eye,
+                  icon: BookOpen,
                   color: "info",
                   description: "+12% so với tuần trước",
                   trend: true,
                 },
                 {
-                  title: "Alerts Today",
+                  title: "Các cảnh báo hôm nay",
                   value: stats.alertsToday.toString(),
                   icon: AlertTriangle,
                   color: "warning",
