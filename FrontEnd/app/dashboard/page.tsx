@@ -100,45 +100,94 @@ export default function DashboardPage() {
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <GlassCard glow="cyan" className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-fg-secondary uppercase tracking-wider">Total Detections</span>
+                    <span
+                    style={{ fontFamily: "var(--font-rajdhani)" }}
+                    className="text-sm sm:text-base font-semibold text-white/80 tracking-[0.04em]"
+                    >
+                      Total Detections
+                    </span>
                     <Database className="h-5 w-5 text-neon-cyan" />
                   </div>
-                  <div className="digital-number text-3xl font-bold text-neon-cyan">
+
+                  <div
+                    style={{ fontFamily: "var(--font-rajdhani)" }}
+                    className="tabular-nums text-4xl font-bold leading-none text-neon-cyan drop-shadow-[0_0_10px_rgba(34,211,238,0.35)]"
+                  >
                     {(stats.totalDetections ?? 0).toLocaleString()}
                   </div>
+
                   <p className="text-xs text-fg-muted mt-2">Database records</p>
                 </GlassCard>
 
+                {/* Object Classes */}
                 <GlassCard glow="cyan" className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-fg-secondary uppercase tracking-wider">Object Classes</span>
+                    <span
+                      style={{ fontFamily: "var(--font-rajdhani)" }}
+                      className="text-sm sm:text-base font-semibold text-white/80 tracking-[0.04em]"
+                    >
+                      Object Classes
+                    </span>
                     <Activity className="h-5 w-5 text-neon-cyan" />
                   </div>
-                  <div className="digital-number text-3xl font-bold text-neon-cyan">
-                    {classes.length}
+
+                  <div
+                    style={{ fontFamily: "var(--font-rajdhani)" }}
+                    className="tabular-nums text-4xl font-bold leading-none text-neon-cyan drop-shadow-[0_0_10px_rgba(34,211,238,0.35)]"
+                  >
+                    {Number(classes.length ?? 0).toLocaleString()}
                   </div>
+
                   <p className="text-xs text-fg-muted mt-2">Unique types</p>
                 </GlassCard>
 
+                {/* Trips Recorded */}
                 <GlassCard glow="green" className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-fg-secondary uppercase tracking-wider">Trips Recorded</span>
+                    <span
+                      style={{ fontFamily: "var(--font-rajdhani)" }}
+                      className="text-sm sm:text-base font-semibold text-white/80 tracking-[0.04em]"
+                    >
+                      Trips Recorded
+                    </span>
                     <Camera className="h-5 w-5 text-neon-green" />
                   </div>
-                  <div className="digital-number text-3xl font-bold text-neon-green">
-                    {stats.totalTrips ?? 0}
+
+                  <div
+                    style={{ fontFamily: "var(--font-rajdhani)" }}
+                    className="tabular-nums text-4xl font-bold leading-none text-neon-green drop-shadow-[0_0_10px_rgba(34,197,94,0.35)]"
+                  >
+                    {Number(stats.totalTrips ?? 0).toLocaleString()}
                   </div>
+
                   <p className="text-xs text-fg-muted mt-2">Journey logs</p>
                 </GlassCard>
 
+                {/* Safety Events */}
                 <GlassCard glow={stats.totalEvents > 10 ? "red" : "green"} className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs text-fg-secondary uppercase tracking-wider">Safety Events</span>
-                    <AlertTriangle className={`h-5 w-5 ${stats.totalEvents > 10 ? 'text-neon-red' : 'text-neon-green'}`} />
+                    <span
+                      style={{ fontFamily: "var(--font-rajdhani)" }}
+                      className="text-sm sm:text-base font-semibold text-white/80 tracking-[0.04em]"
+                    >
+                      Safety Events
+                    </span>
+                    <AlertTriangle
+                      className={`h-5 w-5 ${stats.totalEvents > 10 ? "text-neon-red" : "text-neon-green"}`}
+                    />
                   </div>
-                  <div className={`digital-number text-3xl font-bold ${stats.totalEvents > 10 ? 'text-neon-red' : 'text-neon-green'}`}>
-                    {stats.totalEvents ?? 0}
+
+                  <div
+                    style={{ fontFamily: "var(--font-rajdhani)" }}
+                    className={`tabular-nums text-4xl font-bold leading-none ${
+                      stats.totalEvents > 10
+                        ? "text-neon-red drop-shadow-[0_0_10px_rgba(239,68,68,0.35)]"
+                        : "text-neon-green drop-shadow-[0_0_10px_rgba(34,197,94,0.35)]"
+                    }`}
+                  >
+                    {Number(stats.totalEvents ?? 0).toLocaleString()}
                   </div>
+
                   <p className="text-xs text-fg-muted mt-2">Alert warnings</p>
                 </GlassCard>
               </div>
