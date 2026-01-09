@@ -1,9 +1,15 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Orbitron, Rajdhani, Inter } from "next/font/google"
+import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
+
+const shareTechMono = Share_Tech_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-share-mono",
+});
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -75,10 +81,13 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable}`}
+      className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable} ${shareTechMono.variable}`}
       suppressHydrationWarning
     >
-      <body className={`${rajdhani.className} antialiased h-full overflow-x-hidden`} suppressHydrationWarning>
+      <body
+        className={`${rajdhani.className} antialiased h-full overflow-x-hidden`}
+        suppressHydrationWarning
+      >
         <AuthProvider>
           <div className="min-h-screen h-full w-full">{children}</div>
         </AuthProvider>
