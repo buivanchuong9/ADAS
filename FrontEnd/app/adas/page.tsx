@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { getApiUrl } from "@/lib/api-config"
 import { API_ENDPOINTS } from "@/lib/api-endpoints"
 import { ArrowLeft, Upload, PlayCircle, Film, CheckCircle2, Loader2, AlertTriangle, Sparkles, Database, ShieldCheck, RefreshCw, Clock, FileVideo } from "lucide-react"
+import { useVideoProgress } from "@/hooks/use-video-progress"
 
 type VisionResponse = {
   message?: string
@@ -57,6 +58,55 @@ export default function ADASPage() {
   const [availableVideos, setAvailableVideos] = useState<VideoItem[]>([])
   const [loadingVideos, setLoadingVideos] = useState(false)
 
+  // WebSocket progress monitoring
+  const {
+    progress: wsProgress,
+    status: wsStatus,
+    isFinished: wsIsFinished,
+    error: wsError,
+    processingTime: wsProcessingTime,
+    isConnected: wsIsConnected
+  } = useVideoProgress(currentJobId, isProcessing)
+
+  // Update local state when WebSocket data changes
+  useEffect(() => {
+    if (currentJobId && isProcessing) {
+      setProcessingProgress(wsProgress)
+
+      // Update processing message with progress
+      if (wsProcessingTime !== null) {
+        const minutes = Math.floor(wsProcessingTime / 60)
+        const seconds = wsProcessingTime % 60
+        const timeString = minutes > 0
+          ? `${minutes}:${seconds.toString().padStart(2, '0')}`
+          : `${seconds}s`
+        setProcessingMsg(`Đang phân tích... ${wsProgress}% (${timeString})`)
+      } else {
+        setProcessingMsg(`Đang phân tích... ${wsProgress}%`)
+      }
+
+      // Handle completion
+      if (wsIsFinished && wsStatus === 'completed') {
+        console.log('✅ [WebSocket] Processing completed!')
+        setIsProcessing(false)
+        fetchProcessedVideo(currentJobId)
+      }
+
+      // Handle errors
+      if (wsError) {
+        console.error('❌ [WebSocket] Error:', wsError)
+        toast({
+          title: "Lỗi kết nối WebSocket",
+          description: wsError,
+          variant: "destructive"
+        })
+        // Fallback to polling if WebSocket fails
+        console.log('🔄 Falling back to polling...')
+        pollForResult(currentJobId)
+      }
+    }
+  }, [wsProgress, wsStatus, wsIsFinished, wsError, wsProcessingTime, wsIsConnected, currentJobId, isProcessing])
+
   useEffect(() => {
     return () => {
       if (previewUrl?.startsWith("blob:")) {
@@ -79,31 +129,76 @@ export default function ADASPage() {
       return
     }
 
+    // Show file size info
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2)
+    console.log(`📤 Uploading video: ${file.name} (${fileSizeMB} MB)`)
+
     try {
       setUploading(true)
       setIsProcessing(true)
       setStage("processing")
       setProcessingProgress(0)
-      setProcessingMsg("Đang tải video lên server...")
+      setProcessingMsg(`Đang tải video lên server... (${fileSizeMB} MB)`)
 
-      // Step 1: Upload video
+      // Step 1: Upload video with timeout
       const formData = new FormData()
       formData.append("file", file)
 
-      const uploadRes = await fetch(getApiUrl('/api/video/upload'), {
+      // Create upload promise with timeout (5 minutes for large files)
+      const uploadTimeout = 5 * 60 * 1000 // 5 minutes
+      const uploadPromise = fetch(getApiUrl('/api/video/upload'), {
         method: "POST",
         body: formData,
       })
 
-      if (!uploadRes.ok) {
-        throw new Error(`Upload failed: ${uploadRes.status}`)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Upload timeout - Video quá lớn hoặc mạng chậm. Vui lòng thử lại với video nhỏ hơn.')), uploadTimeout)
+      )
+
+      // Show upload progress message
+      const progressInterval = setInterval(() => {
+        setProcessingMsg(prev => {
+          if (prev.includes('...')) {
+            return `Đang tải video lên server (${fileSizeMB} MB) - Vui lòng chờ`
+          }
+          return prev + '.'
+        })
+      }, 1000)
+
+      const uploadRes = await Promise.race([uploadPromise, timeoutPromise]) as Response
+      clearInterval(progressInterval)
+
+      // Parse response
+      let uploadData: any
+      let errorMessage = ''
+
+      try {
+        uploadData = await uploadRes.json()
+      } catch (parseErr) {
+        console.error('❌ Failed to parse response:', parseErr)
+        throw new Error('Server trả về dữ liệu không hợp lệ')
       }
 
-      const uploadData = await uploadRes.json()
+      // Check for errors
+      if (!uploadRes.ok) {
+        // Extract error message from backend
+        errorMessage = uploadData?.detail || uploadData?.message || `Upload failed with status ${uploadRes.status}`
+
+        if (uploadRes.status === 400) {
+          errorMessage = `Lỗi định dạng video: ${errorMessage}`
+        } else if (uploadRes.status === 413) {
+          errorMessage = 'Video quá lớn. Vui lòng chọn video nhỏ hơn 500MB.'
+        } else if (uploadRes.status === 500) {
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau.'
+        }
+
+        throw new Error(errorMessage)
+      }
+
       const jobId = uploadData.job_id || uploadData.id
 
       if (!jobId) {
-        throw new Error('No job_id returned from upload')
+        throw new Error('Server không trả về job_id. Vui lòng thử lại.')
       }
 
       console.log('✅ Upload OK - Job:', jobId.substring(0, 8))
@@ -112,78 +207,44 @@ export default function ADASPage() {
 
       toast({
         title: "Upload thành công!",
-        description: "Video đang được AI phân tích..."
+        description: `Video đã tải lên (${fileSizeMB} MB). Đang kết nối WebSocket để theo dõi tiến trình...`
       })
 
-      // Step 2: Monitor progress via SSE
-      setProcessingMsg("Đang phân tích video, vui lòng chờ...")
-      pollForResult(jobId)
+      // Step 2: WebSocket will automatically start monitoring via useVideoProgress hook
+      setProcessingMsg("Đang kết nối WebSocket để theo dõi tiến trình phân tích...")
 
     } catch (err: any) {
       console.error('❌ [Upload] Error:', err)
+
+      // Determine error type and show appropriate message
+      let errorTitle = "Lỗi upload"
+      let errorDescription = err.message || "Không thể tải video lên server."
+
+      if (err.message.includes('timeout')) {
+        errorTitle = "Upload quá lâu"
+        errorDescription = `Video ${fileSizeMB} MB quá lớn hoặc mạng chậm. Vui lòng thử video nhỏ hơn hoặc kiểm tra kết nối mạng.`
+      } else if (err.message.includes('Failed to fetch')) {
+        errorTitle = "Lỗi kết nối"
+        errorDescription = "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng."
+      }
+
       toast({
-        title: "Lỗi upload",
-        description: err.message || "Không thể tải video lên server.",
-        variant: "destructive"
+        title: errorTitle,
+        description: errorDescription,
+        variant: "destructive",
+        duration: 8000, // Show longer for errors
       })
+
       setUploading(false)
       setIsProcessing(false)
       setStage("input")
+      setProcessingMsg("")
     }
   }
 
-  // Monitor processing progress via SSE
-  const startProgressMonitoring = (jobId: string) => {
-    const sseUrl = getApiUrl(`/api/video/stream/${jobId}`)
-    console.log('🔄 [SSE] Connecting to:', sseUrl)
-
-    const eventSource = new EventSource(sseUrl)
-
-    eventSource.addEventListener('progress', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        console.log('📊 [Progress]', data)
-
-        setProcessingProgress(data.progress || 0)
-        setProcessingMsg(`Đang phân tích video... ${data.progress || 0}%`)
-
-        if (data.event_count) {
-          setProcessingMsg(`Đang phân tích... ${data.progress}% (Phát hiện ${data.event_count} sự kiện)`)
-        }
-      } catch (err) {
-        console.error('❌ [SSE Parse] Error:', err)
-      }
-    })
-
-    eventSource.addEventListener('complete', (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        console.log('✅ [Complete]', data)
-
-        setProcessingProgress(100)
-        setIsProcessing(false)
-        eventSource.close()
-
-        // Get result video URL
-        fetchProcessedVideo(jobId)
-
-      } catch (err) {
-        console.error('❌ [SSE Complete] Error:', err)
-      }
-    })
-
-    eventSource.addEventListener('error', (event: any) => {
-      console.error('❌ [SSE] Error:', event)
-      eventSource.close()
-
-      // Fallback to polling if SSE fails
-      pollForResult(jobId)
-    })
-  }
-
-  // Fallback polling if SSE doesn't work
+  // Fallback polling if WebSocket doesn't work (kept as backup)
   const pollForResult = async (jobId: string) => {
-    const maxAttempts = 60 // 5 minutes max
+    const maxAttempts = 450 // 15 minutes max (450 attempts × 2 seconds = 900 seconds = 15 minutes)
     let attempts = 0
 
     const poll = async () => {
@@ -197,8 +258,15 @@ export default function ADASPage() {
           console.log(`[Job ${jobId.substring(0, 8)}] Status: ${data.status}, Progress: ${newProgress}%`)
         }
 
+        const elapsedSeconds = attempts * 2
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60)
+        const remainingSeconds = elapsedSeconds % 60
+        const timeString = elapsedMinutes > 0
+          ? `${elapsedMinutes}:${remainingSeconds.toString().padStart(2, '0')}`
+          : `${elapsedSeconds}s`
+
         setProcessingProgress(newProgress)
-        setProcessingMsg(`Đang phân tích... ${newProgress}%`)
+        setProcessingMsg(`Đang phân tích... ${newProgress}% (${timeString})`)
 
         if (data.status === 'completed') {
           setIsProcessing(false)
@@ -214,7 +282,8 @@ export default function ADASPage() {
         if (attempts < maxAttempts && data.status !== 'completed') {
           setTimeout(poll, 2000) // Poll every 2 seconds for faster updates
         } else if (attempts >= maxAttempts) {
-          throw new Error('Processing timeout')
+          const elapsedMinutes = Math.floor((attempts * 2) / 60)
+          throw new Error(`Processing timeout after ${elapsedMinutes} minutes. Video might be too long or server is overloaded. Please try a shorter video or contact support.`)
         }
 
       } catch (err: any) {
@@ -577,8 +646,34 @@ export default function ADASPage() {
                 <div className="absolute inset-0 glass-card flex flex-col items-center justify-center text-neon-cyan gap-4">
                   <Loader2 className="h-12 w-12 animate-spin text-neon-cyan" />
                   <div className="text-center space-y-2">
-                    <p className="text-lg font-semibold">Đang phân tích video...</p>
-                    <p className="text-sm text-fg-secondary">Vui lòng chờ trong giây lát</p>
+                    {/* Show different message based on upload vs processing state */}
+                    {uploading ? (
+                      <>
+                        <p className="text-lg font-semibold">Đang tải video lên server...</p>
+                        <p className="text-sm text-fg-secondary">Vui lòng chờ, đang upload file</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-lg font-semibold">Đang phân tích video...</p>
+                        <p className="text-sm text-fg-secondary">AI đang xử lý video của bạn</p>
+                      </>
+                    )}
+
+                    {/* WebSocket Connection Status - only show when not uploading */}
+                    {!uploading && wsIsConnected && (
+                      <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50">
+                        <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
+                        WebSocket Connected
+                      </Badge>
+                    )}
+
+                    {/* Upload status badge */}
+                    {uploading && (
+                      <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                        <Upload className="w-3 h-3 animate-pulse" />
+                        Đang upload...
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Progress Bar */}
@@ -591,12 +686,12 @@ export default function ADASPage() {
                     </div>
                     <div className="flex justify-between text-xs text-fg-secondary">
                       <span>{processingProgress}%</span>
-                      <span>Đang xử lý...</span>
+                      <span>{uploading ? 'Đang upload...' : 'Đang xử lý...'}</span>
                     </div>
                   </div>
 
                   {processingMsg && (
-                    <p className="text-sm text-neon-yellow animate-pulse">{processingMsg}</p>
+                    <p className="text-sm text-neon-yellow max-w-md text-center px-4">{processingMsg}</p>
                   )}
                 </div>
               ) : previewUrl && stage === "done" ? (
