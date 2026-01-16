@@ -679,8 +679,8 @@ export default function ADASPage() {
 
       {/* Video Selection Dialog */}
       <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
-        <DialogContent className="glass-card border-2 border-neon-cyan/50 max-w-4xl max-h-[80vh]">
-          <DialogHeader>
+        <DialogContent className="glass-card border-2 border-neon-cyan/50">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
               <FileVideo className="w-6 h-6" />
               Chọn Video Mẫu
@@ -690,7 +690,7 @@ export default function ADASPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[500px] pr-4">
+          <ScrollArea className="flex-1 min-h-0 pr-4 overflow-x-hidden">
             {loadingVideos ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
