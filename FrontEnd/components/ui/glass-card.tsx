@@ -16,29 +16,31 @@ export function GlassCard({
     scanLines = false,
     ...props
 }: GlassCardProps) {
-    const glowClass = {
-        cyan: 'glow-cyan',
-        red: 'glow-red',
-        green: 'glow-green',
-        yellow: 'text-neon-yellow',
-        none: '',
-    }[glow]
+    // Map glow colors to CSS variables
+    const glowColorMap = {
+        cyan: 'var(--primary)',
+        red: 'var(--destructive)',
+        green: 'var(--success)',
+        yellow: 'var(--warning)',
+        none: 'transparent',
+    }
 
-    const pulseClass = pulse
-        ? glow === 'red'
-            ? 'glow-pulse-red'
-            : 'glow-pulse-cyan'
-        : ''
+    const glowColor = glowColorMap[glow]
 
     return (
         <div
             className={cn(
-                'glass-card',
-                glowClass,
-                pulseClass,
+                'card-hud',
                 scanLines && 'scan-lines',
                 className
             )}
+            style={{
+                backgroundColor: 'var(--bg-surface)',
+                borderColor: glow !== 'none' ? glowColor : 'var(--border-subtle)',
+                boxShadow: glow !== 'none' && pulse 
+                    ? `0 0 20px ${glowColor}40` 
+                    : 'var(--shadow-soft)',
+            }}
             {...props}
         >
             {children}

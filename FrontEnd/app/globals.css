@@ -6,95 +6,169 @@
    DARK SCI-FI AUTOMOTIVE HMI THEME
    ============================================ */
 
-/* ===== ROOT VARIABLES - DARK SCI-FI PALETTE ===== */
-:root {
+/* ============================================
+   THEME SYSTEM - DARK & LIGHT
+   ============================================ */
+
+/* ===== DARK THEME (Default) - SCI-FI NEON ===== */
+:root,
+[data-theme='dark'] {
   /* Background Colors */
+  --bg-body: #050B14;
   --bg-primary: #050B14;
   --bg-secondary: #0A1628;
   --bg-tertiary: #0F1F3A;
+  --bg-surface: rgba(10, 22, 40, 0.6);
+  --bg-subtle: rgba(15, 31, 58, 0.4);
 
-  /* Foreground Colors - BRIGHTENED for better readability */
+  /* Foreground Colors */
+  --text-main: #FFFFFF;
+  --text-primary: #FFFFFF;
   --fg-primary: #FFFFFF;
-  /* Pure white for maximum contrast */
+  --text-secondary: #E0F2FE;
   --fg-secondary: #E0F2FE;
-  /* Very bright cyan-white */
+  --text-muted: #BAE6FD;
   --fg-muted: #BAE6FD;
-  /* Bright cyan, no longer dim */
+  --text-invert: #050B14;
 
-  /* Neon Accent Colors */
+  /* Primary Colors - Neon Cyan */
+  --primary: #00E5FF;
+  --primary-soft: rgba(0, 229, 255, 0.1);
+  --primary-strong: #00B8D4;
   --neon-cyan: #00E5FF;
+
+  /* Secondary Colors - Cyan/Teal */
+  --secondary: #00E5FF;
+  --secondary-soft: rgba(0, 229, 255, 0.1);
+  --accent: #00E5FF;
+
+  /* Status Colors */
   --neon-red: #FF3B3B;
   --neon-green: #00FFA3;
   --neon-yellow: #FFD700;
   --neon-purple: #B794F6;
+  --success: #00FFA3;
+  --warning: #FFD700;
+  --destructive: #FF3B3B;
 
   /* Glass Effect */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 12px;
 
-  /* Shadows */
+  /* Shadows & Glow */
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.5);
   --shadow-glow-red: 0 0 20px rgba(255, 59, 59, 0.5);
   --shadow-glow-green: 0 0 20px rgba(0, 255, 163, 0.5);
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.1);
 
   /* Border Radius */
   --radius: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
 
-  /* Overview Page - Light Theme Variables */
-  --bg-main: #f7fafc;
+  /* Overview Page Variables (for compatibility) */
+  --bg-main: #050B14;
+  --bg-card: rgba(10, 22, 40, 0.6);
+  --highlight: #FFD700;
+}
+
+/* ===== LIGHT THEME - MODERN SAAS ===== */
+[data-theme='light'] {
+  /* Background Colors */
+  --bg-body: #f5f7fb;
+  --bg-primary: #f5f7fb;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f9fafb;
+
+  /* Foreground Colors */
+  --text-main: #111827;
+  --text-primary: #111827;
+  --fg-primary: #111827;
+  --text-secondary: #6b7280;
+  --fg-secondary: #6b7280;
+  --text-muted: #6b7280;
+  --fg-muted: #6b7280;
+  --text-invert: #ffffff;
+
+  /* Primary Colors - Orange */
+  --primary: #ff7a1a;
+  --primary-soft: #fff3e6;
+  --primary-strong: #e65f00;
+  --neon-cyan: #ff7a1a; /* Map to primary for compatibility */
+
+  /* Secondary Colors - Cyan */
+  --secondary: #00c4ff;
+  --secondary-soft: #e0f7ff;
+  --accent: #00c4ff;
+
+  /* Status Colors */
+  --neon-red: #ef4444;
+  --neon-green: #10b981;
+  --neon-yellow: #f59e0b;
+  --neon-purple: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --destructive: #ef4444;
+
+  /* Glass Effect - Light mode uses subtle transparency */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(229, 231, 235, 0.8);
+  --glass-blur: 12px;
+
+  /* Shadows - Soft, no glow */
+  --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --shadow-glow-cyan: 0 4px 12px rgba(255, 122, 26, 0.15);
+  --shadow-glow-red: 0 4px 12px rgba(239, 68, 68, 0.15);
+  --shadow-glow-green: 0 4px 12px rgba(16, 185, 129, 0.15);
+
+  /* Borders */
+  --border-subtle: #e5e7eb;
+  --border: #e5e7eb;
+
+  /* Border Radius */
+  --radius: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 24px;
+
+  /* Overview Page Variables (for compatibility) */
+  --bg-main: #f5f7fb;
   --bg-card: #ffffff;
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --accent: #10b981;
-  --highlight: #f97316;
-  --border: #e2e8f0;
+  --highlight: #ff7a1a;
 }
 
-/* Dark Theme for Overview Page */
-.dark-theme {
-  /* Dark Background Colors */
-  --bg-main: #0f172a;
-  --bg-card: #1e293b;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --accent: #34d399;
-  --highlight: #fb923c;
-  --border: #334155;
-
-  /* Dark mode specific shadows */
-  --shadow-light: 0 4px 24px rgba(0, 0, 0, 0.6);
-  --glow-accent: 0 0 30px rgba(52, 211, 153, 0.4);
-  --glow-highlight: 0 0 30px rgba(251, 146, 60, 0.4);
-}
-
-/* Smooth theme transition */
-:root,
-.dark-theme {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
+/* ===== OVERVIEW PAGE COMPATIBILITY ===== */
 .dark-theme {
   background-color: var(--bg-main);
   color: var(--text-primary);
 }
 
-/* Dark mode text improvements */
 .dark-theme h1,
 .dark-theme h2,
 .dark-theme h3,
 .dark-theme h4 {
-  color: #f1f5f9 !important;
+  color: var(--text-primary) !important;
 }
 
 .dark-theme p {
-  color: #cbd5e1 !important;
+  color: var(--text-secondary) !important;
 }
 
-/* Tailwind CSS Variables for shadcn/ui - BRIGHTENED */
-:root {
+/* Smooth theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===== TAILWIND CSS VARIABLES FOR SHADCN/UI ===== */
+/* Dark Theme (Default) */
+:root,
+[data-theme='dark'] {
   --background: 5 11 20;
   --foreground: 255 255 255;
   --card: 10 22 40;
@@ -117,6 +191,32 @@
   --success: 0 255 163;
   --warning: 255 215 0;
   --info: 0 229 255;
+}
+
+/* Light Theme */
+[data-theme='light'] {
+  --background: 245 247 251;
+  --foreground: 17 24 39;
+  --card: 255 255 255;
+  --card-foreground: 17 24 39;
+  --popover: 255 255 255;
+  --popover-foreground: 17 24 39;
+  --primary: 255 122 26;
+  --primary-foreground: 255 255 255;
+  --secondary: 0 196 255;
+  --secondary-foreground: 17 24 39;
+  --muted: 249 250 251;
+  --muted-foreground: 107 114 128;
+  --accent: 0 196 255;
+  --accent-foreground: 17 24 39;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: 229 231 235;
+  --input: 229 231 235;
+  --ring: 255 122 26;
+  --success: 16 185 129;
+  --warning: 245 158 11;
+  --info: 0 196 255;
 }
 
 /* ===== BASE STYLES ===== */
@@ -296,14 +396,15 @@ button {
 
 /* ===== CARDS ===== */
 .card-hud {
-  background: var(--glass-bg);
+  background: var(--bg-surface, var(--glass-bg));
   backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle, var(--glass-border));
+  border-radius: var(--radius-xl, var(--radius-lg));
   padding: 1.5rem;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 .card-hud::before {
@@ -313,13 +414,13 @@ button {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
   opacity: 0.5;
 }
 
 .card-hud:hover {
-  border-color: var(--neon-cyan);
-  box-shadow: var(--shadow-glow-cyan);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-soft, var(--shadow-glow-cyan));
   transform: translateY(-4px);
 }
 
