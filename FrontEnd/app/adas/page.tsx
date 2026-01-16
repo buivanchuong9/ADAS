@@ -115,6 +115,14 @@ export default function ADASPage() {
     }
   }, [previewUrl])
 
+  useEffect(() => {
+    console.log("[PlayerState]", {
+      isProcessing,
+      stage,
+      previewUrl,
+    })
+  }, [isProcessing, stage, previewUrl])
+
   const handleFile = (f: File | null) => {
     setResult(null)
     setProcessingMsg("")
@@ -625,14 +633,14 @@ export default function ADASPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-neon-green tracking-wide">2) XEM VIDEO ĐANG ĐƯỢC PHÂN TÍCH</h3>
                 <Badge className="
-    gap-1
-    bg-red-500/10
-    text-red-400
-    border border-red-500/40
-    animate-pulse
-    [animation-duration:1s]
-    shadow-[0_0_12px_rgba(255,0,0,0.6)]
-  ">
+                  gap-1
+                  bg-red-500/10
+                  text-red-400
+                  border border-red-500/40
+                  animate-pulse
+                  [animation-duration:1s]
+                  shadow-[0_0_12px_rgba(255,0,0,0.6)]
+                ">
                   <AlertTriangle className="h-3 w-3" />
                   Dữ liệu đã được lưu mẫu
                 </Badge>
@@ -697,14 +705,25 @@ export default function ADASPage() {
               ) : previewUrl && stage === "done" ? (
                 <video
                   key={previewUrl}
-                  src={previewUrl}
                   controls
                   autoPlay
                   muted
                   loop
+                  playsInline
                   className="w-full h-full object-contain"
                   style={{ maxHeight: "600px" }}
-                />
+                  onError={(e) => {
+                    const err = e.currentTarget.error;
+                    console.log("VIDEO ERROR CODE:", err?.code);
+                    console.log("VIDEO ERROR MSG:", err?.message);
+                    console.log("VIDEO URL:", previewUrl);
+                  }}
+                >
+                  <source
+                    src="{previewUrl}"
+                    type="video/mp4"
+                  />
+                </video>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
                   <Upload className="w-8 h-8 text-neon-cyan" />
@@ -755,8 +774,8 @@ export default function ADASPage() {
 
       {/* Video Selection Dialog */}
       <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
-        <DialogContent className="glass-card border-2 border-neon-cyan/50 max-w-4xl max-h-[80vh]">
-          <DialogHeader>
+        <DialogContent className="glass-card border-2 border-neon-cyan/50">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
               <FileVideo className="w-6 h-6" />
               Chọn Video Mẫu
@@ -766,7 +785,7 @@ export default function ADASPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="h-[500px] pr-4">
+          <ScrollArea className="flex-1 min-h-0 pr-4 overflow-x-hidden">
             {loadingVideos ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
