@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { AuthModal } from '@/components/auth-modal';
 import { User, LogOut } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import styles from './Navigation.module.css';
 
 export default function Navigation() {

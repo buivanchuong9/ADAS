@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/contexts/auth-context"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
 const shareTechMono = Share_Tech_Mono({
@@ -88,9 +89,15 @@ export default function RootLayout({
         className={`${rajdhani.className} antialiased h-full overflow-x-hidden`}
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <div className="min-h-screen h-full w-full">{children}</div>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="dark"
+          enableSystem={false}
+        >
+          <AuthProvider>
+            <div className="min-h-screen h-full w-full">{children}</div>
+          </AuthProvider>
+        </ThemeProvider>
 
         <Analytics />
       </body>
