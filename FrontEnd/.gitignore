@@ -16,6 +16,13 @@ lerna-debug.log*
 .pnp/
 .pnpm-store/
 
+# Next.js build artifacts
+_next*.txt
+__PAGE*.txt
+*.buildinfo.json
+.vercel/
+*.tsbuildinfo
+
 # pnpm store (local)
 .pnpm-store/
 
@@ -28,6 +35,7 @@ lerna-debug.log*
 
 # Allow .env.example to be committed (template without real keys)
 !.env.example
+!.env.production
 
 # Python
 __pycache__/

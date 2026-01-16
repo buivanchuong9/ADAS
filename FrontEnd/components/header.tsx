@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
 import { LogIn, LogOut, User } from "lucide-react";
 import { AuthModal } from "./auth-modal";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -30,7 +31,11 @@ export function Header() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="sticky top-0 z-50 w-full glass-panel border-b border-white/10 backdrop-blur-md"
+        className="sticky top-0 z-50 w-full backdrop-blur-md"
+        style={{
+          backgroundColor: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
       >
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
           {/* Left side - Logo/Title */}
@@ -39,27 +44,43 @@ export function Header() {
               <User className="w-5 h-5 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h2 className="text-sm font-semibold text-neon-cyan tracking-wide">
+              <h2 
+                className="text-sm font-semibold tracking-wide"
+                style={{ color: 'var(--primary)' }}
+              >
                 ADAS Platform
               </h2>
             </div>
           </div>
 
-          {/* Right side - Auth buttons */}
+          {/* Right side - Theme Toggle & Auth buttons */}
           <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
             {isAuthenticated ? (
               <>
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl glass-card border-neon-cyan/30"
+                  className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl border"
+                  style={{
+                    backgroundColor: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    boxShadow: 'var(--shadow-soft)',
+                  }}
                 >
-                  <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse" 
-                    style={{ boxShadow: '0 0 10px var(--neon-green)' }}
+                  <div 
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ backgroundColor: 'var(--success)' }}
                   />
-                  <span className="text-sm text-fg-secondary">
+                  <span 
+                    className="text-sm"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
                     Xin chào,{" "}
-                    <span className="text-neon-cyan font-semibold">
+                    <span 
+                      className="font-semibold"
+                      style={{ color: 'var(--primary)' }}
+                    >
                       {user?.username}
                     </span>
                   </span>
@@ -88,8 +109,13 @@ export function Header() {
           </div>
         </div>
 
-        {/* Scan line effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-cyan to-transparent opacity-50" />
+        {/* Accent line */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-px opacity-50"
+          style={{
+            background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
+          }}
+        />
       </motion.header>
 
       {/* Auth Modal */}

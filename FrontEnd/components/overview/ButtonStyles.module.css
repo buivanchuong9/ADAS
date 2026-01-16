@@ -1,0 +1,104 @@
+/* Hero Section Button Styles - SOLID & CLEAR */
+
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 32px;
+    /* Solid gradient background */
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: #ffffff !important;
+    border: 2px solid #f97316;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btnPrimary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btnPrimary:hover::before {
+    left: 100%;
+}
+
+.btnPrimary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+    border-color: #ea580c;
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 32px;
+    /* Light mode: solid white background with dark border */
+    background: #ffffff;
+    color: #1a202c !important;
+    border: 2px solid #1a202c;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnSecondary:hover {
+    background: #f9fafb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* DARK MODE - HIGH CONTRAST */
+:global(.dark-theme) .btnPrimary {
+    /* Brighter orange gradient in dark mode */
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    border-color: #fb923c;
+    color: #ffffff !important;
+    box-shadow:
+        0 4px 12px rgba(251, 146, 60, 0.6),
+        0 0 20px rgba(251, 146, 60, 0.3);
+}
+
+:global(.dark-theme) .btnPrimary:hover {
+    box-shadow:
+        0 6px 20px rgba(251, 146, 60, 0.7),
+        0 0 30px rgba(251, 146, 60, 0.4);
+}
+
+:global(.dark-theme) .btnSecondary {
+    /* Solid dark background with bright border & text */
+    background: #1f2937;
+    color: #fbbf24 !important;
+    border: 3px solid #fbbf24;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(251, 191, 36, 0.3);
+}
+
+:global(.dark-theme) .btnSecondary:hover {
+    background: #374151;
+    color: #fcd34d !important;
+    border-color: #fcd34d;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(252, 211, 77, 0.5);
+}

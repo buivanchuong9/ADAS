@@ -46,6 +46,12 @@ export const API_ENDPOINTS = {
   // Video processing via vision/video (Swagger)
   VIDEO_UPLOAD: '/vision/video',
   VIDEO_PROCESS: (id: string | number) => `/vision/video/${id}/process`, // assumption if processing per-id exists
+
+  // Video list and management (from OpenAPI & New Backend Spec)
+  VIDEOS_LIST: '/api/video/list',
+  VIDEO_DETAILS: (id: number) => `/api/video/result/${id}`,
+  VIDEO_DOWNLOAD: (jobId: string, filename: string) => `/api/video/download/${jobId}/${filename}`,
+  VIDEO_SAMPLE: (jobId: string, filename: string) => `/api/video/sample/${jobId}/${filename}`,
 } as const
 
 export type ApiEndpointKey = keyof typeof API_ENDPOINTS

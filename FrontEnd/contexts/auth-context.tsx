@@ -1,150 +1,193 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  password: string; // In real app, this would be hashed
-}
+import { authService, UserInfo } from "@/lib/auth/auth.service";
 
 interface AuthContextType {
-  user: User | null;
+  user: UserInfo | null;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (username: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  register: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY_USERS = "adas_users";
-const STORAGE_KEY_CURRENT_USER = "adas_current_user";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Initialize auth state from Supabase session
   useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-    if (storedUser) {
+    // Check for existing session
+    const initializeAuth = async () => {
       try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error parsing stored user:", error);
-        localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+        const session = await authService.getSession();
+
+        if (session?.access_token) {
+          // Fetch user info from backend
+          const userInfo = await authService.getUserInfo(session.access_token);
+
+          if (userInfo) {
+            setUser(userInfo);
+            setIsAuthenticated(true);
+          }
+        }
+      } catch (error: any) {
+        // Handle refresh token errors silently
+        if (error?.message?.includes('refresh_token_not_found') ||
+          error?.message?.includes('Invalid Refresh Token')) {
+          console.log('🔵 [AuthContext] Clearing invalid session...');
+          await authService.signOut();
+        } else {
+          console.error("Error initializing auth:", error);
+        }
+      } finally {
+        setLoading(false);
       }
-    }
-  }, []);
+    };
 
-  // Initialize users array if it doesn't exist
-  const getUsers = (): User[] => {
-    const stored = localStorage.getItem(STORAGE_KEY_USERS);
-    if (!stored) {
-      return [];
-    }
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return [];
-    }
-  };
+    initializeAuth();
 
-  const saveUsers = (users: User[]) => {
-    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
-  };
-
-  const login = async (
-    username: string,
-    password: string
-  ): Promise<{ success: boolean; message: string }> => {
-    const users = getUsers();
-    const foundUser = users.find(
-      (u) => u.username === username && u.password === password
+    // Listen to auth state changes
+    const { data: { subscription } } = authService.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.access_token) {
+          const userInfo = await authService.getUserInfo(session.access_token);
+          if (userInfo) {
+            setUser(userInfo);
+            setIsAuthenticated(true);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setIsAuthenticated(false);
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('✅ [AuthContext] Token refreshed successfully');
+        }
+      }
     );
 
-    if (!foundUser) {
-      return {
-        success: false,
-        message: "Tên đăng nhập hoặc mật khẩu không đúng",
-      };
-    }
-
-    // Remove password from user object before storing
-    const { password: _, ...userWithoutPassword } = foundUser;
-    const userToStore = { ...foundUser };
-
-    localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(userToStore));
-    setUser(foundUser);
-    setIsAuthenticated(true);
-
-    return {
-      success: true,
-      message: "Đăng nhập thành công",
+    return () => {
+      subscription.unsubscribe();
     };
-  };
+  }, []);
 
-  const register = async (
-    username: string,
+  const login = async (
     email: string,
     password: string
   ): Promise<{ success: boolean; message: string }> => {
-    const users = getUsers();
+    try {
+      console.log('🔵 [AuthContext] Login attempt for:', email)
 
-    // Check if username already exists
-    if (users.some((u) => u.username === username)) {
+      const result = await authService.signIn(email, password);
+
+      if (!result.success) {
+        console.error('❌ [AuthContext] Login failed:', result.message)
+        return result;
+      }
+
+      console.log('🔵 [AuthContext] Login successful, fetching user info...')
+
+      // Fetch user info from backend
+      const session = await authService.getSession();
+      if (session?.access_token) {
+        console.log('🔵 [AuthContext] Session found, access token available')
+
+        const userInfo = await authService.getUserInfo(session.access_token);
+
+        if (userInfo) {
+          console.log('✅ [AuthContext] User info retrieved, setting auth state')
+          setUser(userInfo);
+          setIsAuthenticated(true);
+          return {
+            success: true,
+            message: "Đăng nhập thành công",
+          };
+        } else {
+          console.error('❌ [AuthContext] Failed to get user info from backend')
+          return {
+            success: false,
+            message: "Không thể lấy thông tin người dùng từ hệ thống",
+          };
+        }
+      }
+
+      console.error('❌ [AuthContext] No session or access token found')
       return {
         success: false,
-        message: "Tên đăng nhập đã tồn tại",
+        message: "Đã xảy ra lỗi khi đăng nhập",
       };
-    }
-
-    // Check if email already exists
-    if (users.some((u) => u.email === email)) {
+    } catch (error: any) {
+      console.error('❌ [AuthContext] Login error:', error)
       return {
         success: false,
-        message: "Email đã được sử dụng",
+        message: error.message || "Đã xảy ra lỗi khi đăng nhập",
       };
     }
-
-    // Validate password length
-    if (password.length < 6) {
-      return {
-        success: false,
-        message: "Mật khẩu phải có ít nhất 6 ký tự",
-      };
-    }
-
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      username,
-      email,
-      password, // In production, hash this!
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    // Auto login after registration
-    localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(newUser));
-    setUser(newUser);
-    setIsAuthenticated(true);
-
-    return {
-      success: true,
-      message: "Đăng ký thành công",
-    };
   };
 
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-    setUser(null);
-    setIsAuthenticated(false);
+  const register = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      console.log('🔵 [AuthContext] Registration attempt for:', email)
+
+      // Validate password length
+      if (password.length < 6) {
+        console.warn('⚠️ [AuthContext] Password too short')
+        return {
+          success: false,
+          message: "Mật khẩu phải có ít nhất 6 ký tự",
+        };
+      }
+
+      const result = await authService.signUp(email, password);
+
+      if (result.success) {
+        console.log('✅ [AuthContext] Registration successful - user must now log in manually')
+      } else {
+        console.error('❌ [AuthContext] Registration failed:', result.message)
+      }
+
+      return result;
+    } catch (error: any) {
+      console.error('❌ [AuthContext] Registration error:', error)
+      return {
+        success: false,
+        message: error.message || "Đã xảy ra lỗi khi đăng ký",
+      };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      console.log('🔵 [AuthContext] Starting logout...');
+
+      // Sign out from Supabase
+      await authService.signOut();
+      console.log('✅ [AuthContext] Supabase signOut completed');
+
+      // Clear local state
+      setUser(null);
+      setIsAuthenticated(false);
+      console.log('✅ [AuthContext] Local state cleared');
+
+      // Small delay to ensure state is updated
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // ✅ Redirect to overview page and auto-open login modal
+      console.log('🔵 [AuthContext] Redirecting to /overview with login modal...');
+      window.location.href = '/overview?showLogin=true';
+    } catch (error) {
+      console.error('❌ [AuthContext] Logout error:', error);
+      // Even if there's an error, clear local state and redirect
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = '/overview?showLogin=true';
+    }
   };
 
   return (
@@ -152,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated,
+        loading,
         login,
         register,
         logout,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
@@ -25,6 +26,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Camera,
+  Cctv,
+  BookOpen,
+
 } from "lucide-react"
 import Link from "next/link"
 import { HighchartsChart } from "@/components/charts/highcharts-chart"
@@ -55,12 +60,21 @@ const itemVariants: Variants = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
   const [stats, setStats] = useState({
     systemStatus: "hoạt động",
     activeCameras: 0,
     totalDetections: 0,
     alertsToday: 0,
   });
+
+  // Check onboarding status
+  useEffect(() => {
+    const onboardingCompleted = sessionStorage.getItem('adas_onboarding_completed');
+    if (!onboardingCompleted) {
+      router.push('/onboarding');
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -225,10 +239,12 @@ export default function HomePage() {
                   <Link href="/dashboard">
                     <Button
                       size="lg"
-                      className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto"
+                      className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap"
                     >
-                      View Dashboard
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                        View Dashboard
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                      </span>
                     </Button>
                   </Link>
                 </motion.div>
@@ -242,29 +258,29 @@ export default function HomePage() {
             >
               {[
                 {
-                  title: "Trạng Thái Hệ Thống",
+                  title: "Trạng thái hệ thống",
                   value: stats.systemStatus,
                   icon: Activity,
                   color: "success",
                   description: "Tất cả hệ thống trực tuyến",
                 },
                 {
-                  title: "Camera Hoạt Động",
+                  title: "Camera hoạt động",
                   value: stats.activeCameras.toString(),
-                  icon: Car,
+                  icon: Cctv,
                   color: "primary",
                   description: "Giám sát thời gian thực",
                 },
                 {
-                  title: "Total Detections",
+                  title: "Tổng số lần phát hiện",
                   value: stats.totalDetections.toLocaleString(),
-                  icon: Eye,
+                  icon: BookOpen,
                   color: "info",
                   description: "+12% so với tuần trước",
                   trend: true,
                 },
                 {
-                  title: "Alerts Today",
+                  title: "Các cảnh báo hôm nay",
                   value: stats.alertsToday.toString(),
                   icon: AlertTriangle,
                   color: "warning",
@@ -416,7 +432,7 @@ export default function HomePage() {
                     "Phát Hiện AI YOLOv11",
                     "Thu Thập Dữ Liệu Tự Động",
                     "Cảnh Báo Thông Minh",
-                    "Triển Khai Docker",
+
                   ].map((feature, index) => (
                     <motion.div
                       key={feature}
