@@ -616,15 +616,7 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {/* Analytics Dashboard */}
-                    <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-                        <GlassCard className="p-6">
-                            <HighchartsReact highcharts={Highcharts} options={systemPerformanceOptions} />
-                        </GlassCard>
-                        <GlassCard className="p-6 lg:col-span-2">
-                            <HighchartsReact highcharts={Highcharts} options={detectionStatsOptions} />
-                        </GlassCard>
-                    </div>
+                    
 
                     <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                         <GlassCard className="p-6">
@@ -717,42 +709,9 @@ export default function SettingsPage() {
                                 <p className="text-xs text-fg-muted font-medium">Chế độ hiển thị màn hình</p>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Múi Giờ</label>
-                                <div className="relative">
-                                    <select
-                                        value={timezone}
-                                        onChange={(e) => { setTimezone(e.target.value); setHasChanges(true) }}
-                                        className="w-full glass-card border-neon-cyan/30 text-fg-primary px-4 py-3 rounded-lg appearance-none cursor-pointer hover:border-neon-cyan/50 transition-all font-medium"
-                                    >
-                                        <option value="Asia/Ho_Chi_Minh">GMT+7 (Việt Nam)</option>
-                                        <option value="Asia/Tokyo">GMT+9 (Tokyo)</option>
-                                        <option value="America/New_York">GMT-5 (New York)</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
-                                </div>
-                                <p className="text-xs text-fg-muted font-medium">Múi giờ hiển thị</p>
-                            </div>
+                            
 
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Tự Động Lưu</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Lưu cài đặt tự động</p>
-                                    </div>
-                                    <button
-                                        onClick={() => { setAutoSave(!autoSave); setHasChanges(true) }}
-                                        className={`relative w-14 h-7 rounded-full transition-all ${autoSave ? "bg-neon-green/30" : "bg-white/10"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${autoSave ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
-                                                }`}
-                                            style={autoSave ? { boxShadow: "0 0 10px var(--neon-green)" } : {}}
-                                        />
-                                    </button>
-                                </div>
-                            </div>
+                            
                         </div>
                     </GlassCard>
 
@@ -842,103 +801,6 @@ export default function SettingsPage() {
                         </div>
                     </GlassCard>
 
-                    {/* Notification Settings */}
-                    <GlassCard scanLines className="p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Bell className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>THÔNG BÁO</h2>
-                        </div>
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Volume2 className="w-4 h-4 text-fg-secondary" />
-                                        <div>
-                                            <label className="text-sm font-semibold text-fg-primary">Âm Thanh Cảnh Báo</label>
-                                            <p className="text-xs text-fg-muted mt-1 font-medium">Phát âm thanh khi có cảnh báo</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => { setAlertSound(!alertSound); setHasChanges(true) }}
-                                        className={`relative w-14 h-7 rounded-full transition-all ${alertSound ? "bg-neon-green/30" : "bg-white/10"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${alertSound ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
-                                                }`}
-                                            style={alertSound ? { boxShadow: "0 0 10px var(--neon-green)" } : {}}
-                                        />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-fg-primary">Ngưỡng Cảnh Báo</label>
-                                    <span className="text-sm font-bold text-neon-yellow digital-number">{warningThreshold}%</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="50"
-                                    max="100"
-                                    step="5"
-                                    value={warningThreshold}
-                                    onChange={(e) => { setWarningThreshold(Number(e.target.value)); setHasChanges(true) }}
-                                    className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-yellow [&::-webkit-slider-thumb]:cursor-pointer"
-                                    style={{
-                                        background: `linear-gradient(to right, var(--neon-yellow) 0%, var(--neon-yellow) ${(warningThreshold - 50) * 2}%, rgba(255,255,255,0.1) ${(warningThreshold - 50) * 2}%, rgba(255,255,255,0.1) 100%)`
-                                    }}
-                                />
-                                <p className="text-xs text-fg-muted font-medium">Mức độ tin cậy tối thiểu để cảnh báo</p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Mail className="w-4 h-4 text-fg-secondary" />
-                                        <div>
-                                            <label className="text-sm font-semibold text-fg-primary">Email</label>
-                                            <p className="text-xs text-fg-muted mt-1 font-medium">Gửi thông báo qua email</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => { setEmailNotif(!emailNotif); setHasChanges(true) }}
-                                        className={`relative w-14 h-7 rounded-full transition-all ${emailNotif ? "bg-neon-green/30" : "bg-white/10"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${emailNotif ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
-                                                }`}
-                                            style={emailNotif ? { boxShadow: "0 0 10px var(--neon-green)" } : {}}
-                                        />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Smartphone className="w-4 h-4 text-fg-secondary" />
-                                        <div>
-                                            <label className="text-sm font-semibold text-fg-primary">Push Notification</label>
-                                            <p className="text-xs text-fg-muted mt-1 font-medium">Thông báo đẩy trên thiết bị</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => { setPushNotif(!pushNotif); setHasChanges(true) }}
-                                        className={`relative w-14 h-7 rounded-full transition-all ${pushNotif ? "bg-neon-green/30" : "bg-white/10"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${pushNotif ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
-                                                }`}
-                                            style={pushNotif ? { boxShadow: "0 0 10px var(--neon-green)" } : {}}
-                                        />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </GlassCard>
 
                     {/* AI Assistant Settings */}
                     <GlassCard scanLines className="p-6">
@@ -1006,94 +868,10 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Gợi Ý Tự Động</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">AI đề xuất hành động</p>
-                                    </div>
-                                    <button
-                                        onClick={() => { setAutoSuggestions(!autoSuggestions); setHasChanges(true) }}
-                                        className={`relative w-14 h-7 rounded-full transition-all ${autoSuggestions ? "bg-neon-green/30" : "bg-white/10"
-                                            }`}
-                                        disabled={!aiEnabled}
-                                    >
-                                        <div
-                                            className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${autoSuggestions ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
-                                                }`}
-                                            style={autoSuggestions ? { boxShadow: "0 0 10px var(--neon-green)" } : {}}
-                                        />
-                                    </button>
-                                </div>
-                            </div>
+                            
                         </div>
                     </GlassCard>
 
-                    {/* Detection Settings */}
-                    <GlassCard scanLines className="p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Camera className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>PHÁT HIỆN</h2>
-                        </div>
-                        <div className="grid gap-6 md:grid-cols-2">
-                            <div className="space-y-3 md:col-span-2">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-fg-primary">Ngưỡng Tin Cậy</label>
-                                    <span className="text-sm font-bold text-neon-green digital-number">{confidenceThreshold}%</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="50"
-                                    max="95"
-                                    step="5"
-                                    value={confidenceThreshold}
-                                    onChange={(e) => { setConfidenceThreshold(Number(e.target.value)); setHasChanges(true) }}
-                                    className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-green [&::-webkit-slider-thumb]:cursor-pointer"
-                                    style={{
-                                        background: `linear-gradient(to right, var(--neon-green) 0%, var(--neon-green) ${(confidenceThreshold - 50) * (100 / 45)}%, rgba(255,255,255,0.1) ${(confidenceThreshold - 50) * (100 / 45)}%, rgba(255,255,255,0.1) 100%)`
-                                    }}
-                                />
-                                <p className="text-xs text-fg-muted font-medium">Độ tin cậy tối thiểu để hiển thị phát hiện</p>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-fg-primary">Bỏ Qua Khung Hình</label>
-                                    <span className="text-sm font-bold text-neon-cyan digital-number">{frameSkip}</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="5"
-                                    step="1"
-                                    value={frameSkip}
-                                    onChange={(e) => { setFrameSkip(Number(e.target.value)); setHasChanges(true) }}
-                                    className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-cyan [&::-webkit-slider-thumb]:cursor-pointer"
-                                    style={{
-                                        background: `linear-gradient(to right, var(--neon-cyan) 0%, var(--neon-cyan) ${frameSkip * 20}%, rgba(255,255,255,0.1) ${frameSkip * 20}%, rgba(255,255,255,0.1) 100%)`
-                                    }}
-                                />
-                                <p className="text-xs text-fg-muted font-medium">Số khung hình bỏ qua để tăng hiệu suất</p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Chất Lượng Ghi Hình</label>
-                                <div className="relative">
-                                    <select
-                                        value={recordingQuality}
-                                        onChange={(e) => { setRecordingQuality(e.target.value); setHasChanges(true) }}
-                                        className="w-full glass-card border-neon-cyan/30 text-fg-primary px-4 py-3 rounded-lg appearance-none cursor-pointer hover:border-neon-cyan/50 transition-all font-medium"
-                                    >
-                                        <option value="low">Thấp (tiết kiệm)</option>
-                                        <option value="medium">Trung Bình</option>
-                                        <option value="high">Cao (khuyến nghị)</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
-                                </div>
-                                <p className="text-xs text-fg-muted font-medium">Chất lượng video được lưu</p>
-                            </div>
-                        </div>
-                    </GlassCard>
 
                     {/* Advanced Settings */}
                     <GlassCard scanLines className="p-6">
