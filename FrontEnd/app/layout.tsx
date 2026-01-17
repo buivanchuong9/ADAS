@@ -4,6 +4,7 @@ import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { IntroGuard } from "@/components/intro-guard"
 import "./globals.css"
 
 const shareTechMono = Share_Tech_Mono({
@@ -95,7 +96,9 @@ export default function RootLayout({
           enableSystem={false}
         >
           <AuthProvider>
-            <div className="min-h-screen h-full w-full">{children}</div>
+            <IntroGuard>
+              <div className="min-h-screen h-full w-full">{children}</div>
+            </IntroGuard>
           </AuthProvider>
         </ThemeProvider>
 

@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import IntroSlider from '@/components/onboarding/IntroSlider';
 
-const ONBOARDING_KEY = 'adas_onboarding_completed';
+const INTRO_KEY = 'adas_intro_completed';
 
-export default function OnboardingPage() {
+export default function IntroPage() {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const router = useRouter();
 
     const handleComplete = () => {
         setIsTransitioning(true);
 
-        // Mark onboarding as completed
-        sessionStorage.setItem(ONBOARDING_KEY, 'true');
+        // Mark intro as completed
+        sessionStorage.setItem(INTRO_KEY, 'true');
 
         // Wait for fade out animation before navigating
         setTimeout(() => {

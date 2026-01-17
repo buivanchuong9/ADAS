@@ -34,27 +34,11 @@ export const authService = {
                 console.error('❌ [SignUp] Supabase client not available')
                 return {
                     success: false,
-                    message: 'Supabase client không khả dụng',
+                    message: 'Dịch vụ xác thực không khả dụng',
                 }
             }
 
-            // Step 1: Check if user already exists
-            console.log('🔵 [SignUp] Checking if user exists...')
-            const { data: existingUser } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            })
-
-            if (existingUser?.user) {
-                console.log('⚠️ [SignUp] User already exists, signing them in')
-                return {
-                    success: true,
-                    message: 'Tài khoản đã tồn tại, đang đăng nhập...',
-                    data: existingUser,
-                }
-            }
-
-            // Step 2: Create new user
+            // Create new user directly - Supabase will handle duplicate email validation
             console.log('🔵 [SignUp] Creating new user...')
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                 email,
@@ -62,19 +46,28 @@ export const authService = {
             })
 
             if (signUpError) {
-                console.error('❌ [SignUp] Supabase signup error:', signUpError)
+                console.error('❌ [SignUp] Supabase signup error:', signUpError.message)
 
-                // Handle specific error cases
-                if (signUpError.message.includes('already registered')) {
+                // Handle specific error cases with user-friendly messages
+                if (signUpError.message.includes('already registered') ||
+                    signUpError.message.includes('User already registered')) {
                     return {
                         success: false,
                         message: 'Email đã được đăng ký. Vui lòng đăng nhập.',
                     }
                 }
 
+                if (signUpError.message.includes('Password')) {
+                    return {
+                        success: false,
+                        message: 'Mật khẩu không hợp lệ. Vui lòng thử lại.',
+                    }
+                }
+
+                // Generic error message to avoid exposing internal details
                 return {
                     success: false,
-                    message: signUpError.message || 'Đã xảy ra lỗi khi đăng ký',
+                    message: 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.',
                 }
             }
 
@@ -82,7 +75,7 @@ export const authService = {
                 console.error('❌ [SignUp] No user data returned')
                 return {
                     success: false,
-                    message: 'Không thể tạo tài khoản',
+                    message: 'Không thể tạo tài khoản. Vui lòng thử lại.',
                 }
             }
 
@@ -95,16 +88,17 @@ export const authService = {
             console.log('🔵 [SignUp] Signing out to require manual login...')
             await supabase.auth.signOut()
 
+            // Don't return sensitive data - only success message
             return {
                 success: true,
                 message: 'Đăng ký thành công! Vui lòng đăng nhập.',
-                data: signUpData,
             }
         } catch (err: any) {
             console.error('❌ [SignUp] Unexpected error:', err)
+            // Don't expose internal error details to user
             return {
                 success: false,
-                message: err.message || 'Đã xảy ra lỗi khi đăng ký',
+                message: 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.',
             }
         }
     },
@@ -121,7 +115,7 @@ export const authService = {
                 console.error('❌ [SignIn] Supabase client not available')
                 return {
                     success: false,
-                    message: 'Supabase client not available',
+                    message: 'Dịch vụ xác thực không khả dụng',
                 }
             }
 
@@ -132,7 +126,8 @@ export const authService = {
             })
 
             if (error) {
-                console.error('❌ [SignIn] Supabase error:', error)
+                console.error('❌ [SignIn] Supabase error:', error.message)
+                // Don't expose internal error details - use generic message
                 return {
                     success: false,
                     message: 'Email hoặc mật khẩu không đúng',
@@ -145,16 +140,17 @@ export const authService = {
                 hasSession: !!data?.session,
             })
 
+            // Don't return sensitive data - session is already stored in Supabase client
             return {
                 success: true,
                 message: 'Đăng nhập thành công',
-                data,
             }
         } catch (err: any) {
             console.error('❌ [SignIn] Unexpected error:', err)
+            // Don't expose internal error details to user
             return {
                 success: false,
-                message: err.message || 'Đã xảy ra lỗi khi đăng nhập',
+                message: 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.',
             }
         }
     },
@@ -235,7 +231,6 @@ export const authService = {
             }
 
             const result = await response.json()
-            console.log('🔵 [GetUserInfo] Response data:', result)
 
             if (result.success && result.user) {
                 console.log('✅ [GetUserInfo] User info retrieved:', {
