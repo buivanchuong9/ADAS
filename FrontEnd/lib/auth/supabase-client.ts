@@ -50,12 +50,15 @@ export function getSupabase(): SupabaseClient | null {
             },
         })
 
-        // Add error listener for auth errors
+        // Add error listener for auth errors (silent in production)
         supabaseInstance.auth.onAuthStateChange((event, session) => {
-            if (event === 'TOKEN_REFRESHED') {
-                console.log('✅ Token refreshed successfully')
-            } else if (event === 'SIGNED_OUT') {
-                console.log('🔵 User signed out')
+            // Only log in development
+            if (process.env.NODE_ENV === 'development') {
+                if (event === 'TOKEN_REFRESHED') {
+                    console.log('✅ Token refreshed')
+                } else if (event === 'SIGNED_OUT') {
+                    console.log('🔵 User signed out')
+                }
             }
         })
     }

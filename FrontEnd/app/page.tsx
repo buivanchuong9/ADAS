@@ -68,14 +68,6 @@ export default function HomePage() {
     alertsToday: 0,
   });
 
-  // Check onboarding status
-  useEffect(() => {
-    const onboardingCompleted = sessionStorage.getItem('adas_onboarding_completed');
-    if (!onboardingCompleted) {
-      router.push('/onboarding');
-    }
-  }, [router]);
-
   useEffect(() => {
     const fetchStats = async () => {
       try {

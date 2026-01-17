@@ -178,15 +178,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Small delay to ensure state is updated
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // ✅ Redirect to overview page and auto-open login modal
-      console.log('🔵 [AuthContext] Redirecting to /overview with login modal...');
-      window.location.href = '/overview?showLogin=true';
+      // ✅ Redirect to login page
+      console.log('🔵 [AuthContext] Redirecting to /login...');
+      window.location.href = '/login';
     } catch (error) {
       console.error('❌ [AuthContext] Logout error:', error);
       // Even if there's an error, clear local state and redirect
       setUser(null);
       setIsAuthenticated(false);
-      window.location.href = '/overview?showLogin=true';
+      window.location.href = '/login';
     }
   };
 
