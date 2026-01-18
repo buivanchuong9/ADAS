@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -33,6 +34,7 @@ type VideoItem = {
 
 export default function DriverMonitorPage() {
   const { toast } = useToast()
+  const { t } = useLanguage()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [fatigueLevel, setFatigueLevel] = useState(0)
@@ -94,15 +96,15 @@ export default function DriverMonitorPage() {
 
       if (videos.length === 0) {
         toast({
-          title: "Chưa có video",
-          description: "Hệ thống chưa có video nào. Hãy upload video mới.",
+          title: t('adas.noVideos'),
+          description: t('adas.noVideosDesc'),
         })
       }
     } catch (err) {
       console.error('❌ [VideoList] Error:', err)
       toast({
-        title: "Lỗi lấy danh sách video",
-        description: "Không thể kết nối tới backend.",
+        title: t('adas.videoListError'),
+        description: t('adas.videoListErrorDesc'),
         variant: "destructive"
       })
     } finally {
@@ -143,8 +145,8 @@ export default function DriverMonitorPage() {
     setIsMonitoring(false)
     
     toast({
-      title: "Đã chọn video",
-      description: `Đang sử dụng: ${video.video_filename}`,
+      title: t('driverMonitor.videoSelected'),
+      description: t('driverMonitor.videoSelectedDesc', { filename: video.video_filename }),
     })
   }
 
@@ -152,8 +154,8 @@ export default function DriverMonitorPage() {
   const startMonitoring = async () => {
     if (!videoUrl) {
       toast({
-        title: "Chưa chọn video",
-        description: "Vui lòng chọn video hoặc upload video mới trước khi bắt đầu giám sát.",
+        title: t('driverMonitor.noVideoSelected'),
+        description: t('driverMonitor.noVideoSelectedDesc'),
         variant: "destructive"
       })
       return
@@ -168,14 +170,14 @@ export default function DriverMonitorPage() {
         await videoRef.current.play()
         setIsMonitoring(true)
         toast({
-          title: "Bắt đầu giám sát",
-          description: "Đang phân tích video...",
+          title: t('driverMonitor.monitoringStarted'),
+          description: t('driverMonitor.analyzingVideo'),
         })
       } catch (err) {
         console.error("Video play error:", err)
         toast({
-          title: "Lỗi phát video",
-          description: "Không thể phát video. Vui lòng thử lại.",
+          title: t('driverMonitor.videoPlayError'),
+          description: t('driverMonitor.videoPlayErrorDesc'),
           variant: "destructive"
         })
       }
@@ -204,22 +206,22 @@ export default function DriverMonitorPage() {
             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
               <Badge className="gap-1 text-xs bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
                 <Sparkles className="w-3 h-3" />
-                <span className="hidden sm:inline">Realtime AI</span>
-                <span className="sm:hidden">AI</span>
+                <span className="hidden sm:inline">{t('driverMonitor.realtimeAI')}</span>
+                <span className="sm:hidden">{t('driverMonitor.ai')}</span>
               </Badge>
               <Badge className="gap-1 text-xs bg-neon-green/20 text-neon-green border-neon-green/50">
                 <ShieldCheck className="w-3 h-3" />
-                <span className="hidden sm:inline">Driver Monitor</span>
-                <span className="sm:hidden">Monitor</span>
+                <span className="hidden sm:inline">{t('driverMonitor.badge')}</span>
+                <span className="sm:hidden">{t('driverMonitor.badgeShort')}</span>
               </Badge>
             </div>
             <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider">
               <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">DRIVER MONITOR</span>
-              <span className="sm:hidden">DRIVER</span>
+              <span className="hidden sm:inline">{t('driverMonitor.title')}</span>
+              <span className="sm:hidden">{t('driverMonitor.titleShort')}</span>
             </h1>
             <p className="text-xs sm:text-sm text-fg-secondary">
-              Upload hoặc dùng video mẫu để giám sát tài xế.
+              {t('driverMonitor.subtitle')}
             </p>
           </div>
         </div>
@@ -235,9 +237,9 @@ export default function DriverMonitorPage() {
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
                   <Upload className="w-4 h-4" />
-                  1) CHỌN VIDEO
+                  {t('adas.step1Title')}
                 </h3>
-                <p className="text-xs text-fg-secondary mt-1">Upload video hoặc dùng video mẫu từ hệ thống</p>
+                <p className="text-xs text-fg-secondary mt-1">{t('adas.step1Desc')}</p>
               </div>
               <div className="space-y-4">
                 <Input
@@ -263,8 +265,8 @@ export default function DriverMonitorPage() {
                       ) : (
                         <PlayCircle className="h-4 w-4" />
                       )}
-                      <span className="hidden sm:inline">Video mẫu</span>
-                      <span className="sm:hidden">Mẫu</span>
+                      <span className="hidden sm:inline">{t('adas.sampleVideo')}</span>
+                      <span className="sm:hidden">{t('adas.sampleVideoShort')}</span>
                     </span>
                   </Button>
                 </div>
@@ -275,7 +277,7 @@ export default function DriverMonitorPage() {
                     : "border-neon-red/50"
                     }`}>
                     <div className="text-xs text-fg-secondary font-medium tracking-wide">
-                      Trạng thái
+                      {t('adas.status')}
                     </div>
                     <div
                       className={`flex items-center gap-2 text-sm font-medium
@@ -296,16 +298,16 @@ export default function DriverMonitorPage() {
                       />
                       <span className="leading-none mt-[5px]">
                         {isMonitoring
-                          ? "Đang giám sát"
+                          ? t('driverMonitor.monitoring')
                           : (file || videoUrl)
-                            ? "Sẵn sàng"
-                            : "Chưa sẵn sàng"}
+                            ? t('adas.ready')
+                            : t('adas.notReady')}
                       </span>
                     </div>
                   </div>
                   <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
-                    <div className="text-xs text-fg-secondary font-medium">Nguồn video</div>
-                    <div className="font-semibold text-neon-green">{file ? "Upload mới" : videoUrl ? "Video mẫu" : "Chưa chọn"}</div>
+                    <div className="text-xs text-fg-secondary font-medium">{t('adas.videoSource')}</div>
+                    <div className="font-semibold text-neon-green">{file ? t('adas.newUpload') : videoUrl ? t('adas.sampleVideo') : t('adas.notSelected')}</div>
                   </div>
                 </div>
 
@@ -317,7 +319,7 @@ export default function DriverMonitorPage() {
                     className="w-full glass-card border-2 border-neon-green/50 bg-neon-green/10 text-neon-green hover:bg-neon-green/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <PlayCircle className="h-4 w-4 mr-2" />
-                    Bắt Đầu Giám Sát
+                    {t('driverMonitor.startMonitoring')}
                   </Button>
                 ) : (
                   <Button
@@ -325,7 +327,7 @@ export default function DriverMonitorPage() {
                     className="w-full glass-card border-2 border-neon-red/50 bg-neon-red/10 text-neon-red hover:bg-neon-red/20 font-bold"
                   >
                     <AlertTriangle className="h-4 w-4 mr-2" />
-                    Dừng Giám Sát
+                    {t('driverMonitor.stopMonitoring')}
                   </Button>
                 )}
               </div>
@@ -335,22 +337,22 @@ export default function DriverMonitorPage() {
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
                   <ShieldCheck className="w-4 h-4" />
-                  THÔNG TIN GIÁM SÁT
+                  {t('driverMonitor.monitoringInfoTitle')}
                 </h3>
-                <p className="text-xs text-fg-secondary mt-1">Hệ thống phân tích hành vi tài xế từ video.</p>
+                <p className="text-xs text-fg-secondary mt-1">{t('driverMonitor.monitoringInfoDesc')}</p>
               </div>
               <div className="text-sm text-fg-secondary space-y-2">
                 <div className="flex items-center gap-2">
                   <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"><Eye className="w-3 h-3" />Fatigue</Badge>
-                  <span>Phát hiện mệt mỏi</span>
+                  <span>{t('driverMonitor.fatigueDetection')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50"><AlertTriangle className="w-3 h-3" />Distraction</Badge>
-                  <span>Phát hiện mất tập trung</span>
+                  <span>{t('driverMonitor.distractionDetection')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><ShieldCheck className="w-3 h-3" />Eyes</Badge>
-                  <span>Theo dõi trạng thái mắt</span>
+                  <span>{t('driverMonitor.eyeTracking')}</span>
                 </div>
               </div>
             </GlassCard>
@@ -360,7 +362,7 @@ export default function DriverMonitorPage() {
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-neon-green tracking-wide">2) XEM VIDEO ĐANG ĐƯỢC GIÁM SÁT</h3>
+                <h3 className="text-xl font-bold text-neon-green tracking-wide">{t('driverMonitor.step2Title')}</h3>
                 {isMonitoring && (
                   <Badge className="
                     gap-1
@@ -372,12 +374,12 @@ export default function DriverMonitorPage() {
                     shadow-[0_0_12px_rgba(255,0,0,0.6)]
                   ">
                     <AlertTriangle className="h-3 w-3" />
-                    Đang giám sát
+                    {t('driverMonitor.monitoring')}
                   </Badge>
                 )}
               </div>
               <p className="text-xs text-fg-secondary mt-1">
-                Video sẽ được phân tích để phát hiện mệt mỏi và mất tập trung của tài xế.
+                {t('driverMonitor.step2Desc')}
               </p>
             </div>
             <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
@@ -404,7 +406,7 @@ export default function DriverMonitorPage() {
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
                   <Upload className="w-8 h-8 text-neon-cyan" />
-                  <p>Chưa có video. Upload hoặc dùng video mẫu.</p>
+                  <p>{t('adas.noVideoMessage')}</p>
                 </div>
               )}
             </div>
@@ -420,7 +422,7 @@ export default function DriverMonitorPage() {
                     drop-shadow-[0_0_16px_rgba(255,0,0,1)]
                   "
                 />
-                Đang phân tích: Fatigue {fatigueLevel}% | Distraction {distractionLevel}% | Eyes {eyesClosed ? 'CLOSED' : 'OPEN'} | Blink {blinkRate}/min
+                {t('driverMonitor.analyzingStatus', { fatigue: fatigueLevel, distraction: distractionLevel, eyes: eyesClosed ? t('driverMonitor.eyesClosed') : t('driverMonitor.eyesOpen'), blink: blinkRate })}
               </div>
             )}
             {videoUrl && !isMonitoring && (
@@ -456,10 +458,10 @@ export default function DriverMonitorPage() {
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
               <FileVideo className="w-6 h-6" />
-              Chọn Video Mẫu
+              {t('adas.selectSampleVideo')}
             </DialogTitle>
             <DialogDescription className="text-fg-secondary">
-              Chọn một video từ database để giám sát. Tổng cộng có {availableVideos.length} video.
+              {t('driverMonitor.selectSampleVideoDesc', { count: availableVideos.length })}
             </DialogDescription>
           </DialogHeader>
 
@@ -467,7 +469,7 @@ export default function DriverMonitorPage() {
             {loadingVideos ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
-                <span className="ml-3 text-fg-secondary">Đang tải danh sách video...</span>
+                <span className="ml-3 text-fg-secondary">{t('adas.loadingVideoList')}</span>
               </div>
             ) : availableVideos.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 text-fg-secondary">
@@ -515,16 +517,16 @@ export default function DriverMonitorPage() {
                             {video.status === 'completed' ? (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10">
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                                Đã xong
+                                {t('adas.completed')}
                               </Badge>
                             ) : video.status === 'processing' ? (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10">
                                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                Đang chạy
+                                {t('adas.processing')}
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10">
-                                Chưa chạy
+                                {t('adas.notStarted')}
                               </Badge>
                             )}
                           </div>
@@ -542,7 +544,7 @@ export default function DriverMonitorPage() {
                         className="glass-card bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 hover:bg-neon-cyan/30 shrink-0"
                       >
                         <PlayCircle className="w-4 h-4" />
-                        Chọn
+                        {t('common.select')}
                       </Button>
                     </div>
                   </div>

@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { MobileNav } from "@/components/mobile-nav"
 import { GlassCard } from "@/components/ui/glass-card"
 import { Badge } from "@/components/ui/badge"
+import { useLanguage } from "@/contexts/language-context"
 import Highcharts from "highcharts"
 import HighchartsReact from "highcharts-react-official"
 import {
@@ -27,8 +28,9 @@ import {
 } from "lucide-react"
 
 export default function SettingsPage() {
+    const { language, setLanguage, t } = useLanguage()
+    
     // System Settings
-    const [language, setLanguage] = useState("vi")
     const [theme, setTheme] = useState("dark")
     const [timezone, setTimezone] = useState("Asia/Ho_Chi_Minh")
     const [autoSave, setAutoSave] = useState(true)
@@ -86,7 +88,8 @@ export default function SettingsPage() {
     }
 
     // Highcharts configurations
-    const systemPerformanceOptions: Highcharts.Options = {
+    const performanceLabel = t('settings.performanceLabel');
+    const systemPerformanceOptions: Highcharts.Options = useMemo(() => ({
         chart: {
           type: "pie",
           backgroundColor: "transparent",
@@ -145,7 +148,7 @@ export default function SettingsPage() {
       
               if (!anyChart.__perfTexts.label) {
                 anyChart.__perfTexts.label = chart.renderer
-                  .text("Hiệu suất", 0, 0)
+                  .text(performanceLabel, 0, 0)
                   .css({
                     fontSize: "12px",
                     fontWeight: "500",
@@ -161,6 +164,7 @@ export default function SettingsPage() {
               }
       
               anyChart.__perfTexts.label.attr({
+                text: performanceLabel,
                 x: centerX,
                 y: labelY,
               });
@@ -169,7 +173,7 @@ export default function SettingsPage() {
         },
       
         title: {
-          text: "Hiệu Suất Hệ Thống",
+          text: t('settings.systemPerformance'),
           style: {
             color: "#00E5FF",
             fontFamily: "var(--font-inter)",
@@ -220,15 +224,15 @@ export default function SettingsPage() {
         credits: {
           enabled: false,
         },
-    };
-    const detectionStatsOptions = {
+    }), [performanceLabel]);
+    const detectionStatsOptions = useMemo(() => ({
         chart: {
             type: 'area',
             backgroundColor: 'transparent',
             height: 280
         },
         title: {
-            text: 'Thống Kê Phát Hiện 7 Ngày',
+            text: t('settings.detectionStats'),
             style: {
                 color: '#00E5FF',
                 fontFamily: 'var(--font-inter)',
@@ -237,7 +241,7 @@ export default function SettingsPage() {
             }
         },
         xAxis: {
-            categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+            categories: [t('settings.monday'), t('settings.tuesday'), t('settings.wednesday'), t('settings.thursday'), t('settings.friday'), t('settings.saturday'), t('settings.sunday')],
             labels: {
                 style: {
                     color: '#BAE6FD',
@@ -250,7 +254,7 @@ export default function SettingsPage() {
         },
         yAxis: {
             title: {
-                text: 'Số lượng',
+                text: t('settings.quantity'),
                 style: {
                     color: '#BAE6FD',
                     fontFamily: 'var(--font-inter)',
@@ -287,7 +291,7 @@ export default function SettingsPage() {
             }
         },
         series: [{
-            name: 'Xe',
+            name: t('settings.vehicles'),
             data: [245, 312, 289, 356, 401, 378, 423],
             color: '#00E5FF',
             fillColor: {
@@ -298,7 +302,7 @@ export default function SettingsPage() {
                 ]
             }
         }, {
-            name: 'Người',
+            name: t('settings.people'),
             data: [156, 189, 201, 234, 267, 245, 289],
             color: '#00FFA3',
             fillColor: {
@@ -323,16 +327,16 @@ export default function SettingsPage() {
         credits: {
             enabled: false
         }
-    }
+    }), [t]);
 
-    const aiUsageOptions = {
+    const aiUsageOptions = useMemo(() => ({
         chart: {
             type: 'pie',
             backgroundColor: 'transparent',
             height: 280
         },
         title: {
-            text: 'Sử Dụng AI Assistant',
+            text: t('settings.aiUsage'),
             style: {
                 color: '#00E5FF',
                 fontFamily: 'var(--font-inter)',
@@ -349,7 +353,7 @@ export default function SettingsPage() {
                 fontFamily: 'var(--font-inter)',
                 fontSize: '12px'
             },
-            pointFormat: '<b>{point.percentage:.1f}%</b><br/>Số lượng: {point.y}'
+            pointFormat: `<b>{point.percentage:.1f}%</b><br/>${t('settings.quantity')}: {point.y}`
         },
         plotOptions: {
             pie: {
@@ -372,27 +376,27 @@ export default function SettingsPage() {
             }
         },
         series: [{
-            name: 'Queries',
+            name: t('settings.queries'),
             data: [
-                { name: 'Hỗ trợ lái xe', y: 456, color: '#00E5FF' },
-                { name: 'Phân tích dữ liệu', y: 289, color: '#00FFA3' },
-                { name: 'Cảnh báo', y: 178, color: '#FFD700' },
-                { name: 'Khác', y: 123, color: '#B794F6' }
+                { name: t('settings.drivingSupport'), y: 456, color: '#00E5FF' },
+                { name: t('settings.dataAnalysis'), y: 289, color: '#00FFA3' },
+                { name: t('settings.alerts'), y: 178, color: '#FFD700' },
+                { name: t('settings.other'), y: 123, color: '#B794F6' }
             ]
         }],
         credits: {
             enabled: false
         }
-    }
+    }), [t]);
 
-    const confidenceDistOptions = {
+    const confidenceDistOptions = useMemo(() => ({
         chart: {
             type: 'column',
             backgroundColor: 'transparent',
             height: 280
         },
         title: {
-            text: 'Phân Bố Độ Tin Cậy',
+            text: t('settings.confidenceDistribution'),
             style: {
                 color: '#00E5FF',
                 fontFamily: 'var(--font-inter)',
@@ -414,7 +418,7 @@ export default function SettingsPage() {
         },
         yAxis: {
             title: {
-                text: 'Số lượng phát hiện',
+                text: t('settings.detectionCount'),
                 style: {
                     color: '#BAE6FD',
                     fontFamily: 'var(--font-inter)',
@@ -457,7 +461,7 @@ export default function SettingsPage() {
             }
         },
         series: [{
-            name: 'Phát hiện',
+            name: t('settings.detections'),
             data: [89, 234, 567, 892, 1245],
             color: {
                 linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
@@ -473,16 +477,16 @@ export default function SettingsPage() {
         credits: {
             enabled: false
         }
-    }
+    }), [t]);
 
-    const notificationTimelineOptions = {
+    const notificationTimelineOptions = useMemo(() => ({
         chart: {
             type: 'spline',
             backgroundColor: 'transparent',
             height: 280
         },
         title: {
-            text: 'Lịch Sử Thông Báo 24h',
+            text: t('settings.notificationTimeline'),
             style: {
                 color: '#00E5FF',
                 fontFamily: 'var(--font-inter)',
@@ -504,7 +508,7 @@ export default function SettingsPage() {
         },
         yAxis: {
             title: {
-                text: 'Số thông báo',
+                text: t('settings.notifications'),
                 style: {
                     color: '#BAE6FD',
                     fontFamily: 'var(--font-inter)',
@@ -541,14 +545,14 @@ export default function SettingsPage() {
             }
         },
         series: [{
-            name: 'Cảnh báo',
+            name: t('settings.warnings'),
             data: [12, 8, 15, 23, 34, 28, 19, 25, 18],
             color: '#FFD700',
             marker: {
                 symbol: 'circle'
             }
         }, {
-            name: 'Nguy hiểm',
+            name: t('settings.critical'),
             data: [3, 2, 5, 8, 12, 9, 6, 7, 4],
             color: '#FF3B3B',
             marker: {
@@ -569,7 +573,7 @@ export default function SettingsPage() {
         credits: {
             enabled: false
         }
-    }
+    }), [t]);
 
     return (
         <div className="flex h-screen bg-bg-primary">
@@ -581,9 +585,9 @@ export default function SettingsPage() {
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-neon-cyan tracking-wider" style={{ fontFamily: 'var(--font-orbitron)' }}>CÀI ĐẶT</h1>
+                            <h1 className="text-3xl font-bold text-neon-cyan tracking-wider" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.title')}</h1>
                             <p className="text-sm text-fg-secondary mt-1 font-medium">
-                                Tùy chỉnh hệ thống ADAS theo nhu cầu của bạn
+                                {t('settings.subtitle')}
                             </p>
                         </div>
                         <div className="flex gap-3">
@@ -592,7 +596,7 @@ export default function SettingsPage() {
                                 className="glass-card border-neon-yellow/50 text-neon-yellow px-4 py-2 rounded-lg hover:glow-yellow transition-all flex items-center gap-2 font-semibold"
                             >
                                 <RotateCcw className="w-4 h-4" />
-                                <span className="hidden sm:inline">Đặt Lại</span>
+                                <span className="hidden sm:inline">{t('settings.reset')}</span>
                             </button>
                             <button
                                 onClick={handleSave}
@@ -603,7 +607,7 @@ export default function SettingsPage() {
                                     }`}
                             >
                                 <Save className="w-4 h-4" />
-                                <span className="hidden sm:inline">Lưu</span>
+                                <span className="hidden sm:inline">{t('settings.save')}</span>
                             </button>
                         </div>
                     </div>
@@ -612,7 +616,7 @@ export default function SettingsPage() {
                     {showSaveConfirm && (
                         <div className="glass-card border-neon-green/50 glow-green p-4 flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
-                            <span className="text-neon-green font-semibold">Đã lưu cài đặt thành công!</span>
+                            <span className="text-neon-green font-semibold">{t('settings.saved')}</span>
                         </div>
                     )}
 
@@ -639,25 +643,25 @@ export default function SettingsPage() {
                                 <Badge className="glass-card border-neon-cyan/30 text-neon-cyan text-xs font-semibold">+12%</Badge>
                             </div>
                             <div className="digital-number text-2xl font-bold text-neon-cyan mb-1">3,247</div>
-                            <p className="text-xs text-fg-secondary font-medium">Phát hiện hôm nay</p>
+                            <p className="text-xs text-fg-secondary font-medium">{t('settings.detectionsToday')}</p>
                         </GlassCard>
 
                         <GlassCard glow="green" className="p-6">
                             <div className="flex items-center justify-between mb-3">
                                 <Activity className="w-5 h-5 text-neon-green" />
-                                <Badge className="glass-card border-neon-green/30 text-neon-green text-xs font-semibold">Tốt</Badge>
+                                <Badge className="glass-card border-neon-green/30 text-neon-green text-xs font-semibold">{t('common.success')}</Badge>
                             </div>
                             <div className="digital-number text-2xl font-bold text-neon-green mb-1">98.5%</div>
-                            <p className="text-xs text-fg-secondary font-medium">Độ chính xác</p>
+                            <p className="text-xs text-fg-secondary font-medium">{t('settings.accuracy')}</p>
                         </GlassCard>
 
                         <GlassCard glow="yellow" className="p-6">
                             <div className="flex items-center justify-between mb-3">
                                 <Brain className="w-5 h-5 text-neon-yellow" />
-                                <Badge className="glass-card border-neon-yellow/30 text-neon-yellow text-xs font-semibold">Active</Badge>
+                                <Badge className="glass-card border-neon-yellow/30 text-neon-yellow text-xs font-semibold">{t('common.active')}</Badge>
                             </div>
                             <div className="digital-number text-2xl font-bold text-neon-yellow mb-1">1,046</div>
-                            <p className="text-xs text-fg-secondary font-medium">AI Queries</p>
+                            <p className="text-xs text-fg-secondary font-medium">{t('settings.aiQueries')}</p>
                         </GlassCard>
 
                         <GlassCard className="p-6 border-neon-purple/30">
@@ -666,7 +670,7 @@ export default function SettingsPage() {
                                 <Badge className="glass-card border-neon-purple/30 text-neon-purple text-xs font-semibold">85%</Badge>
                             </div>
                             <div className="digital-number text-2xl font-bold text-neon-purple mb-1">24 FPS</div>
-                            <p className="text-xs text-fg-secondary font-medium">Hiệu suất</p>
+                            <p className="text-xs text-fg-secondary font-medium">{t('settings.performance')}</p>
                         </GlassCard>
                     </div>
 
@@ -674,23 +678,26 @@ export default function SettingsPage() {
                     <GlassCard scanLines className="p-6">
                         <div className="flex items-center gap-3 mb-6">
                             <Settings className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>HỆ THỐNG</h2>
+                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.system')}</h2>
                         </div>
-                        <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Ngôn Ngữ</label>
+                                <label className="text-sm font-semibold text-fg-primary">{t('settings.language')}</label>
                                 <div className="relative">
                                     <select
                                         value={language}
-                                        onChange={(e) => { setLanguage(e.target.value); setHasChanges(true) }}
+                                        onChange={(e) => {
+                                            const newLang = e.target.value as "vi" | "en";
+                                            setLanguage(newLang);
+                                        }}
                                         className="w-full glass-card border-neon-cyan/30 text-fg-primary px-4 py-3 rounded-lg appearance-none cursor-pointer hover:border-neon-cyan/50 transition-all font-medium"
                                     >
-                                        <option value="vi">Tiếng Việt</option>
-                                        <option value="en">English</option>
+                                        <option value="vi">{t('settings.vietnamese')}</option>
+                                        <option value="en">{t('settings.english')}</option>
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
                                 </div>
-                                <p className="text-xs text-fg-muted font-medium">Ngôn ngữ hiển thị giao diện</p>
+                                <p className="text-xs text-fg-muted font-medium">{t('settings.languageDesc')}</p>
                             </div>
                         </div>
                     </GlassCard>
@@ -699,11 +706,11 @@ export default function SettingsPage() {
                     <GlassCard scanLines className="p-6">
                         <div className="flex items-center gap-3 mb-6">
                             <Monitor className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>HIỂN THỊ</h2>
+                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.display')}</h2>
                         </div>
                         <div className="grid gap-6 md:grid-cols-2">
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Chất Lượng Video</label>
+                                <label className="text-sm font-semibold text-fg-primary">{t('settings.videoQuality')}</label>
                                 <div className="relative">
                                     <select
                                         value={videoQuality}
@@ -716,14 +723,14 @@ export default function SettingsPage() {
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
                                 </div>
-                                <p className="text-xs text-fg-muted font-medium">Độ phân giải video stream</p>
+                                <p className="text-xs text-fg-muted font-medium">{t('settings.videoQualityDesc')}</p>
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Hiển Thị FPS</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Hiện số khung hình/giây</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.showFPS')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.showFPSDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setShowFPS(!showFPS); setHasChanges(true) }}
@@ -741,7 +748,7 @@ export default function SettingsPage() {
 
                             <div className="space-y-3 md:col-span-2">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-fg-primary">Độ Mờ Overlay</label>
+                                    <label className="text-sm font-semibold text-fg-primary">{t('settings.overlayOpacity')}</label>
                                     <span className="text-sm font-bold text-neon-cyan digital-number">{overlayOpacity}%</span>
                                 </div>
                                 <input
@@ -756,14 +763,14 @@ export default function SettingsPage() {
                                         background: `linear-gradient(to right, var(--neon-cyan) 0%, var(--neon-cyan) ${overlayOpacity}%, rgba(255,255,255,0.1) ${overlayOpacity}%, rgba(255,255,255,0.1) 100%)`
                                     }}
                                 />
-                                <p className="text-xs text-fg-muted font-medium">Độ trong suốt của lớp phát hiện</p>
+                                <p className="text-xs text-fg-muted font-medium">{t('settings.overlayOpacityDesc')}</p>
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Hiển Thị HUD</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Hiện thông tin trên màn hình</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.showHUD')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.showHUDDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setShowHUD(!showHUD); setHasChanges(true) }}
@@ -786,14 +793,14 @@ export default function SettingsPage() {
                     <GlassCard scanLines className="p-6">
                         <div className="flex items-center gap-3 mb-6">
                             <Brain className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>TRỢ LÝ AI</h2>
+                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.aiAssistant')}</h2>
                         </div>
                         <div className="grid gap-6 md:grid-cols-2">
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Kích Hoạt AI</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Bật/tắt trợ lý AI</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.enableAI')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.enableAIDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setAiEnabled(!aiEnabled); setHasChanges(true) }}
@@ -810,7 +817,7 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Ngôn Ngữ Phản Hồi</label>
+                                <label className="text-sm font-semibold text-fg-primary">{t('settings.aiResponseLanguage')}</label>
                                 <div className="relative">
                                     <select
                                         value={aiLanguage}
@@ -818,20 +825,20 @@ export default function SettingsPage() {
                                         className="w-full glass-card border-neon-cyan/30 text-fg-primary px-4 py-3 rounded-lg appearance-none cursor-pointer hover:border-neon-cyan/50 transition-all font-medium"
                                         disabled={!aiEnabled}
                                     >
-                                        <option value="vi">Tiếng Việt</option>
-                                        <option value="en">English</option>
-                                        <option value="auto">Tự Động</option>
+                                        <option value="vi">{t('settings.vietnamese')}</option>
+                                        <option value="en">{t('settings.english')}</option>
+                                        <option value="auto">{t('settings.auto')}</option>
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
                                 </div>
-                                <p className="text-xs text-fg-muted font-medium">Ngôn ngữ trả lời của AI</p>
+                                <p className="text-xs text-fg-muted font-medium">{t('settings.aiResponseLanguageDesc')}</p>
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Phản Hồi Giọng Nói</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">AI trả lời bằng giọng nói</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.voiceFeedback')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.voiceFeedbackDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setVoiceFeedback(!voiceFeedback); setHasChanges(true) }}
@@ -857,17 +864,17 @@ export default function SettingsPage() {
                     <GlassCard scanLines className="p-6">
                         <div className="flex items-center gap-3 mb-6">
                             <Sliders className="w-6 h-6 text-neon-cyan" />
-                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>NÂNG CAO</h2>
+                            <h2 className="text-xl font-bold text-neon-cyan tracking-wide" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.advanced')}</h2>
                             <Badge className="glass-card border-neon-yellow/50 text-neon-yellow text-xs font-semibold">
-                                Chuyên Gia
+                                {t('settings.expert')}
                             </Badge>
                         </div>
                         <div className="grid gap-6 md:grid-cols-2">
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Chế Độ Debug</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Hiển thị thông tin chi tiết</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.debugMode')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.debugModeDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setDebugMode(!debugMode); setHasChanges(true) }}
@@ -886,8 +893,8 @@ export default function SettingsPage() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <label className="text-sm font-semibold text-fg-primary">Giám Sát Hiệu Suất</label>
-                                        <p className="text-xs text-fg-muted mt-1 font-medium">Theo dõi CPU/GPU/RAM</p>
+                                        <label className="text-sm font-semibold text-fg-primary">{t('settings.performanceMonitoring')}</label>
+                                        <p className="text-xs text-fg-muted mt-1 font-medium">{t('settings.performanceMonitoringDesc')}</p>
                                     </div>
                                     <button
                                         onClick={() => { setPerfMonitoring(!perfMonitoring); setHasChanges(true) }}
@@ -905,8 +912,8 @@ export default function SettingsPage() {
 
                             <div className="space-y-3 md:col-span-2">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-semibold text-fg-primary">Thời Gian Lưu Dữ Liệu</label>
-                                    <span className="text-sm font-bold text-neon-cyan digital-number">{dataRetention} ngày</span>
+                                    <label className="text-sm font-semibold text-fg-primary">{t('settings.dataRetention')}</label>
+                                    <span className="text-sm font-bold text-neon-cyan digital-number">{t('settings.days', { count: dataRetention })}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -920,7 +927,7 @@ export default function SettingsPage() {
                                         background: `linear-gradient(to right, var(--neon-cyan) 0%, var(--neon-cyan) ${((dataRetention - 7) / 83) * 100}%, rgba(255,255,255,0.1) ${((dataRetention - 7) / 83) * 100}%, rgba(255,255,255,0.1) 100%)`
                                     }}
                                 />
-                                <p className="text-xs text-fg-muted font-medium">Số ngày lưu trữ dữ liệu phát hiện</p>
+                                <p className="text-xs text-fg-muted font-medium">{t('settings.dataRetentionDesc')}</p>
                             </div>
                         </div>
                     </GlassCard>
@@ -932,11 +939,9 @@ export default function SettingsPage() {
                                 <Gauge className="w-5 h-5 text-neon-cyan" />
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-sm font-bold text-neon-cyan mb-2" style={{ fontFamily: 'var(--font-orbitron)' }}>LƯU Ý</h3>
+                                <h3 className="text-sm font-bold text-neon-cyan mb-2" style={{ fontFamily: 'var(--font-orbitron)' }}>{t('settings.note')}</h3>
                                 <p className="text-xs text-fg-secondary leading-relaxed font-medium">
-                                    Một số cài đặt có thể ảnh hưởng đến hiệu suất hệ thống.
-                                    Nếu bạn gặp vấn đề về độ trễ hoặc hiệu suất, hãy thử giảm chất lượng video,
-                                    tăng số khung hình bỏ qua, hoặc tắt một số tính năng không cần thiết.
+                                    {t('settings.noteText')}
                                 </p>
                             </div>
                         </div>

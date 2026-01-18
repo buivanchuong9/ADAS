@@ -2,12 +2,14 @@
 
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
+import { useLanguage } from "@/contexts/language-context";
 import { LogIn, LogOut, User } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import Link from "next/link";
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
+  const { t } = useLanguage();
 
   const handleLogout = async () => {
     await logout();
@@ -64,7 +66,7 @@ export function Header() {
                   className="text-sm"
                   style={{ color: 'var(--text-muted)' }}
                 >
-                  Xin chào,{" "}
+                  {t('header.greeting')}{" "}
                   <span
                     className="font-semibold"
                     style={{ color: 'var(--primary)' }}
@@ -80,7 +82,7 @@ export function Header() {
                 className="btn-neon btn-neon-red flex items-center gap-2 px-4 py-2 text-sm"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Đăng xuất</span>
+                <span className="hidden sm:inline">{t('header.logout')}</span>
               </motion.button>
             </>
           ) : (
@@ -91,7 +93,7 @@ export function Header() {
                 className="btn-neon flex items-center gap-2 px-4 py-2 text-sm"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Đăng nhập</span>
+                <span>{t('header.login')}</span>
               </motion.button>
             </Link>
           )}

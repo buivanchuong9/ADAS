@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useLanguage } from "@/contexts/language-context"
 import { Sidebar } from "@/components/sidebar"
 import { MobileNav } from "@/components/mobile-nav"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -14,11 +15,12 @@ interface Message {
 }
 
 export default function AIAssistant() {
+  const { t } = useLanguage()
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       role: 'ai',
-      content: 'Xin chào! Tôi là trợ lý ảo của hệ thống ADAS. Tôi có thể giúp bạn phân tích hành vi lái xe, giải thích các cảnh báo an toàn và đưa ra khuyến nghị. Tôi có thể hỗ trợ gì cho bạn? 🚗',
+      content: t('aiAssistant.welcomeMessage'),
       timestamp: new Date()
     }
   ])
@@ -27,10 +29,10 @@ export default function AIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const quickSuggestions = [
-    "Bạn là ai?",
-    "Giải thích cảnh báo lệch làn đường",
-    "Làm sao để cải thiện điểm an toàn?",
-    "Nguyên nhân gây ra cảnh báo mệt mỏi?"
+    t('aiAssistant.suggestion1'),
+    t('aiAssistant.suggestion2'),
+    t('aiAssistant.suggestion3'),
+    t('aiAssistant.suggestion4')
   ]
 
   // Auto scroll to bottom when new messages arrive
@@ -127,8 +129,8 @@ export default function AIAssistant() {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-neon-cyan tracking-wider">AI ASSISTANT</h1>
-              <p className="text-sm text-fg-secondary">Powered by advanced neural networks</p>
+              <h1 className="text-2xl font-bold text-neon-cyan tracking-wider">{t('aiAssistant.title')}</h1>
+              <p className="text-sm text-fg-secondary">{t('aiAssistant.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -212,7 +214,7 @@ export default function AIAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
-              placeholder="Hỏi tôi bất cứ điều gì về ADAS..."
+              placeholder={t('aiAssistant.inputPlaceholder')}
               disabled={isLoading}
               className="flex-1 glass-card px-4 py-3 text-fg-primary placeholder:text-fg-muted focus:glow-cyan transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             />
