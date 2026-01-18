@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/language-context";
 import {
   LayoutDashboard,
   Video,
@@ -16,47 +18,48 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const navigation = [
-  {
-    name: "Bảng Điều Khiển",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Tổng quan hệ thống",
-  },
-  {
-    name: "Phát Hiện Trực Tiếp",
-    href: "/",
-    icon: Video,
-    description: "ADAS thời gian thực",
-  },
-  {
-    name: "Giám Sát ADAS",
-    href: "/adas",
-    icon: Car,
-    description: "Giám sát nâng cao",
-  },
-  {
-    name: "Giám Sát Tài Xế",
-    href: "/driver-monitor",
-    icon: Eye,
-    description: "Hành vi tài xế",
-  },
-  {
-    name: "Phân Tích",
-    href: "/analytics",
-    icon: BarChart3,
-    description: "Số liệu hiệu suất",
-  },
-  {
-    name: "Trợ Lý AI",
-    href: "/ai-assistant",
-    icon: Brain,
-    description: "Hỗ trợ AI",
-  },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const { t, language } = useLanguage();
+
+  const navigation = useMemo(() => [
+    {
+      name: t('nav.dashboard'),
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      description: t('nav.dashboardDesc'),
+    },
+    {
+      name: t('nav.liveDetection'),
+      href: "/",
+      icon: Video,
+      description: t('nav.liveDetectionDesc'),
+    },
+    {
+      name: t('nav.adasMonitor'),
+      href: "/adas",
+      icon: Car,
+      description: t('nav.adasMonitorDesc'),
+    },
+    {
+      name: t('nav.driverMonitor'),
+      href: "/driver-monitor",
+      icon: Eye,
+      description: t('nav.driverMonitorDesc'),
+    },
+    {
+      name: t('nav.analytics'),
+      href: "/analytics",
+      icon: BarChart3,
+      description: t('nav.analyticsDesc'),
+    },
+    {
+      name: t('nav.aiAssistant'),
+      href: "/ai-assistant",
+      icon: Brain,
+      description: t('nav.aiAssistantDesc'),
+    },
+  ], [language, t]);
 
   return (
     <motion.aside
@@ -203,7 +206,7 @@ export function Sidebar() {
           }}
         >
           <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
-          <span className="font-semibold text-sm">Cài Đặt</span>
+          <span className="font-semibold text-sm">{t('nav.settings')}</span>
         </Link>
 
         {/* Status indicator */}
@@ -229,7 +232,7 @@ export function Sidebar() {
               className="text-xs font-semibold"
               style={{ color: 'var(--success)' }}
             >
-              Hệ Thống Trực Tuyến
+              {t('nav.systemOnline')}
             </span>
           </div>
         </motion.div>

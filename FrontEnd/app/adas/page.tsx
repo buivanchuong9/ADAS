@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getApiUrl } from "@/lib/api-config"
 import { API_ENDPOINTS } from "@/lib/api-endpoints"
+import { useLanguage } from "@/contexts/language-context"
 import { ArrowLeft, Upload, PlayCircle, Film, CheckCircle2, Loader2, AlertTriangle, Sparkles, Database, ShieldCheck, RefreshCw, Clock, FileVideo } from "lucide-react"
 import { useVideoProgress } from "@/hooks/use-video-progress"
 
@@ -39,6 +40,7 @@ type VideoItem = {
 
 export default function ADASPage() {
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -80,9 +82,9 @@ export default function ADASPage() {
         const timeString = minutes > 0
           ? `${minutes}:${seconds.toString().padStart(2, '0')}`
           : `${seconds}s`
-        setProcessingMsg(`Đang phân tích... ${wsProgress}% (${timeString})`)
+        setProcessingMsg(t('adas.analyzingProgress', { progress: wsProgress, time: timeString }))
       } else {
-        setProcessingMsg(`Đang phân tích... ${wsProgress}%`)
+        setProcessingMsg(t('adas.analyzingProgressNoTime', { progress: wsProgress }))
       }
 
       // Handle completion
@@ -133,7 +135,7 @@ export default function ADASPage() {
 
   const uploadAndAnalyze = async () => {
     if (!file) {
-      toast({ title: "Chưa chọn video", description: "Vui lòng chọn một file video để phân tích", variant: "destructive" })
+      toast({ title: t('adas.noVideoSelected'), description: t('adas.noVideoSelectedDesc'), variant: "destructive" })
       return
     }
 
@@ -167,7 +169,7 @@ export default function ADASPage() {
       const progressInterval = setInterval(() => {
         setProcessingMsg(prev => {
           if (prev.includes('...')) {
-            return `Đang tải video lên server (${fileSizeMB} MB) - Vui lòng chờ`
+            return t('adas.uploadingVideoToServerWait', { size: fileSizeMB })
           }
           return prev + '.'
         })
@@ -184,7 +186,7 @@ export default function ADASPage() {
         uploadData = await uploadRes.json()
       } catch (parseErr) {
         console.error('❌ Failed to parse response:', parseErr)
-        throw new Error('Server trả về dữ liệu không hợp lệ')
+        throw new Error(t('adas.invalidServerResponse'))
       }
 
       // Check for errors
@@ -193,11 +195,11 @@ export default function ADASPage() {
         errorMessage = uploadData?.detail || uploadData?.message || `Upload failed with status ${uploadRes.status}`
 
         if (uploadRes.status === 400) {
-          errorMessage = `Lỗi định dạng video: ${errorMessage}`
+          errorMessage = `${t('adas.videoFormatError')}: ${errorMessage}`
         } else if (uploadRes.status === 413) {
-          errorMessage = 'Video quá lớn. Vui lòng chọn video nhỏ hơn 500MB.'
+          errorMessage = t('adas.videoTooLarge')
         } else if (uploadRes.status === 500) {
-          errorMessage = 'Lỗi server. Vui lòng thử lại sau.'
+          errorMessage = t('adas.serverError')
         }
 
         throw new Error(errorMessage)
@@ -206,7 +208,7 @@ export default function ADASPage() {
       const jobId = uploadData.job_id || uploadData.id
 
       if (!jobId) {
-        throw new Error('Server không trả về job_id. Vui lòng thử lại.')
+        throw new Error(t('adas.noJobId'))
       }
 
       console.log('✅ Upload OK - Job:', jobId.substring(0, 8))
@@ -214,26 +216,26 @@ export default function ADASPage() {
       setUploading(false)
 
       toast({
-        title: "Upload thành công!",
-        description: `Video đã tải lên (${fileSizeMB} MB). Đang kết nối WebSocket để theo dõi tiến trình...`
+        title: t('adas.uploadSuccess'),
+        description: t('adas.uploadSuccessDesc', { size: fileSizeMB })
       })
 
       // Step 2: WebSocket will automatically start monitoring via useVideoProgress hook
-      setProcessingMsg("Đang kết nối WebSocket để theo dõi tiến trình phân tích...")
+      setProcessingMsg(t('adas.connectingWebSocket'))
 
     } catch (err: any) {
       console.error('❌ [Upload] Error:', err)
 
       // Determine error type and show appropriate message
-      let errorTitle = "Lỗi upload"
-      let errorDescription = err.message || "Không thể tải video lên server."
+      let errorTitle = t('adas.uploadError')
+      let errorDescription = err.message || t('adas.uploadErrorDesc')
 
       if (err.message.includes('timeout')) {
-        errorTitle = "Upload quá lâu"
-        errorDescription = `Video ${fileSizeMB} MB quá lớn hoặc mạng chậm. Vui lòng thử video nhỏ hơn hoặc kiểm tra kết nối mạng.`
+        errorTitle = t('adas.uploadTimeoutTitle')
+        errorDescription = t('adas.uploadTimeoutDesc', { size: fileSizeMB })
       } else if (err.message.includes('Failed to fetch')) {
-        errorTitle = "Lỗi kết nối"
-        errorDescription = "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng."
+        errorTitle = t('adas.connectionError')
+        errorDescription = t('adas.connectionErrorDesc')
       }
 
       toast({
@@ -274,7 +276,7 @@ export default function ADASPage() {
           : `${elapsedSeconds}s`
 
         setProcessingProgress(newProgress)
-        setProcessingMsg(`Đang phân tích... ${newProgress}% (${timeString})`)
+        setProcessingMsg(t('adas.analyzingProgress', { progress: newProgress, time: timeString }))
 
         if (data.status === 'completed') {
           setIsProcessing(false)
@@ -283,7 +285,7 @@ export default function ADASPage() {
         }
 
         if (data.status === 'error') {
-          throw new Error(data.error_message || 'Processing failed')
+          throw new Error(data.error_message || t('adas.processingFailed'))
         }
 
         attempts++
@@ -298,7 +300,7 @@ export default function ADASPage() {
         console.error('❌ [Poll] Error:', err)
         setIsProcessing(false)
         toast({
-          title: "Lỗi phân tích",
+          title: t('adas.analysisError'),
           description: err.message,
           variant: "destructive"
         })
@@ -343,7 +345,7 @@ export default function ADASPage() {
     } catch (err: any) {
       console.error('❌ [FetchResult] Error:', err)
       toast({
-        title: "Lỗi lấy kết quả",
+        title: t('adas.fetchResultError'),
         description: err.message,
         variant: "destructive"
       })
@@ -411,8 +413,8 @@ export default function ADASPage() {
       playUrl = getApiUrl(API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename))
 
       toast({
-        title: "Đã chọn video kết quả",
-        description: `Đang phát kết quả phân tích của: ${video.video_filename}`,
+        title: t('adas.selectedResultVideo'),
+        description: t('adas.selectedResultVideoDesc', { filename: video.video_filename }),
       })
 
       // Set stages to done so it shows up
@@ -424,8 +426,8 @@ export default function ADASPage() {
       playUrl = getApiUrl(API_ENDPOINTS.VIDEO_SAMPLE(video.job_id, video.video_filename))
 
       toast({
-        title: "Đã chọn video gốc",
-        description: `Đang phát video gốc: ${video.video_filename}`,
+        title: t('adas.selectedOriginalVideo'),
+        description: t('adas.selectedOriginalVideoDesc', { filename: video.video_filename }),
       })
 
       // Reset stages
@@ -464,11 +466,11 @@ export default function ADASPage() {
             </div>
             <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider">
               <Film className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">ADAS VIDEO ANALYSIS</span>
-              <span className="sm:hidden">ADAS ANALYSIS</span>
+              <span className="hidden sm:inline">{t('adas.title')}</span>
+              <span className="sm:hidden">{t('adas.titleShort')}</span>
             </h1>
             <p className="text-xs sm:text-sm text-fg-secondary">
-              Upload hoặc dùng video mẫu, AI phân tích và lưu vào hệ thống.
+              {t('adas.subtitle')}
             </p>
           </div>
         </div>
@@ -514,8 +516,8 @@ export default function ADASPage() {
                           <PlayCircle className="h-4 w-4" />
                         )}
 
-                        <span className="hidden sm:inline">Video mẫu</span>
-                        <span className="sm:hidden">Mẫu</span>
+                        <span className="hidden sm:inline">{t('adas.sampleVideo')}</span>
+                        <span className="sm:hidden">{t('adas.sampleVideoShort')}</span>
                       </span>
                     </Button>
                   </div>
@@ -526,7 +528,7 @@ export default function ADASPage() {
                       : "border-neon-red/50"
                       }`}>
                       <div className="text-xs text-fg-secondary font-medium tracking-wide">
-                        Trạng thái
+                        {t('adas.status')}
                       </div>
 
                       <div
@@ -548,17 +550,17 @@ export default function ADASPage() {
                         />
                         <span className="leading-none mt-[5px]">
                           {uploading
-                            ? "Đang phân tích"
+                            ? t('adas.analyzing')
                             : (file || previewUrl)
-                              ? "Sẵn sàng"
-                              : "Chưa sẵn sàng"}
+                              ? t('adas.ready')
+                              : t('adas.notReady')}
                         </span>
                       </div>
 
                     </div>
                     <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
-                      <div className="text-xs text-fg-secondary font-medium">Nguồn video</div>
-                      <div className="font-semibold text-neon-green">{file ? "Upload mới" : previewUrl ? "Video mẫu" : "Chưa chọn"}</div>
+                      <div className="text-xs text-fg-secondary font-medium">{t('adas.videoSource')}</div>
+                      <div className="font-semibold text-neon-green">{file ? t('adas.newUpload') : previewUrl ? t('adas.sampleVideo') : t('adas.notSelected')}</div>
                     </div>
                   </div>
 
@@ -590,12 +592,12 @@ export default function ADASPage() {
                     {uploading || isProcessing ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {uploading ? "Đang tải lên..." : "Đang phân tích..."}
+                        {uploading ? t('adas.uploading') : t('adas.analyzing')}
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        Gửi Video Phân Tích
+                        {t('adas.sendVideoAnalysis')}
                       </>
                     )}
                   </Button>
@@ -606,22 +608,22 @@ export default function ADASPage() {
                 <div className="mb-4">
                   <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
                     <ShieldCheck className="w-4 h-4" />
-                    QUY TRÌNH LƯU TRỮ
+                    {t('adas.storageProcessTitle')}
                   </h3>
-                  <p className="text-xs text-fg-secondary mt-1">Video đã phân tích sẽ vào hệ thống và sẵn sàng cho bước kế tiếp.</p>
+                  <p className="text-xs text-fg-secondary mt-1">{t('adas.storageProcessDesc')}</p>
                 </div>
                 <div className="text-sm text-fg-secondary space-y-2">
                   <div className="flex items-center gap-2">
                     <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"><Upload className="w-3 h-3" />Upload</Badge>
-                    <span>Gửi video tới hệ thống</span>
+                    <span>{t('adas.step1Process')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50"><Sparkles className="w-3 h-3" />AI</Badge>
-                    <span>AI phân tích nội dung video</span>
+                    <span>{t('adas.step2Process')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><Database className="w-3 h-3" />System</Badge>
-                    <span>Lưu kết quả vào hệ thống và có thể lấy lại bằng "Video mẫu"</span>
+                    <span>{t('adas.step3Process')}</span>
                   </div>
                 </div>
               </GlassCard>
@@ -631,7 +633,7 @@ export default function ADASPage() {
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-neon-green tracking-wide">2) XEM VIDEO ĐANG ĐƯỢC PHÂN TÍCH</h3>
+                <h3 className="text-xl font-bold text-neon-green tracking-wide">{t('adas.step2Title')}</h3>
                 <Badge className="
                   gap-1
                   bg-red-500/10
@@ -642,11 +644,11 @@ export default function ADASPage() {
                   shadow-[0_0_12px_rgba(255,0,0,0.6)]
                 ">
                   <AlertTriangle className="h-3 w-3" />
-                  Dữ liệu đã được lưu mẫu
+                  {t('adas.sampleDataSaved')}
                 </Badge>
               </div>
               <p className="text-xs text-fg-secondary mt-1">
-                Video sẽ được gửi tới AI và lưu vào hệ thống. Bạn có thể dùng video mẫu để tránh upload lớn.
+                {t('adas.step2Desc')}
               </p>
             </div>
             <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
@@ -657,13 +659,13 @@ export default function ADASPage() {
                     {/* Show different message based on upload vs processing state */}
                     {uploading ? (
                       <>
-                        <p className="text-lg font-semibold">Đang tải video lên server...</p>
-                        <p className="text-sm text-fg-secondary">Vui lòng chờ, đang upload file</p>
+                        <p className="text-lg font-semibold">{t('adas.uploadingVideo')}</p>
+                        <p className="text-sm text-fg-secondary">{t('adas.uploadingVideoDesc')}</p>
                       </>
                     ) : (
                       <>
-                        <p className="text-lg font-semibold">Đang phân tích video...</p>
-                        <p className="text-sm text-fg-secondary">AI đang xử lý video của bạn</p>
+                        <p className="text-lg font-semibold">{t('adas.analyzingVideo')}</p>
+                        <p className="text-sm text-fg-secondary">{t('adas.analyzingVideoDesc')}</p>
                       </>
                     )}
 
@@ -727,7 +729,7 @@ export default function ADASPage() {
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
                   <Upload className="w-8 h-8 text-neon-cyan" />
-                  <p>Chưa có video. Upload hoặc dùng video mẫu.</p>
+                  <p>{t('adas.noVideoMessage')}</p>
                 </div>
               )}
 
@@ -739,7 +741,7 @@ export default function ADASPage() {
                   className="gap-2 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  Phân tích video khác
+                  {t('adas.analyzeAnotherVideo')}
                 </Button>
                 <Button
                   variant="outline"
@@ -747,7 +749,7 @@ export default function ADASPage() {
                   className="gap-2 glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Quay lại
+                  {t('common.back')}
                 </Button>
               </div>
             ) : (
@@ -778,10 +780,10 @@ export default function ADASPage() {
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
               <FileVideo className="w-6 h-6" />
-              Chọn Video Mẫu
+              {t('adas.selectSampleVideo')}
             </DialogTitle>
             <DialogDescription className="text-fg-secondary">
-              Chọn một video từ database để phân tích. Tổng cộng có {availableVideos.length} video.
+              {t('adas.selectSampleVideoDesc', { count: availableVideos.length })}
             </DialogDescription>
           </DialogHeader>
 
@@ -837,16 +839,16 @@ export default function ADASPage() {
                             {video.status === 'completed' ? (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10">
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                                Đã xong
+                                {t('adas.completed')}
                               </Badge>
                             ) : video.status === 'processing' ? (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10">
                                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                Đang chạy
+                                {t('adas.processing')}
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10">
-                                Chưa chạy
+                                {t('adas.notStarted')}
                               </Badge>
                             )}
                           </div>
@@ -864,7 +866,7 @@ export default function ADASPage() {
                         className="glass-card bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 hover:bg-neon-cyan/30 flex-shrink-0"
                       >
                         <PlayCircle className="w-4 h-4 mr-1" />
-                        Chọn
+                        {t('common.select')}
                       </Button>
                     </div>
                   </div>
@@ -881,26 +883,26 @@ export default function ADASPage() {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-neon-green flex items-center gap-2">
               <CheckCircle2 className="w-6 h-6" />
-              Phân Tích Hoàn Tất!
+              {t('adas.analysisComplete')}
             </DialogTitle>
             <DialogDescription className="text-fg-secondary text-base mt-2">
-              Video của bạn đã được AI phân tích thành công. Bạn có muốn xem video đã qua xử lý không?
+              {t('adas.analysisCompleteDesc')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
             {result && (
               <div className="glass-card border border-neon-cyan/30 p-4 rounded-lg">
-                <h4 className="text-sm font-semibold text-neon-cyan mb-2">Thông tin phân tích:</h4>
+                <h4 className="text-sm font-semibold text-neon-cyan mb-2">{t('adas.analysisInfo')}</h4>
                 <div className="text-xs text-fg-secondary space-y-1">
                   <div className="flex justify-between">
-                    <span>Job ID:</span>
+                    <span>{t('adas.jobId')}:</span>
                     <span className="font-mono text-neon-green">{currentJobId}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Trạng thái:</span>
+                    <span>{t('adas.status')}:</span>
                     <Badge className="bg-neon-green/20 text-neon-green border-neon-green/50">
-                      Hoàn thành
+                      {t('adas.completed')}
                     </Badge>
                   </div>
                 </div>
@@ -913,7 +915,7 @@ export default function ADASPage() {
                 className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
               >
                 <PlayCircle className="w-5 h-5 mr-2" />
-                Xem Video Ngay
+                {t('adas.viewVideoNow')}
               </Button>
               <Button
                 variant="outline"
@@ -923,7 +925,7 @@ export default function ADASPage() {
                 }}
                 className="glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
               >
-                Đóng
+                {t('common.close')}
               </Button>
             </div>
           </div>

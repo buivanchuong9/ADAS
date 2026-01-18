@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/language-context";
 import {
   Card,
   CardContent,
@@ -61,8 +62,9 @@ const itemVariants: Variants = {
 
 export default function HomePage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
-    systemStatus: "hoạt động",
+    systemStatus: t('common.online'),
     activeCameras: 0,
     totalDetections: 0,
     alertsToday: 0,
@@ -76,10 +78,10 @@ export default function HomePage() {
           signal: AbortSignal.timeout(5000), // 5 second timeout
         }).catch(() => null);
 
-        let systemStatus = "ngoại tuyến";
+        let systemStatus = t('common.offline');
         if (statusRes && statusRes.ok) {
           const statusData = await statusRes.json().catch(() => ({}));
-          systemStatus = statusData.status === "success" ? "hoạt động" : "ngoại tuyến";
+          systemStatus = statusData.status === "success" ? t('common.online') : t('common.offline');
         }
 
         // Fetch alerts statistics with timeout
@@ -95,7 +97,7 @@ export default function HomePage() {
 
         setStats({
           systemStatus,
-          activeCameras: systemStatus === "hoạt động" ? 1 : 0,
+          activeCameras: systemStatus === t('common.online') ? 1 : 0,
           totalDetections: 0,
           alertsToday,
         });
@@ -103,7 +105,7 @@ export default function HomePage() {
         // Silently handle errors - backend may not be running
         // Set offline state without logging errors
         setStats({
-          systemStatus: "ngoại tuyến",
+          systemStatus: t('common.offline'),
           activeCameras: 0,
           totalDetections: 0,
           alertsToday: 0,
@@ -118,15 +120,15 @@ export default function HomePage() {
 
   // Sample chart data
   const detectionChartData = [
-    { name: "Cars", y: 45 },
-    { name: "Pedestrians", y: 25 },
-    { name: "Cycles", y: 20 },
-    { name: "Others", y: 10 },
+    { name: t('settings.vehicles'), y: 45 },
+    { name: t('settings.people'), y: 25 },
+    { name: t('home.cycles'), y: 20 },
+    { name: t('settings.other'), y: 10 },
   ];
 
   const performanceChartData = [
     {
-      name: "Performance",
+      name: t('settings.performanceLabel'),
       data: [65, 72, 68, 75, 80, 78, 85],
       color: "#667eea",
     },
@@ -201,7 +203,7 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  Advanced Driver Assistance System
+                  {t('home.title')}
                 </motion.h1>
 
                 <motion.p
@@ -210,8 +212,7 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  Real-time AI-powered safety monitoring with WebSocket streaming,
-                  automatic data collection, and intelligent alerts.
+                  {t('home.subtitle')}
                 </motion.p>
 
                 <motion.div
@@ -225,7 +226,7 @@ export default function HomePage() {
                       className="btn-neon w-full sm:w-auto"
                     >
                       <Zap className="w-5 h-5 mr-2 inline" />
-                      START DETECTION
+                      {t('home.startDetection')}
                     </button>
                   </Link>
                   <Link href="/dashboard">
@@ -234,7 +235,7 @@ export default function HomePage() {
                       className="shadow-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 w-full sm:w-auto inline-flex items-center justify-center gap-2 whitespace-nowrap"
                     >
                       <span className="inline-flex items-center gap-2 whitespace-nowrap">
-                        View Dashboard
+                        {t('home.viewDashboard')}
                         <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                       </span>
                     </Button>
@@ -250,33 +251,33 @@ export default function HomePage() {
             >
               {[
                 {
-                  title: "Trạng thái hệ thống",
+                  title: t('home.systemStatus'),
                   value: stats.systemStatus,
                   icon: Activity,
                   color: "success",
-                  description: "Tất cả hệ thống trực tuyến",
+                  description: t('home.allSystemsOnline'),
                 },
                 {
-                  title: "Camera hoạt động",
+                  title: t('home.activeCameras'),
                   value: stats.activeCameras.toString(),
                   icon: Cctv,
                   color: "primary",
-                  description: "Giám sát thời gian thực",
+                  description: t('home.realTimeMonitoring'),
                 },
                 {
-                  title: "Tổng số lần phát hiện",
+                  title: t('home.totalDetections'),
                   value: stats.totalDetections.toLocaleString(),
                   icon: BookOpen,
                   color: "info",
-                  description: "+12% so với tuần trước",
+                  description: t('home.percentIncrease', { percent: 12 }),
                   trend: true,
                 },
                 {
-                  title: "Các cảnh báo hôm nay",
+                  title: t('home.alertsToday'),
                   value: stats.alertsToday.toString(),
                   icon: AlertTriangle,
                   color: "warning",
-                  description: "Cảnh báo an toàn đã phát",
+                  description: t('home.safetyAlertsIssued'),
                 },
               ].map((stat, index) => (
                 <motion.div
@@ -299,7 +300,7 @@ export default function HomePage() {
                     </CardHeader>
                     <CardContent className="pb-8">
                       <div className="flex items-center gap-2 mb-2">
-                        {stat.title === "Trạng Thái Hệ Thống" && (
+                        {stat.title === t('home.systemStatus') && (
                           <motion.div
                             className="w-2 h-2 rounded-full bg-success"
                             animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
@@ -328,16 +329,16 @@ export default function HomePage() {
               className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
             >
               <HighchartsChart
-                title="Detection Distribution"
-                description="Current detection breakdown"
+                title={t('home.detectionDistribution')}
+                description={t('home.detectionDistributionDesc')}
                 type="pie"
                 data={detectionChartData}
                 height={300}
                 className="sm:pl-8"
               />
               <HighchartsChart
-                title="System Performance"
-                description="Performance over time"
+                title={t('home.systemPerformance')}
+                description={t('home.systemPerformanceDesc')}
                 type="line"
                 data={performanceChartData}
                 height={300}
@@ -351,9 +352,9 @@ export default function HomePage() {
             >
               <Card glass>
                 <CardHeader>
-                  <CardTitle className="text-xl">Thao Tác Nhanh</CardTitle>
+                  <CardTitle className="text-xl">{t('home.quickActions')}</CardTitle>
                   <CardDescription>
-                    Các tác vụ và phím tắt thường dùng
+                    {t('home.quickActionsDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -361,22 +362,22 @@ export default function HomePage() {
                     {
                       href: "/adas",
                       icon: Zap,
-                      title: "Bắt Đầu Phát Hiện Trực Tiếp",
-                      description: "Giám sát ADAS thời gian thực",
+                      title: t('home.startLiveDetection'),
+                      description: t('home.startLiveDetectionDesc'),
                       gradient: "from-primary to-primary/80",
                     },
                     {
                       href: "/driver-monitor",
                       icon: Eye,
-                      title: "Giám Sát Tài Xế",
-                      description: "Theo dõi hành vi tài xế",
+                      title: t('home.monitorDriver'),
+                      description: t('home.monitorDriverDesc'),
                       gradient: "from-accent to-accent/80",
                     },
                     {
                       href: "/analytics",
                       icon: TrendingUp,
-                      title: "Xem Phân Tích",
-                      description: "Thông tin chi tiết hiệu suất",
+                      title: t('home.viewAnalytics'),
+                      description: t('home.viewAnalyticsDesc'),
                       gradient: "from-info to-info/80",
                     },
                   ].map((action) => (
@@ -413,19 +414,24 @@ export default function HomePage() {
 
               <Card glass>
                 <CardHeader>
-                  <CardTitle className="text-xl">Tính Năng Hệ Thống</CardTitle>
+                  <CardTitle className="text-xl">{t('home.systemFeatures')}</CardTitle>
                   <CardDescription>
-                    Điều làm nên sức mạnh của ADAS
+                    {t('home.systemFeaturesDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    "Phát Trực Tiếp WebSocket Thời Gian Thực",
-                    "Cảnh Báo Thông Minh",
-
+                    {
+                      title: t('home.websocketStreaming'),
+                      desc: t('home.websocketStreamingDesc'),
+                    },
+                    {
+                      title: t('home.smartAlerts'),
+                      desc: t('home.smartAlertsDesc'),
+                    },
                   ].map((feature, index) => (
                     <motion.div
-                      key={feature}
+                      key={feature.title}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.7 + index * 0.1 }}
@@ -434,14 +440,10 @@ export default function HomePage() {
                       <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
                       <div>
                         <div className="font-medium text-foreground">
-                          {feature}
+                          {feature.title}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {index === 0 && "Xử lý video độ trễ thấp"}
-                          {index === 1 && "Nhận dạng đối tượng hiện đại nhất"}
-                          {index === 2 && "Cải thiện mô hình liên tục"}
-                          {index === 3 && "Cảnh báo bằng giọng nói và hình ảnh"}
-                          {index === 4 && "Cài đặt một lệnh"}
+                          {feature.desc}
                         </div>
                       </div>
                     </motion.div>
@@ -456,14 +458,14 @@ export default function HomePage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl">Hoạt Động Gần Đây</CardTitle>
+                      <CardTitle className="text-xl">{t('home.recentActivity')}</CardTitle>
                       <CardDescription>
-                        Sự kiện và phát hiện mới nhất của hệ thống
+                        {t('home.recentActivityDesc')}
                       </CardDescription>
                     </div>
                     <Link href="/events">
                       <Button variant="glass" size="sm">
-                        Xem Tất Cả
+                        {t('home.viewAll')}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -474,22 +476,22 @@ export default function HomePage() {
                     {[
                       {
                         icon: Clock,
-                        text: "Hệ thống khởi động thành công",
-                        subtext: "Tất cả dịch vụ hoạt động",
-                        time: "Vừa xong",
+                        text: t('home.systemStarted'),
+                        subtext: t('home.systemStartedDesc'),
+                        time: t('home.justNow'),
                       },
                       {
                         icon: CheckCircle2,
-                        text: "Kết nối cơ sở dữ liệu thành công",
-                        subtext: "SQLite sẵn sàng",
-                        time: "1 phút trước",
+                        text: t('home.dbConnected'),
+                        subtext: t('home.dbConnectedDesc'),
+                        time: t('home.minutesAgo', { count: 1 }),
                         color: "success",
                       },
                       {
                         icon: Activity,
-                        text: "Backend API trực tuyến",
-                        subtext: "Sẵn sàng nhận yêu cầu",
-                        time: "2 phút trước",
+                        text: t('home.apiOnline'),
+                        subtext: t('home.apiOnlineDesc'),
+                        time: t('home.minutesAgo', { count: 2 }),
                         color: "primary",
                       },
                     ].map((activity, index) => {

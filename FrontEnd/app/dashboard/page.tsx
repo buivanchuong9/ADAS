@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
 import { Sidebar } from "@/components/sidebar"
 import { MobileNav } from "@/components/mobile-nav"
 import { GlassCard } from "@/components/ui/glass-card"
@@ -32,6 +33,7 @@ interface DetectionClass {
 export default function DashboardPage() {
   const router = useRouter()
   const { isAuthenticated, loading: authLoading } = useAuth()
+  const { t } = useLanguage()
   const [stats, setStats] = useState<Stats>({
     totalDetections: 0,
     totalTrips: 0,
@@ -68,7 +70,7 @@ export default function DashboardPage() {
       const session = await authService.getSession()
       if (!session?.access_token) {
         console.warn('No access token available')
-        setError('Phiên đăng nhập đã hết hạn')
+        setError(t('dashboard.sessionExpired'))
         router.push('/login')
         return
       }
@@ -143,7 +145,7 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.error('Error fetching dashboard data:', err)
-      setError('Đang sử dụng dữ liệu mẫu')
+      setError(t('dashboard.usingMockData'))
     } finally {
       setLoading(false)
     }
@@ -155,7 +157,7 @@ export default function DashboardPage() {
       <div className="flex h-screen items-center justify-center bg-bg-primary">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan" />
-          <p className="mt-4 text-fg-secondary">Đang kiểm tra xác thực...</p>
+          <p className="mt-4 text-fg-secondary">{t('dashboard.checkingAuth')}</p>
         </div>
       </div>
     )
@@ -176,15 +178,15 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-neon-cyan tracking-wider">DASHBOARD</h1>
+              <h1 className="text-3xl font-bold text-neon-cyan tracking-wider">{t('dashboard.title')}</h1>
               <p className="text-sm text-fg-secondary mt-1">
-                Real-time system overview with live data
+                {t('dashboard.subtitle')}
               </p>
             </div>
             <Badge className="glass-card border-neon-green/50 text-neon-green px-4 py-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse" style={{ boxShadow: '0 0 10px var(--neon-green)' }} />
-                ONLINE
+                {t('common.online')}
               </div>
             </Badge>
           </div>
@@ -202,7 +204,7 @@ export default function DashboardPage() {
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cyan" />
-              <p className="mt-4 text-fg-secondary">Loading system data...</p>
+              <p className="mt-4 text-fg-secondary">{t('dashboard.loadingData')}</p>
             </div>
           ) : (
             <>
@@ -218,7 +220,7 @@ export default function DashboardPage() {
                         height: 300
                       },
                       title: {
-                        text: 'Xu Hướng Phát Hiện Thời Gian Thực',
+                        text: t('dashboard.detectionTrendTitle'),
                         style: {
                           color: '#00E5FF',
                           fontFamily: 'var(--font-inter)',
@@ -240,7 +242,7 @@ export default function DashboardPage() {
                       },
                       yAxis: {
                         title: {
-                          text: 'Số lượng phát hiện',
+                          text: t('settings.detectionCount'),
                           style: {
                             color: '#BAE6FD',
                             fontFamily: 'var(--font-inter)',
@@ -327,7 +329,7 @@ export default function DashboardPage() {
                         height: 300
                       },
                       title: {
-                        text: 'Độ Chính Xác Phát Hiện Theo Thời Gian',
+                        text: t('dashboard.accuracyTrendTitle'),
                         style: {
                           color: '#00E5FF',
                           fontFamily: 'var(--font-inter)',
@@ -336,7 +338,7 @@ export default function DashboardPage() {
                         }
                       },
                       xAxis: {
-                        categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                        categories: [t('settings.monday'), t('settings.tuesday'), t('settings.wednesday'), t('settings.thursday'), t('settings.friday'), t('settings.saturday'), t('settings.sunday')],
                         labels: {
                           style: {
                             color: '#BAE6FD',
@@ -388,7 +390,7 @@ export default function DashboardPage() {
                         }
                       },
                       series: [{
-                        name: 'Độ chính xác',
+                        name: t('settings.accuracy'),
                         data: [96.5, 97.2, 96.8, 98.1, 97.9, 98.5, 98.3],
                         color: '#00FFA3',
                         marker: {
