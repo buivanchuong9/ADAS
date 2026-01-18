@@ -692,26 +692,6 @@ export default function SettingsPage() {
                                 </div>
                                 <p className="text-xs text-fg-muted font-medium">Ngôn ngữ hiển thị giao diện</p>
                             </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-fg-primary">Chế Độ Giao Diện</label>
-                                <div className="relative">
-                                    <select
-                                        value={theme}
-                                        onChange={(e) => { setTheme(e.target.value); setHasChanges(true) }}
-                                        className="w-full glass-card border-neon-cyan/30 text-fg-primary px-4 py-3 rounded-lg appearance-none cursor-pointer hover:border-neon-cyan/50 transition-all font-medium"
-                                    >
-                                        <option value="dark">Tối</option>
-                                        <option value="auto">Tự Động</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-fg-secondary pointer-events-none" />
-                                </div>
-                                <p className="text-xs text-fg-muted font-medium">Chế độ hiển thị màn hình</p>
-                            </div>
-
-                            
-
-                            
                         </div>
                     </GlassCard>
 

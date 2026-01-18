@@ -421,8 +421,6 @@ export default function HomePage() {
                 <CardContent className="space-y-4">
                   {[
                     "Phát Trực Tiếp WebSocket Thời Gian Thực",
-                    "Phát Hiện AI YOLOv11",
-                    "Thu Thập Dữ Liệu Tự Động",
                     "Cảnh Báo Thông Minh",
 
                   ].map((feature, index) => (

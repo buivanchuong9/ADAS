@@ -48,22 +48,10 @@ const navigation = [
     description: "Số liệu hiệu suất",
   },
   {
-    name: "Thu Thập Dữ Liệu",
-    href: "/data-collection",
-    icon: Database,
-    description: "Quản lý dataset",
-  },
-  {
     name: "Trợ Lý AI",
     href: "/ai-assistant",
     icon: Brain,
     description: "Hỗ trợ AI",
-  },
-  {
-    name: "Sự Kiện",
-    href: "/events",
-    icon: AlertTriangle,
-    description: "Lịch sử cảnh báo",
   },
 ];
 
@@ -112,14 +100,6 @@ export function Sidebar() {
               className="w-full h-full object-cover"
             />
           </motion.div>
-          <div className="text-center">
-            <p 
-              className="text-xs font-semibold tracking-wide"
-              style={{ color: 'var(--primary)' }}
-            >
-              ADAS Platform <span style={{ color: 'var(--text-muted)' }}>• v3.0</span>
-            </p>
-          </div>
         </Link>
       </motion.div>
 
