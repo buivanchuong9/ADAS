@@ -32,13 +32,7 @@ const premiumTheme: Highcharts.Options = {
     "#fee140", // Yellow
     "#0ba360", // Dark green
   ],
-  title: {
-    style: {
-      color: "#ffffff",
-      fontWeight: "600",
-      fontSize: "18px",
-    },
-  },
+
   subtitle: {
     style: {
       color: "#9ca3af",
@@ -171,6 +165,7 @@ export function HighchartsChart({
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         },
       },
+      title: undefined,
       credits: {
         enabled: false,
       },
