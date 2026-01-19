@@ -1,10 +1,11 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/language-context";
 import {
   LayoutDashboard,
   Video,
@@ -20,59 +21,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const navigation = [
-  {
-    name: "Bảng Điều Khiển",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-    description: "Tổng quan hệ thống",
-  },
-  {
-    name: "Phát Hiện Trực Tiếp",
-    href: "/",
-    icon: Video,
-    description: "ADAS thời gian thực",
-  },
-  {
-    name: "Giám Sát ADAS",
-    href: "/adas",
-    icon: Car,
-    description: "Giám sát nâng cao",
-  },
-  {
-    name: "Giám Sát Tài Xế",
-    href: "/driver-monitor",
-    icon: Eye,
-    description: "Hành vi tài xế",
-  },
-  {
-    name: "Phân Tích",
-    href: "/analytics",
-    icon: BarChart3,
-    description: "Số liệu hiệu suất",
-  },
-  {
-    name: "Thu Thập Dữ Liệu",
-    href: "/data-collection",
-    icon: Database,
-    description: "Quản lý dataset",
-  },
-  {
-    name: "Trợ Lý AI",
-    href: "/ai-assistant",
-    icon: Brain,
-    description: "Hỗ trợ AI",
-  },
-  {
-    name: "Sự Kiện",
-    href: "/events",
-    icon: AlertTriangle,
-    description: "Lịch sử cảnh báo",
-  },
-];
-
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
+  const { t, language } = useLanguage();
+  const pathname = usePathname();
+
+  const navigation = useMemo(() => [
+    { name: t("nav.dashboard"), href: "/dashboard", icon: LayoutDashboard, description: t("nav.dashboardDesc") },
+    { name: t("nav.liveDetection"), href: "/", icon: Video, description: t("nav.liveDetectionDesc") },
+    { name: t("nav.adasMonitor"), href: "/adas", icon: Car, description: t("nav.adasMonitorDesc") },
+    { name: t("nav.driverMonitor"), href: "/driver-monitor", icon: Eye, description: t("nav.driverMonitorDesc") },
+    { name: t("nav.analytics"), href: "/analytics", icon: BarChart3, description: t("nav.analyticsDesc") },
+    { name: t("nav.dataCollection"), href: "/data-collection", icon: Database, description: t("nav.dataCollectionDesc") },
+    { name: t("nav.aiAssistant"), href: "/ai-assistant", icon: Brain, description: t("nav.aiAssistantDesc") },
+    { name: t("nav.events"), href: "/events", icon: AlertTriangle, description: t("nav.eventsDesc") },
+  ], [language, t]);
   useEffect(() => {
   if (isOpen) {
     document.body.style.overflow = "hidden";
@@ -87,8 +50,6 @@ export function MobileNav() {
     document.body.style.touchAction = "";
   };
 }, [isOpen]);
-
-  const pathname = usePathname();
 
   return (
     <>
@@ -168,7 +129,7 @@ export function MobileNav() {
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-semibold text-neon-cyan">
-                    ADAS Platform <span className="text-fg-secondary">• v3.0</span>
+                    {t("header.platformName")} <span className="text-fg-secondary">• v3.0</span>
                   </p>
                 </div>
               </Link>
@@ -191,7 +152,7 @@ export function MobileNav() {
 
       return (
         <Link
-          key={item.name}
+          key={item.href}
           href={item.href}
           onClick={() => setIsOpen(false)}
           className={cn(
@@ -221,14 +182,14 @@ export function MobileNav() {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all"
               >
                 <Settings className="w-5 h-5" />
-                <span className="font-semibold text-sm">Cài Đặt</span>
+                <span className="font-semibold text-sm">{t("nav.settings")}</span>
               </Link>
 
               <div className="mt-4 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span className="text-sm font-medium text-green-700">
-                    System Online
+                    {t("nav.systemOnline")}
                   </span>
                 </div>
               </div>
