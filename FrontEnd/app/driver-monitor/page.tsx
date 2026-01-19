@@ -1,215 +1,559 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Sidebar } from '@/components/sidebar'
-import { MobileNav } from '@/components/mobile-nav'
-import { Card } from '@/components/ui/card'
+import Link from 'next/link'
+import { useLanguage } from '@/contexts/language-context'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, Play, Square, Eye, Zap } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { GlassCard } from '@/components/ui/glass-card'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { getApiUrl } from '@/lib/api-config'
+import { API_ENDPOINTS } from '@/lib/api-endpoints'
+import { ArrowLeft, Upload, PlayCircle, Eye, Loader2, AlertTriangle, Sparkles, ShieldCheck, RefreshCw, Clock, FileVideo, CheckCircle2, Database } from 'lucide-react'
+
+type VideoItem = {
+  id: number
+  job_id: string
+  video_filename: string
+  video_path: string
+  status: string
+  progress_percent?: number
+  created_at: string
+  duration_seconds?: number | null
+  video_size_mb?: number | null
+}
 
 export default function DriverMonitorPage() {
+  const { toast } = useToast()
+  const { t } = useLanguage()
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [fatigueLevel, setFatigueLevel] = useState(0)
   const [distractionLevel, setDistractionLevel] = useState(0)
   const [eyesClosed, setEyesClosed] = useState(false)
+  const [blinkRate, setBlinkRate] = useState(0)
+  
+  // Video selection state (tái sử dụng từ tab ADAS)
+  const [file, setFile] = useState<File | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
+  const [showVideoDialog, setShowVideoDialog] = useState(false)
+  const [availableVideos, setAvailableVideos] = useState<VideoItem[]>([])
+  const [loadingVideos, setLoadingVideos] = useState(false)
 
-  const startMonitoring = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setIsMonitoring(true)
-      }
-    } catch (err) {
-      console.error("Lỗi truy cập camera:", err)
-    }
-  }
-
-  const stopMonitoring = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-      tracks.forEach((track) => track.stop())
-      setIsMonitoring(false)
-    }
-  }
-
+  // Cleanup video URL on unmount
   useEffect(() => {
-    if (!isMonitoring || !videoRef.current || !canvasRef.current) return
-
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    const drawFrame = () => {
-      if (videoRef.current && ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height)
-
-        // Mock fatigue and distraction detection
-        const mockFatigue = Math.random() * 100
-        const mockDistraction = Math.random() * 100
-        const mockEyesClosed = Math.random() > 0.7
-
-        setFatigueLevel(Math.round(mockFatigue))
-        setDistractionLevel(Math.round(mockDistraction))
-        setEyesClosed(mockEyesClosed)
-
-        // Draw face detection box
-        ctx.strokeStyle = mockFatigue > 60 ? "#ff6b35" : "#4ade80"
-        ctx.lineWidth = 3
-        ctx.strokeRect(150, 100, 200, 250)
-
-        // Draw eye indicators
-        ctx.fillStyle = mockEyesClosed ? "#ff6b35" : "#4ade80"
-        ctx.beginPath()
-        ctx.arc(200, 150, 8, 0, Math.PI * 2)
-        ctx.fill()
-
-        ctx.beginPath()
-        ctx.arc(300, 150, 8, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Draw status text
-        ctx.fillStyle = "#ffffff"
-        ctx.font = "14px Arial"
-        ctx.fillText(`Mệt Mỏi: ${Math.round(mockFatigue)}%`, 160, 380)
-        ctx.fillText(`Phân Tán: ${Math.round(mockDistraction)}%`, 160, 400)
+    return () => {
+      if (videoUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(videoUrl)
       }
-      requestAnimationFrame(drawFrame)
     }
+  }, [videoUrl])
 
-    drawFrame()
+  // Mock detection data update (sẽ được thay bằng API call thực tế)
+  useEffect(() => {
+    if (!isMonitoring) return
+
+    const interval = setInterval(() => {
+      const mockFatigue = Math.random() * 100
+      const mockDistraction = Math.random() * 100
+      const mockEyesClosed = Math.random() > 0.7
+      const mockBlinkRate = Math.floor(Math.random() * 30) + 10
+
+      setFatigueLevel(Math.round(mockFatigue))
+      setDistractionLevel(Math.round(mockDistraction))
+      setEyesClosed(mockEyesClosed)
+      setBlinkRate(mockBlinkRate)
+    }, 1000) // Update every second
+
+    return () => clearInterval(interval)
   }, [isMonitoring])
 
+  // Load video list when dialog opens
+  const loadVideoList = async () => {
+    try {
+      setLoadingVideos(true)
+      const res = await fetch(getApiUrl(`${API_ENDPOINTS.VIDEOS_LIST}?limit=20`))
+      const data = await res.json()
+
+      let videos: VideoItem[] = []
+      if (data?.videos && Array.isArray(data.videos)) {
+        videos = data.videos
+      } else if (Array.isArray(data)) {
+        videos = data
+      }
+
+      setAvailableVideos(videos)
+
+      if (videos.length === 0) {
+        toast({
+          title: t('adas.noVideos'),
+          description: t('adas.noVideosDesc'),
+        })
+      }
+    } catch (err) {
+      console.error('❌ [VideoList] Error:', err)
+      toast({
+        title: t('adas.videoListError'),
+        description: t('adas.videoListErrorDesc'),
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingVideos(false)
+    }
+  }
+
+  // Open video selection dialog
+  const useSampleVideo = async () => {
+    setShowVideoDialog(true)
+    await loadVideoList()
+  }
+
+  // Handle file upload
+  const handleFile = (f: File | null) => {
+    setFile(f)
+    if (videoUrl?.startsWith("blob:")) URL.revokeObjectURL(videoUrl)
+    setVideoUrl(f ? URL.createObjectURL(f) : null)
+    setSelectedVideo(null)
+    setIsMonitoring(false)
+  }
+
+  // Select video from list
+  const selectVideo = (video: VideoItem) => {
+    let playUrl = ""
+    
+    if (video.status === 'completed') {
+      const resultFilename = video.video_filename.replace('.mp4', '_result.mp4')
+      playUrl = getApiUrl(API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename))
+    } else {
+      playUrl = getApiUrl(API_ENDPOINTS.VIDEO_SAMPLE(video.job_id, video.video_filename))
+    }
+
+    setVideoUrl(playUrl)
+    setSelectedVideo(video)
+    setFile(null)
+    setShowVideoDialog(false)
+    setIsMonitoring(false)
+    
+    toast({
+      title: t('driverMonitor.videoSelected'),
+      description: t('driverMonitor.videoSelectedDesc', { filename: video.video_filename }),
+    })
+  }
+
+  // Start monitoring với video file
+  const startMonitoring = async () => {
+    if (!videoUrl) {
+      toast({
+        title: t('driverMonitor.noVideoSelected'),
+        description: t('driverMonitor.noVideoSelectedDesc'),
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (videoRef.current) {
+      videoRef.current.src = videoUrl
+      videoRef.current.loop = true
+      videoRef.current.muted = true
+      
+      try {
+        await videoRef.current.play()
+        setIsMonitoring(true)
+        toast({
+          title: t('driverMonitor.monitoringStarted'),
+          description: t('driverMonitor.analyzingVideo'),
+        })
+      } catch (err) {
+        console.error("Video play error:", err)
+        toast({
+          title: t('driverMonitor.videoPlayError'),
+          description: t('driverMonitor.videoPlayErrorDesc'),
+          variant: "destructive"
+        })
+      }
+    }
+  }
+
+  // Stop monitoring
+  const stopMonitoring = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+    setIsMonitoring(false)
+  }
+
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <MobileNav />
-      <Sidebar />
-
-      <main className="flex-1 overflow-auto">
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Giám Sát Tài Xế</h1>
-            <p className="text-sm sm:text-base text-gray-600">Theo dõi tình trạng tài xế và phát hiện mệt mỏi, phân tán</p>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-            <div className="xl:col-span-2">
-              <Card className="bg-card border-border overflow-hidden">
-                <div className="relative bg-black aspect-video">
-                  <video ref={videoRef} className="w-full h-full object-cover hidden" autoPlay playsInline />
-                  <canvas ref={canvasRef} width={640} height={480} className="w-full h-full" />
-                  {!isMonitoring && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                      <div className="text-center">
-                        <p className="text-foreground/60 mb-4">Nhấn nút bên dưới để bắt đầu giám sát</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4 border-t border-border flex gap-3">
-                  {!isMonitoring ? (
-                    <Button
-                      onClick={startMonitoring}
-                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Bắt Đầu Giám Sát
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={stopMonitoring}
-                      className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                    >
-                      <Square className="w-4 h-4 mr-2" />
-                      Dừng Giám Sát
-                    </Button>
-                  )}
-                </div>
-              </Card>
+    <div className="flex flex-col min-h-screen bg-bg-primary text-fg-primary">
+      <header className="flex items-center justify-between p-3 sm:p-5 border-b border-white/10 glass-card backdrop-blur-xl">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="text-fg-secondary hover:text-neon-cyan">
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            </Button>
+          </Link>
+          <div>
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <Badge className="gap-1 text-xs bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                <Sparkles className="w-3 h-3" />
+                <span className="hidden sm:inline">{t('driverMonitor.realtimeAI')}</span>
+                <span className="sm:hidden">{t('driverMonitor.ai')}</span>
+              </Badge>
+              <Badge className="gap-1 text-xs bg-neon-green/20 text-neon-green border-neon-green/50">
+                <ShieldCheck className="w-3 h-3" />
+                <span className="hidden sm:inline">{t('driverMonitor.badge')}</span>
+                <span className="sm:hidden">{t('driverMonitor.badgeShort')}</span>
+              </Badge>
             </div>
-
-            <div className="space-y-4">
-              <Card className="bg-card border-border p-4">
-                <h3 className="font-semibold text-foreground mb-4">Chỉ Số Tài Xế</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-foreground/70 flex items-center gap-2">
-                        <Zap className="w-4 h-4" />
-                        Mệt Mỏi
-                      </span>
-                      <span className="text-lg font-bold text-primary">{fatigueLevel}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${fatigueLevel > 60 ? "bg-destructive" : "bg-primary"
-                          }`}
-                        style={{ width: `${fatigueLevel}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-foreground/70 flex items-center gap-2">
-                        <Eye className="w-4 h-4" />
-                        Phân Tán
-                      </span>
-                      <span className="text-lg font-bold text-primary">{distractionLevel}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${distractionLevel > 60 ? "bg-destructive" : "bg-primary"
-                          }`}
-                        style={{ width: `${distractionLevel}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {(eyesClosed || fatigueLevel > 60 || distractionLevel > 60) && (
-                <Card className="p-4 border-destructive/50 bg-destructive/5">
-                  <div className="flex gap-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">Cảnh Báo</h4>
-                      <p className="text-sm text-foreground/70">
-                        {eyesClosed && "Phát hiện mắt đóng. "}
-                        {fatigueLevel > 60 && "Mức mệt mỏi cao. "}
-                        {distractionLevel > 60 && "Phát hiện phân tán."}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              )}
-
-              <Card className="bg-card border-border p-4">
-                <h3 className="font-semibold text-foreground mb-3">Trạng Thái</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-foreground/70">Mắt:</span>
-                    <span className={eyesClosed ? "text-destructive font-semibold" : "text-green-400 font-semibold"}>
-                      {eyesClosed ? "Đóng" : "Mở"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-foreground/70">Tình Trạng:</span>
-                    <span
-                      className={fatigueLevel > 60 ? "text-destructive font-semibold" : "text-green-400 font-semibold"}
-                    >
-                      {fatigueLevel > 60 ? "Mệt Mỏi" : "Bình Thường"}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider">
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">{t('driverMonitor.title')}</span>
+              <span className="sm:hidden">{t('driverMonitor.titleShort')}</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-fg-secondary">
+              {t('driverMonitor.subtitle')}
+            </p>
           </div>
         </div>
+        <div className="hidden lg:flex items-center gap-2">
+        </div>
+      </header>
+
+      <main className="flex-1 p-3 sm:p-4 lg:p-6">
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-3">
+          {/* Left Panel - Controls */}
+          <div className="space-y-4 xl:col-span-1">
+            <GlassCard glow="cyan" className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
+                  <Upload className="w-4 h-4" />
+                  {t('adas.step1Title')}
+                </h3>
+                <p className="text-xs text-fg-secondary mt-1">{t('adas.step1Desc')}</p>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFile(e.target.files?.[0] || null)}
+                  disabled={isMonitoring}
+                  className="
+                    cursor-pointer glass-card border-neon-cyan/30
+                    text-fg-primary file:text-neon-cyan
+                    video-file-input
+                  "
+                />
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    onClick={useSampleVideo}
+                    disabled={loadingVideos || isMonitoring}
+                    className="flex-1 glass-card border-2 border-neon-cyan/50 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20 font-semibold"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      {loadingVideos ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <PlayCircle className="h-4 w-4" />
+                      )}
+                      <span className="hidden sm:inline">{t('adas.sampleVideo')}</span>
+                      <span className="sm:hidden">{t('adas.sampleVideoShort')}</span>
+                    </span>
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className={`rounded-lg glass-card border-2 p-3 ${file || videoUrl
+                    ? "border-neon-green/50"
+                    : "border-neon-red/50"
+                    }`}>
+                    <div className="text-xs text-fg-secondary font-medium tracking-wide">
+                      {t('adas.status')}
+                    </div>
+                    <div
+                      className={`flex items-center gap-2 text-sm font-medium
+                          antialiased
+                          transition-colors duration-300
+                          ${isMonitoring
+                          ? "text-neon-yellow drop-shadow-[0_0_6px_rgba(250,204,21,0.45)]"
+                          : (file || videoUrl)
+                            ? "text-neon-green drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
+                            : "text-neon-red drop-shadow-[0_0_6px_rgba(239,68,68,0.45)]"
+                        }
+                        `}
+                    >
+                      <Loader2
+                        className={`h-3.5 w-3.5
+                            ${isMonitoring ? "animate-spin opacity-90" : "opacity-70"}
+                          `}
+                      />
+                      <span className="leading-none mt-[5px]">
+                        {isMonitoring
+                          ? t('driverMonitor.monitoring')
+                          : (file || videoUrl)
+                            ? t('adas.ready')
+                            : t('adas.notReady')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
+                    <div className="text-xs text-fg-secondary font-medium">{t('adas.videoSource')}</div>
+                    <div className="font-semibold text-neon-green">{file ? t('adas.newUpload') : videoUrl ? t('adas.sampleVideo') : t('adas.notSelected')}</div>
+                  </div>
+                </div>
+
+                {/* Start/Stop Monitoring Button */}
+                {!isMonitoring ? (
+                  <Button
+                    onClick={startMonitoring}
+                    disabled={!videoUrl}
+                    className="w-full glass-card border-2 border-neon-green/50 bg-neon-green/10 text-neon-green hover:bg-neon-green/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                    {t('driverMonitor.startMonitoring')}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={stopMonitoring}
+                    className="w-full glass-card border-2 border-neon-red/50 bg-neon-red/10 text-neon-red hover:bg-neon-red/20 font-bold"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    {t('driverMonitor.stopMonitoring')}
+                  </Button>
+                )}
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
+                  <ShieldCheck className="w-4 h-4" />
+                  {t('driverMonitor.monitoringInfoTitle')}
+                </h3>
+                <p className="text-xs text-fg-secondary mt-1">{t('driverMonitor.monitoringInfoDesc')}</p>
+              </div>
+              <div className="text-sm text-fg-secondary space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"><Eye className="w-3 h-3" />Fatigue</Badge>
+                  <span>{t('driverMonitor.fatigueDetection')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50"><AlertTriangle className="w-3 h-3" />Distraction</Badge>
+                  <span>{t('driverMonitor.distractionDetection')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><ShieldCheck className="w-3 h-3" />Eyes</Badge>
+                  <span>{t('driverMonitor.eyeTracking')}</span>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+
+          {/* Right Panel - Video Display */}
+          <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
+            <div className="mb-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-neon-green tracking-wide">{t('driverMonitor.step2Title')}</h3>
+                {isMonitoring && (
+                  <Badge className="
+                    gap-1
+                    bg-red-500/10
+                    text-red-400
+                    border border-red-500/40
+                    animate-pulse
+                    [animation-duration:1s]
+                    shadow-[0_0_12px_rgba(255,0,0,0.6)]
+                  ">
+                    <AlertTriangle className="h-3 w-3" />
+                    {t('driverMonitor.monitoring')}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-fg-secondary mt-1">
+                {t('driverMonitor.step2Desc')}
+              </p>
+            </div>
+            <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
+              {videoUrl && isMonitoring ? (
+                <video
+                  ref={videoRef}
+                  key={videoUrl}
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-contain"
+                  style={{ maxHeight: "600px" }}
+                  onError={(e) => {
+                    const err = e.currentTarget.error;
+                    console.log("VIDEO ERROR CODE:", err?.code);
+                    console.log("VIDEO ERROR MSG:", err?.message);
+                    console.log("VIDEO URL:", videoUrl);
+                  }}
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                </video>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
+                  <Upload className="w-8 h-8 text-neon-cyan" />
+                  <p>{t('adas.noVideoMessage')}</p>
+                </div>
+              )}
+            </div>
+            {isMonitoring && (
+              <div className="mt-4 text-sm text-fg-secondary flex items-center gap-2">
+                <AlertTriangle
+                  className="
+                    h-10 w-10
+                    text-red-500
+                    animate-pulse
+                    [animation-duration:0.8s]
+                    drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]
+                    drop-shadow-[0_0_16px_rgba(255,0,0,1)]
+                  "
+                />
+                {t('driverMonitor.analyzingStatus', { fatigue: fatigueLevel, distraction: distractionLevel, eyes: eyesClosed ? t('driverMonitor.eyesClosed') : t('driverMonitor.eyesOpen'), blink: blinkRate })}
+              </div>
+            )}
+            {videoUrl && !isMonitoring && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button
+                  onClick={startMonitoring}
+                  className="gap-2 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  Bắt Đầu Giám Sát
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setVideoUrl(null)
+                    setFile(null)
+                    setSelectedVideo(null)
+                  }}
+                  className="gap-2 glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Chọn Video Khác
+                </Button>
+              </div>
+            )}
+          </GlassCard>
+        </div>
       </main>
+
+      {/* Video Selection Dialog - Tái sử dụng từ tab ADAS */}
+      <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
+        <DialogContent className="glass-card border-2 border-neon-cyan/50">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
+              <FileVideo className="w-6 h-6" />
+              {t('adas.selectSampleVideo')}
+            </DialogTitle>
+            <DialogDescription className="text-fg-secondary">
+              {t('driverMonitor.selectSampleVideoDesc', { count: availableVideos.length })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 min-h-0 pr-4 overflow-x-hidden">
+            {loadingVideos ? (
+              <div className="flex items-center justify-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
+                <span className="ml-3 text-fg-secondary">{t('adas.loadingVideoList')}</span>
+              </div>
+            ) : availableVideos.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-40 text-fg-secondary">
+                <FileVideo className="w-12 h-12 mb-3 text-neon-cyan/50" />
+                <p>Chưa có video nào trong database.</p>
+                <p className="text-sm mt-1">Hãy upload video mới để bắt đầu.</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {availableVideos.map((video) => (
+                  <div
+                    key={video.id}
+                    onClick={() => selectVideo(video)}
+                    className="w-full text-left glass-card border-2 border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/5 transition-all p-4 rounded-lg group cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileVideo className="w-5 h-5 text-neon-cyan shrink-0" />
+                          <h4 className="font-semibold text-fg-primary truncate group-hover:text-neon-cyan transition-colors">
+                            {video.video_filename || `Video #${video.id}`}
+                          </h4>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-fg-secondary">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              {video.duration_seconds
+                                ? `${Math.floor(video.duration_seconds / 60)}:${(video.duration_seconds % 60).toString().padStart(2, '0')}`
+                                : 'N/A'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Database className="w-3 h-3" />
+                            <span>
+                              {video.video_size_mb
+                                ? `${video.video_size_mb.toFixed(1)} MB`
+                                : 'N/A'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            {video.status === 'completed' ? (
+                              <Badge variant="outline" className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10">
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                {t('adas.completed')}
+                              </Badge>
+                            ) : video.status === 'processing' ? (
+                              <Badge variant="outline" className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10">
+                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                {t('adas.processing')}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10">
+                                {t('adas.notStarted')}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {video.created_at && (
+                            <div className="text-xs opacity-70">
+                              {new Date(video.created_at).toLocaleDateString('vi-VN')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        className="glass-card bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 hover:bg-neon-cyan/30 shrink-0"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        {t('common.select')}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
