@@ -32,6 +32,7 @@ jobs:
 
       - name: Build frontend
         working-directory: ./FrontEnd
+        
         run: npm run build
 
       - name: Deploy to IIS

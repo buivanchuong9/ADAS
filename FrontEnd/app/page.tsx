@@ -198,22 +198,13 @@ export default function HomePage() {
                 </motion.div>
 
                 <motion.h1
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-neon-cyan"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold my-7 text-neon-cyan"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
                   {t('home.title')}
                 </motion.h1>
-
-                <motion.p
-                  className="text-base sm:text-lg lg:text-xl text-fg-secondary max-w-3xl mb-8 leading-relaxed"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  {t('home.subtitle')}
-                </motion.p>
 
                 <motion.div
                   className="flex flex-wrap gap-3 sm:gap-4"
@@ -350,14 +341,15 @@ export default function HomePage() {
               variants={itemVariants}
               className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
             >
-              <Card glass>
+              <Card glass className="xl:col-span-2 w-full">
+
                 <CardHeader>
                   <CardTitle className="text-xl">{t('home.quickActions')}</CardTitle>
                   <CardDescription>
                     {t('home.quickActionsDesc')}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="pt-3 grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
                     {
                       href: "/adas",
@@ -411,45 +403,6 @@ export default function HomePage() {
                   ))}
                 </CardContent>
               </Card>
-
-              <Card glass>
-                <CardHeader>
-                  <CardTitle className="text-xl">{t('home.systemFeatures')}</CardTitle>
-                  <CardDescription>
-                    {t('home.systemFeaturesDesc')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    {
-                      title: t('home.websocketStreaming'),
-                      desc: t('home.websocketStreamingDesc'),
-                    },
-                    {
-                      title: t('home.smartAlerts'),
-                      desc: t('home.smartAlertsDesc'),
-                    },
-                  ].map((feature, index) => (
-                    <motion.div
-                      key={feature.title}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + index * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
-                      <div>
-                        <div className="font-medium text-foreground">
-                          {feature.title}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {feature.desc}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </CardContent>
-              </Card>
             </motion.div>
 
             {/* Recent Activity */}
@@ -480,20 +433,7 @@ export default function HomePage() {
                         subtext: t('home.systemStartedDesc'),
                         time: t('home.justNow'),
                       },
-                      {
-                        icon: CheckCircle2,
-                        text: t('home.dbConnected'),
-                        subtext: t('home.dbConnectedDesc'),
-                        time: t('home.minutesAgo', { count: 1 }),
-                        color: "success",
-                      },
-                      {
-                        icon: Activity,
-                        text: t('home.apiOnline'),
-                        subtext: t('home.apiOnlineDesc'),
-                        time: t('home.minutesAgo', { count: 2 }),
-                        color: "primary",
-                      },
+                      
                     ].map((activity, index) => {
                       const iconColorClass =
                         activity.color === "success"
