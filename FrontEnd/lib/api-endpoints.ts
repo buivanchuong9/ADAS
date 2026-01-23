@@ -43,15 +43,23 @@ export const API_ENDPOINTS = {
   WS_INFERENCE_VIDEO: '/ws/inference/video',
   WS_MODELS_WEBCAM: '/ws/models/webcam',
 
-  // Video processing via vision/video (Swagger)
-  VIDEO_UPLOAD: '/vision/video',
+  // Video
   VIDEO_PROCESS: (id: string | number) => `/vision/video/${id}/process`, // assumption if processing per-id exists
-
-  // Video list and management (from OpenAPI & New Backend Spec)
+  VIDEO_UPLOAD: '/api/video/upload',
   VIDEOS_LIST: '/api/video/list',
-  VIDEO_DETAILS: (id: number) => `/api/video/result/${id}`,
-  VIDEO_DOWNLOAD: (jobId: string, filename: string) => `/api/video/download/${jobId}/${filename}`,
-  VIDEO_SAMPLE: (jobId: string, filename: string) => `/api/video/sample/${jobId}/${filename}`,
+  VIDEO_RESULT: (jobId: string | number) => `/api/video/result/${jobId}`,
+  VIDEO_DETAILS: (id: string | number) => `/api/video/result/${id}`,
+  VIDEO_DOWNLOAD: (jobId: string, filename: string) =>
+    `/api/video/download/${jobId}/${filename}`,
+  VIDEO_SAMPLE: (jobId: string, filename: string) =>
+    `/api/video/sample/${jobId}/${filename}`,
+
+    // 🔍 Driver monitoring
+  DRIVER_MONITOR_ANALYZE: '/api/driver-monitor/analyze',                  // POST
+  DRIVER_STATUS_SAVE: '/api/driver-status',                               // POST
+  DRIVER_STATUS_CURRENT: '/api/driver-status',                            // GET
+  DRIVER_STATUS_HISTORY: '/api/driver-status/history',                    // GET
+  DRIVER_MONITOR_DOWNLOAD: (jobId: string | number) => `/api/download/${jobId}`, // GET
 } as const
 
 export type ApiEndpointKey = keyof typeof API_ENDPOINTS

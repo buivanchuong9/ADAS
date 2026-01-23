@@ -199,23 +199,22 @@ export default {
     speedOverTime: "Tốc Độ Theo Thời Gian",
     fatigueOverTime: "Mức Mệt Mỏi Theo Thời Gian",
     safetyScoreComparison: "So Sánh Điểm An Toàn",
+  
     recommendations: "Khuyến Nghị",
     increaseSafetyDistance: "Tăng Khoảng Cách An Toàn",
-    increaseSafetyDistanceDesc: "Bạn đã có 2 cảnh báo va chạm. Hãy tăng khoảng cách với xe phía trước.",
+    increaseSafetyDistanceDesc:
+      "Bạn đã có 2 cảnh báo va chạm. Hãy tăng khoảng cách với xe phía trước.",
     restRegularly: "Nghỉ Ngơi Thường Xuyên",
-    restRegularlyDesc: "Mức mệt mỏi tăng nhanh sau 1.5 giờ lái. Hãy nghỉ ngơi 15 phút.",
+    restRegularlyDesc:
+      "Mức mệt mỏi tăng nhanh sau 1.5 giờ lái. Hãy nghỉ ngơi 15 phút.",
     followSpeedLimit: "Tuân Thủ Giới Hạn Tốc Độ",
-    followSpeedLimitDesc: "Bạn đã vượt tốc độ 3 lần. Hãy tuân thủ giới hạn tốc độ để an toàn hơn.",
-    today: "Hôm Nay",
-    yesterday: "Hôm Qua",
-    threeDaysAgo: "3 Ngày Trước",
-    oneWeekAgo: "1 Tuần Trước",
+    followSpeedLimitDesc:
+      "Bạn đã vượt tốc độ 3 lần. Hãy tuân thủ giới hạn tốc độ để an toàn hơn.",
+  
     speed: "Tốc Độ (km/h)",
     fatigue: "Mệt Mỏi (%)",
     safetyScoreLabel: "Điểm An Toàn",
-    speed: "Tốc Độ (km/h)",
-    fatigue: "Mệt Mỏi (%)",
-    safetyScoreLabel: "Điểm An Toàn",
+  
     today: "Hôm Nay",
     yesterday: "Hôm Qua",
     threeDaysAgo: "3 Ngày Trước",
@@ -416,6 +415,15 @@ export default {
     stopMonitoring: "Dừng Giám Sát",
     selectAnotherVideo: "Chọn Video Khác",
     selectSampleVideoDesc: "Chọn một video từ database để giám sát. Tổng cộng có {count} video.",
+    uploading: "Đang tải lên...",
+    uploadRequiredTitle: "Cần upload video",
+    uploadRequiredDesc: "Vui lòng upload video để bắt đầu giám sát tài xế. Video mẫu chỉ dùng để xem trước.",
+    jobCompleted: "Hoàn thành",
+    jobFailed: "Thất bại",
+    apiError: "Lỗi API",
+    progressLabel: "Tiến trình: {percent}%",
+    jobNotFoundTitle: "Không tìm thấy job",
+    jobNotFoundDesc: "GET /api/video/result trả về 404. Job driver-monitor có thể không được /api/video/result theo dõi. Kiểm tra backend có ghi job driver-monitor vào cùng hệ thống video/result hay không.",
   },
 
   // AI Assistant

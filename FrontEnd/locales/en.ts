@@ -409,6 +409,15 @@ export default {
     stopMonitoring: "Stop Monitoring",
     selectAnotherVideo: "Select Another Video",
     selectSampleVideoDesc: "Select a video from database to monitor. Total {count} videos.",
+    uploading: "Uploading...",
+    uploadRequiredTitle: "Upload required",
+    uploadRequiredDesc: "Please upload a video to start driver monitoring. Sample videos are for preview only.",
+    jobCompleted: "Job completed",
+    jobFailed: "Job failed",
+    apiError: "API error",
+    progressLabel: "Progress: {percent}%",
+    jobNotFoundTitle: "Job not found",
+    jobNotFoundDesc: "GET /api/video/result returned 404. The driver-monitor job may not be tracked by this endpoint. Check that the backend registers driver-monitor jobs in the same video/result system.",
   },
 
   // AI Assistant
