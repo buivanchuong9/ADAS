@@ -10,14 +10,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem={false}
+      forcedTheme="light"
     >
       <LanguageProvider>
         <AuthProvider>
-          <IntroGuard>
-            {children}
-          </IntroGuard>
+          <IntroGuard>{children}</IntroGuard>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

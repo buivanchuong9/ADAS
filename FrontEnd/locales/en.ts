@@ -56,7 +56,8 @@ export default {
   // Home Page
   home: {
     title: "Advanced Driver Assistance System",
-    subtitle: "Real-time AI-powered safety monitoring with WebSocket streaming, automatic data collection, and intelligent alerts.",
+    subtitle:
+      "Real-time AI-powered safety monitoring with WebSocket streaming, automatic data collection, and intelligent alerts.",
     startDetection: "START DETECTION",
     viewDashboard: "View Dashboard",
     quickActions: "Quick Actions",
@@ -142,7 +143,8 @@ export default {
     dataRetentionDesc: "Number of days to store detection data",
     days: "{count} days",
     note: "NOTE",
-    noteText: "Some settings may affect system performance. If you experience latency or performance issues, try reducing video quality, increasing frame skip, or disabling unnecessary features.",
+    noteText:
+      "Some settings may affect system performance. If you experience latency or performance issues, try reducing video quality, increasing frame skip, or disabling unnecessary features.",
     systemPerformance: "System Performance",
     detectionStats: "7-Day Detection Statistics",
     aiUsage: "AI Assistant Usage",
@@ -201,11 +203,14 @@ export default {
     safetyScoreComparison: "Safety Score Comparison",
     recommendations: "Recommendations",
     increaseSafetyDistance: "Increase Safety Distance",
-    increaseSafetyDistanceDesc: "You have 2 collision warnings. Please increase distance from the vehicle ahead.",
+    increaseSafetyDistanceDesc:
+      "You have 2 collision warnings. Please increase distance from the vehicle ahead.",
     restRegularly: "Rest Regularly",
-    restRegularlyDesc: "Fatigue level increases rapidly after 1.5 hours of driving. Take a 15-minute break.",
+    restRegularlyDesc:
+      "Fatigue level increases rapidly after 1.5 hours of driving. Take a 15-minute break.",
     followSpeedLimit: "Follow Speed Limit",
-    followSpeedLimitDesc: "You exceeded the speed limit 3 times. Please follow speed limits for safety.",
+    followSpeedLimitDesc:
+      "You exceeded the speed limit 3 times. Please follow speed limits for safety.",
     speed: "Speed (km/h)",
     fatigue: "Fatigue (%)",
     safetyScoreLabel: "Safety Score",
@@ -303,21 +308,25 @@ export default {
     subtitle: "Upload or use sample videos, AI analyzes and saves to system.",
     noVideoSelected: "No video selected",
     noVideoSelectedDesc: "Please select a video file to analyze",
-    uploadTimeout: "Upload timeout - Video too large or slow network. Please try again with a smaller video.",
+    uploadTimeout:
+      "Upload timeout - Video too large or slow network. Please try again with a smaller video.",
     invalidServerResponse: "Server returned invalid data",
     videoFormatError: "Video format error",
     videoTooLarge: "Video too large. Please select a video smaller than 500MB.",
     serverError: "Server error. Please try again later.",
     noJobId: "Server did not return job_id. Please try again.",
     uploadSuccess: "Upload successful!",
-    uploadSuccessDesc: "Video uploaded ({size} MB). Connecting WebSocket to monitor progress...",
+    uploadSuccessDesc:
+      "Video uploaded ({size} MB). Connecting WebSocket to monitor progress...",
     connectingWebSocket: "Connecting WebSocket to monitor analysis progress...",
     uploadError: "Upload error",
     uploadErrorDesc: "Unable to upload video to server.",
     uploadTimeoutTitle: "Upload timeout",
-    uploadTimeoutDesc: "Video {size} MB is too large or network is slow. Please try a smaller video or check network connection.",
+    uploadTimeoutDesc:
+      "Video {size} MB is too large or network is slow. Please try a smaller video or check network connection.",
     connectionError: "Connection error",
-    connectionErrorDesc: "Unable to connect to server. Please check network connection.",
+    connectionErrorDesc:
+      "Unable to connect to server. Please check network connection.",
     processingFailed: "Processing failed",
     analysisError: "Analysis error",
     analysisComplete: "Analysis Complete!",
@@ -346,13 +355,16 @@ export default {
     uploading: "Uploading...",
     sendVideoAnalysis: "Send Video Analysis",
     storageProcessTitle: "STORAGE PROCESS",
-    storageProcessDesc: "Analyzed video will be saved to system and ready for next step.",
+    storageProcessDesc:
+      "Analyzed video will be saved to system and ready for next step.",
     step1Process: "Send video to system",
     step2Process: "AI analyzes video content",
-    step3Process: "Save results to system and can be retrieved via \"Sample Video\"",
+    step3Process:
+      'Save results to system and can be retrieved via "Sample Video"',
     step2Title: "2) VIEW VIDEO BEING ANALYZED",
     sampleDataSaved: "Sample data saved",
-    step2Desc: "Video will be sent to AI and saved to system. You can use sample videos to avoid large uploads.",
+    step2Desc:
+      "Video will be sent to AI and saved to system. You can use sample videos to avoid large uploads.",
     uploadingVideo: "Uploading video to server...",
     uploadingVideoDesc: "Please wait, uploading file",
     analyzingVideo: "Analyzing video...",
@@ -360,9 +372,11 @@ export default {
     processing: "Processing...",
     noVideoMessage: "No video. Upload or use sample video.",
     analyzeAnotherVideo: "Analyze Another Video",
-    dataWillBeSaved: "Data after analysis will be saved to system and can be retrieved at \"Sample Video\" step.",
+    dataWillBeSaved:
+      'Data after analysis will be saved to system and can be retrieved at "Sample Video" step.',
     selectSampleVideo: "Select Sample Video",
-    selectSampleVideoDesc: "Select a video from database to analyze. Total {count} videos.",
+    selectSampleVideoDesc:
+      "Select a video from database to analyze. Total {count} videos.",
     loadingVideoList: "Loading video list...",
     noVideosInDatabase: "No videos in database.",
     uploadNewVideoToStart: "Please upload a new video to start.",
@@ -374,12 +388,13 @@ export default {
     analyzingProgress: "Analyzing... {progress}% ({time})",
     analyzingProgressNoTime: "Analyzing... {progress}%",
     uploadingVideoToServer: "Uploading video to server... ({size} MB)",
-    uploadingVideoToServerWait: "Uploading video to server ({size} MB) - Please wait",
+    uploadingVideoToServerWait:
+      "Uploading video to server ({size} MB) - Please wait",
   },
 
   // Driver Monitor
   driverMonitor: {
-    title: "DRIVER MONITOR",
+    title: "DRIVER VIDEO ANALYSIS",
     titleShort: "DRIVER",
     subtitle: "Upload or use sample videos to monitor driver.",
     badge: "Driver Monitor",
@@ -389,7 +404,8 @@ export default {
     videoSelected: "Video selected",
     videoSelectedDesc: "Using: {filename}",
     noVideoSelected: "No video selected",
-    noVideoSelectedDesc: "Please select a video or upload a new video before starting monitoring.",
+    noVideoSelectedDesc:
+      "Please select a video or upload a new video before starting monitoring.",
     monitoringStarted: "Monitoring started",
     analyzingVideo: "Analyzing video...",
     videoPlayError: "Video play error",
@@ -401,37 +417,44 @@ export default {
     distractionDetection: "Distraction detection",
     eyeTracking: "Eye state tracking",
     step2Title: "2) VIEW VIDEO BEING MONITORED",
-    step2Desc: "Video will be analyzed to detect driver fatigue and distraction.",
-    analyzingStatus: "Analyzing: Fatigue {fatigue}% | Distraction {distraction}% | Eyes {eyes} | Blink {blink}/min",
+    step2Desc:
+      "Video will be analyzed to detect driver fatigue and distraction.",
+    analyzingStatus:
+      "Analyzing: Fatigue {fatigue}% | Distraction {distraction}% | Eyes {eyes} | Blink {blink}/min",
     eyesClosed: "CLOSED",
     eyesOpen: "OPEN",
     startMonitoring: "Start Monitoring",
     stopMonitoring: "Stop Monitoring",
     selectAnotherVideo: "Select Another Video",
-    selectSampleVideoDesc: "Select a video from database to monitor. Total {count} videos.",
+    selectSampleVideoDesc:
+      "Select a video from database to monitor. Total {count} videos.",
     uploading: "Uploading...",
     uploadRequiredTitle: "Upload required",
-    uploadRequiredDesc: "Please upload a video to start driver monitoring. Sample videos are for preview only.",
+    uploadRequiredDesc:
+      "Please upload a video to start driver monitoring. Sample videos are for preview only.",
     jobCompleted: "Job completed",
     jobFailed: "Job failed",
     apiError: "API error",
     progressLabel: "Progress: {percent}%",
     jobNotFoundTitle: "Job not found",
-    jobNotFoundDesc: "GET /api/video/result returned 404. The driver-monitor job may not be tracked by this endpoint. Check that the backend registers driver-monitor jobs in the same video/result system.",
+    jobNotFoundDesc:
+      "GET /api/video/result returned 404. The driver-monitor job may not be tracked by this endpoint. Check that the backend registers driver-monitor jobs in the same video/result system.",
   },
 
   // AI Assistant
   aiAssistant: {
     title: "AI ASSISTANT",
     subtitle: "Powered by advanced neural networks",
-    welcomeMessage: "Hello! I'm the virtual assistant of the ADAS system. I can help you analyze driving behavior, explain safety warnings and provide recommendations. How can I assist you? 🚗",
+    welcomeMessage:
+      "Hello! I'm the virtual assistant of the ADAS system. I can help you analyze driving behavior, explain safety warnings and provide recommendations. How can I assist you? 🚗",
     suggestion1: "Who are you?",
     suggestion2: "Explain lane departure warning",
     suggestion3: "How to improve safety score?",
     suggestion4: "What causes fatigue warnings?",
     thinking: "Thinking...",
     inputPlaceholder: "Ask me anything about ADAS...",
-    technicalError: "Sorry, I'm experiencing technical issues. Please try again later. 🔧",
+    technicalError:
+      "Sorry, I'm experiencing technical issues. Please try again later. 🔧",
     error: "Error",
   },
 };

@@ -3,82 +3,12 @@
 @import "tailwindcss";
 
 /* ============================================
-   DARK SCI-FI AUTOMOTIVE HMI THEME
+   THEME SYSTEM - LIGHT MODE ONLY
    ============================================ */
 
-/* ============================================
-   THEME SYSTEM - DARK & LIGHT
-   ============================================ */
-
-/* ===== DARK THEME (Default) - SCI-FI NEON ===== */
+/* ===== LIGHT THEME (Default) ===== */
 :root,
-[data-theme='dark'] {
-  /* Background Colors */
-  --bg-body: #050B14;
-  --bg-primary: #050B14;
-  --bg-secondary: #0A1628;
-  --bg-tertiary: #0F1F3A;
-  --bg-surface: rgba(10, 22, 40, 0.6);
-  --bg-subtle: rgba(15, 31, 58, 0.4);
-
-  /* Foreground Colors */
-  --text-main: #FFFFFF;
-  --text-primary: #FFFFFF;
-  --fg-primary: #FFFFFF;
-  --text-secondary: #E0F2FE;
-  --fg-secondary: #E0F2FE;
-  --text-muted: #BAE6FD;
-  --fg-muted: #BAE6FD;
-  --text-invert: #050B14;
-
-  /* Primary Colors - Neon Cyan */
-  --primary: #00E5FF;
-  --primary-soft: rgba(0, 229, 255, 0.1);
-  --primary-strong: #00B8D4;
-  --neon-cyan: #00E5FF;
-
-  /* Secondary Colors - Cyan/Teal */
-  --secondary: #00E5FF;
-  --secondary-soft: rgba(0, 229, 255, 0.1);
-  --accent: #00E5FF;
-
-  /* Status Colors */
-  --neon-red: #FF3B3B;
-  --neon-green: #00FFA3;
-  --neon-yellow: #FFD700;
-  --neon-purple: #B794F6;
-  --success: #00FFA3;
-  --warning: #FFD700;
-  --destructive: #FF3B3B;
-
-  /* Glass Effect */
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-blur: 12px;
-
-  /* Shadows & Glow */
-  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.5);
-  --shadow-glow-red: 0 0 20px rgba(255, 59, 59, 0.5);
-  --shadow-glow-green: 0 0 20px rgba(0, 255, 163, 0.5);
-
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --border: rgba(255, 255, 255, 0.1);
-
-  /* Border Radius */
-  --radius: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
-
-  /* Overview Page Variables (for compatibility) */
-  --bg-main: #050B14;
-  --bg-card: rgba(10, 22, 40, 0.6);
-  --highlight: #FFD700;
-}
-
-/* ===== LIGHT THEME - MODERN SAAS ===== */
-[data-theme='light'] {
+[data-theme="light"] {
   /* Background Colors */
   --bg-body: #f5f7fb;
   --bg-primary: #f5f7fb;
@@ -143,58 +73,18 @@
   --highlight: #ff7a1a;
 }
 
-/* ===== OVERVIEW PAGE COMPATIBILITY ===== */
-.dark-theme {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-}
-
-.dark-theme h1,
-.dark-theme h2,
-.dark-theme h3,
-.dark-theme h4 {
-  color: var(--text-primary) !important;
-}
-
-.dark-theme p {
-  color: var(--text-secondary) !important;
-}
-
 /* Smooth theme transition */
 * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 /* ===== TAILWIND CSS VARIABLES FOR SHADCN/UI ===== */
-/* Dark Theme (Default) */
+/* Light Theme (Default) */
 :root,
-[data-theme='dark'] {
-  --background: 5 11 20;
-  --foreground: 255 255 255;
-  --card: 10 22 40;
-  --card-foreground: 255 255 255;
-  --popover: 10 22 40;
-  --popover-foreground: 255 255 255;
-  --primary: 0 229 255;
-  --primary-foreground: 5 11 20;
-  --secondary: 15 31 58;
-  --secondary-foreground: 224 242 254;
-  --muted: 15 31 58;
-  --muted-foreground: 224 242 254;
-  --accent: 0 229 255;
-  --accent-foreground: 5 11 20;
-  --destructive: 255 59 59;
-  --destructive-foreground: 255 255 255;
-  --border: 255 255 255 / 0.1;
-  --input: 255 255 255 / 0.1;
-  --ring: 0 229 255;
-  --success: 0 255 163;
-  --warning: 255 215 0;
-  --info: 0 229 255;
-}
-
-/* Light Theme */
-[data-theme='light'] {
+[data-theme="light"] {
   --background: 245 247 251;
   --foreground: 17 24 39;
   --card: 255 255 255;
@@ -229,7 +119,11 @@ html {
 }
 
 body {
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif !important;
+  font-family:
+    "Be Vietnam Pro",
+    system-ui,
+    -apple-system,
+    sans-serif !important;
   background: var(--bg-primary);
   color: var(--fg-primary);
   line-height: 1.7;
@@ -250,7 +144,11 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Be Vietnam Pro",
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-weight: 700;
   color: var(--fg-primary);
   letter-spacing: 0.05em;
@@ -305,7 +203,6 @@ h6 {
 }
 
 @keyframes pulse-cyan {
-
   0%,
   100% {
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
@@ -317,7 +214,6 @@ h6 {
 }
 
 @keyframes pulse-red {
-
   0%,
   100% {
     box-shadow: 0 0 10px rgba(255, 59, 59, 0.3);
@@ -408,7 +304,7 @@ button {
 }
 
 .card-hud::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -470,7 +366,9 @@ textarea::placeholder {
 .progress-neon-fill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.5s ease, background-color 0.3s ease;
+  transition:
+    width 0.5s ease,
+    background-color 0.3s ease;
   box-shadow: 0 0 10px currentColor;
 }
 
@@ -493,32 +391,36 @@ textarea::placeholder {
 }
 
 .scan-lines::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: repeating-linear-gradient(0deg,
-      rgba(0, 229, 255, 0.03) 0px,
-      rgba(0, 229, 255, 0.03) 1px,
-      transparent 1px,
-      transparent 2px);
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 229, 255, 0.03) 0px,
+    rgba(0, 229, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
   pointer-events: none;
   z-index: 1;
 }
 
 .scan-lines::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -100%;
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(180deg,
-      transparent 0%,
-      rgba(0, 229, 255, 0.1) 50%,
-      transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.1) 50%,
+    transparent 100%
+  );
   animation: scan 4s linear infinite;
   pointer-events: none;
   z-index: 2;
@@ -561,7 +463,7 @@ textarea::placeholder {
 
 .cyberpunk-frame::before,
 .cyberpunk-frame::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 30px;
   height: 30px;

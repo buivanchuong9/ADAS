@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useLanguage } from "@/contexts/language-context"
-import { Sidebar } from "@/components/sidebar"
-import { MobileNav } from "@/components/mobile-nav"
-import { Card } from "@/components/ui/card"
+import { useLanguage } from "@/contexts/language-context";
+import { Sidebar } from "@/components/sidebar";
+import { MobileNav } from "@/components/mobile-nav";
+import { Card } from "@/components/ui/card";
 import {
   LineChart,
   Line,
@@ -15,8 +15,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts"
-import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react"
+} from "recharts";
+import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react";
 
 const speedData = [
   { time: "0:00", speed: 0 },
@@ -28,7 +28,7 @@ const speedData = [
   { time: "1:30", speed: 50 },
   { time: "1:45", speed: 40 },
   { time: "2:00", speed: 0 },
-]
+];
 
 const fatigueData = [
   { time: "0:00", fatigue: 10 },
@@ -36,18 +36,17 @@ const fatigueData = [
   { time: "1:00", fatigue: 25 },
   { time: "1:30", fatigue: 35 },
   { time: "2:00", fatigue: 40 },
-]
-
+];
 
 export default function Analytics() {
-  const { t } = useLanguage()
-  
+  const { t } = useLanguage();
+
   const tripComparisonData = [
-    { trip: t('analytics.today'), score: 85 },
-    { trip: t('analytics.yesterday'), score: 78 },
-    { trip: t('analytics.threeDaysAgo'), score: 82 },
-    { trip: t('analytics.oneWeekAgo'), score: 75 },
-  ]
+    { trip: t("analytics.today"), score: 85 },
+    { trip: t("analytics.yesterday"), score: 78 },
+    { trip: t("analytics.threeDaysAgo"), score: 82 },
+    { trip: t("analytics.oneWeekAgo"), score: 75 },
+  ];
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -57,8 +56,12 @@ export default function Analytics() {
       <main className="flex-1 overflow-auto">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('analytics.title')}</h1>
-            <p className="text-sm sm:text-base text-gray-600">{t('analytics.subtitle')}</p>
+            <h1 className="text-3xl font-bold text-neon-cyan tracking-wider uppercase">
+              {t("analytics.title")}
+            </h1>
+            <p className="text-sm text-fg-secondary mt-1">
+              {t("analytics.subtitle")}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -66,7 +69,9 @@ export default function Analytics() {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">{t('analytics.distance')}</p>
+                    <p className="text-sm text-gray-600 mb-1 font-medium">
+                      {t("analytics.distance")}
+                    </p>
                     <p className="text-2xl font-bold text-blue-600">42.5 km</p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-blue-500" />
@@ -78,7 +83,9 @@ export default function Analytics() {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">{t('analytics.drivingTime')}</p>
+                    <p className="text-sm text-gray-600 mb-1 font-medium">
+                      {t("analytics.drivingTime")}
+                    </p>
                     <p className="text-2xl font-bold text-green-600">2h 15m</p>
                   </div>
                   <Clock className="w-8 h-8 text-green-500" />
@@ -90,8 +97,12 @@ export default function Analytics() {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">{t('analytics.averageSpeed')}</p>
-                    <p className="text-2xl font-bold text-purple-600">54 km/h</p>
+                    <p className="text-sm text-gray-600 mb-1 font-medium">
+                      {t("analytics.averageSpeed")}
+                    </p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      54 km/h
+                    </p>
                   </div>
                   <Gauge className="w-8 h-8 text-purple-500" />
                 </div>
@@ -102,7 +113,9 @@ export default function Analytics() {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">{t('analytics.safetyScore')}</p>
+                    <p className="text-sm text-gray-600 mb-1 font-medium">
+                      {t("analytics.safetyScore")}
+                    </p>
                     <p className="text-2xl font-bold text-orange-600">85/100</p>
                   </div>
                   <AlertTriangle className="w-8 h-8 text-orange-500" />
@@ -114,7 +127,9 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Card className="bg-white border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.speedOverTime')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("analytics.speedOverTime")}
+                </h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={speedData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -125,7 +140,7 @@ export default function Analytics() {
                         backgroundColor: "#ffffff",
                         border: "1px solid #e5e7eb",
                         color: "#1f2937",
-                        borderRadius: "8px"
+                        borderRadius: "8px",
                       }}
                     />
                     <Legend />
@@ -135,7 +150,7 @@ export default function Analytics() {
                       stroke="#3b82f6"
                       strokeWidth={2}
                       dot={{ fill: "#3b82f6", r: 4 }}
-                      name={t('analytics.speed')}
+                      name={t("analytics.speed")}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -144,7 +159,9 @@ export default function Analytics() {
 
             <Card className="bg-white border-2 border-red-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.fatigueOverTime')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("analytics.fatigueOverTime")}
+                </h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={fatigueData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -155,7 +172,7 @@ export default function Analytics() {
                         backgroundColor: "#ffffff",
                         border: "1px solid #e5e7eb",
                         color: "#1f2937",
-                        borderRadius: "8px"
+                        borderRadius: "8px",
                       }}
                     />
                     <Legend />
@@ -165,7 +182,7 @@ export default function Analytics() {
                       stroke="#ef4444"
                       strokeWidth={2}
                       dot={{ fill: "#ef4444", r: 4 }}
-                      name={t('analytics.fatigue')}
+                      name={t("analytics.fatigue")}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -176,7 +193,9 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-white border-2 border-indigo-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.safetyScoreComparison')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("analytics.safetyScoreComparison")}
+                </h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={tripComparisonData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -187,10 +206,15 @@ export default function Analytics() {
                         backgroundColor: "#ffffff",
                         border: "1px solid #e5e7eb",
                         color: "#1f2937",
-                        borderRadius: "8px"
+                        borderRadius: "8px",
                       }}
                     />
-                    <Bar dataKey="score" fill="#6366f1" name={t('analytics.safetyScoreLabel')} radius={[8, 8, 0, 0]} />
+                    <Bar
+                      dataKey="score"
+                      fill="#6366f1"
+                      name={t("analytics.safetyScoreLabel")}
+                      radius={[8, 8, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -198,24 +222,32 @@ export default function Analytics() {
 
             <Card className="bg-white border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('analytics.recommendations')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("analytics.recommendations")}
+                </h3>
                 <div className="space-y-3">
                   <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">{t('analytics.increaseSafetyDistance')}</p>
+                    <p className="text-sm font-semibold text-blue-900 mb-1">
+                      {t("analytics.increaseSafetyDistance")}
+                    </p>
                     <p className="text-xs text-blue-700">
-                      {t('analytics.increaseSafetyDistanceDesc')}
+                      {t("analytics.increaseSafetyDistanceDesc")}
                     </p>
                   </div>
                   <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <p className="text-sm font-semibold text-green-900 mb-1">{t('analytics.restRegularly')}</p>
+                    <p className="text-sm font-semibold text-green-900 mb-1">
+                      {t("analytics.restRegularly")}
+                    </p>
                     <p className="text-xs text-green-700">
-                      {t('analytics.restRegularlyDesc')}
+                      {t("analytics.restRegularlyDesc")}
                     </p>
                   </div>
                   <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-500">
-                    <p className="text-sm font-semibold text-orange-900 mb-1">{t('analytics.followSpeedLimit')}</p>
+                    <p className="text-sm font-semibold text-orange-900 mb-1">
+                      {t("analytics.followSpeedLimit")}
+                    </p>
                     <p className="text-xs text-orange-700">
-                      {t('analytics.followSpeedLimitDesc')}
+                      {t("analytics.followSpeedLimitDesc")}
                     </p>
                   </div>
                 </div>
@@ -225,5 +257,5 @@ export default function Analytics() {
         </div>
       </main>
     </div>
-  )
+  );
 }

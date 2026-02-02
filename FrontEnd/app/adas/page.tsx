@@ -1,64 +1,80 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { GlassCard } from "@/components/ui/glass-card"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { GlassCard } from "@/components/ui/glass-card";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { getApiUrl } from "@/lib/api-config"
-import { API_ENDPOINTS } from "@/lib/api-endpoints"
-import { useLanguage } from "@/contexts/language-context"
-import { ArrowLeft, Upload, PlayCircle, Film, CheckCircle2, Loader2, AlertTriangle, Sparkles, Database, ShieldCheck, RefreshCw, Clock, FileVideo } from "lucide-react"
-import { useVideoProgress } from "@/hooks/use-video-progress"
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
+import { useLanguage } from "@/contexts/language-context";
+import {
+  ArrowLeft,
+  Upload,
+  PlayCircle,
+  Film,
+  CheckCircle2,
+  Loader2,
+  AlertTriangle,
+  Sparkles,
+  Database,
+  ShieldCheck,
+  RefreshCw,
+  Clock,
+  FileVideo,
+} from "lucide-react";
+import { useVideoProgress } from "@/hooks/use-video-progress";
 
 type VisionResponse = {
-  message?: string
-  data?: any
-}
+  message?: string;
+  data?: any;
+};
 
 type VideoItem = {
-  id: number
-  job_id: string
-  video_filename: string
-  video_path: string
-  status: string
-  progress_percent?: number
-  created_at: string
-  duration_seconds?: number | null
-  video_size_mb?: number | null
-}
+  id: number;
+  job_id: string;
+  video_filename: string;
+  video_path: string;
+  status: string;
+  progress_percent?: number;
+  created_at: string;
+  duration_seconds?: number | null;
+  video_size_mb?: number | null;
+};
 
 export default function ADASPage() {
-  const { toast } = useToast()
-  const { t } = useLanguage()
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [processingMsg, setProcessingMsg] = useState<string>("")
-  const [result, setResult] = useState<VisionResponse | null>(null)
-  const [stage, setStage] = useState<"input" | "processing" | "done">("input")
+  const { toast } = useToast();
+  const { t } = useLanguage();
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [processingMsg, setProcessingMsg] = useState<string>("");
+  const [result, setResult] = useState<VisionResponse | null>(null);
+  const [stage, setStage] = useState<"input" | "processing" | "done">("input");
 
   // Video processing state
-  const [currentJobId, setCurrentJobId] = useState<string | null>(null)
-  const [processingProgress, setProcessingProgress] = useState(0)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null)
-  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(
+    null,
+  );
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
   // Video selection modal state
-  const [showVideoDialog, setShowVideoDialog] = useState(false)
-  const [availableVideos, setAvailableVideos] = useState<VideoItem[]>([])
-  const [loadingVideos, setLoadingVideos] = useState(false)
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
+  const [availableVideos, setAvailableVideos] = useState<VideoItem[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
 
   // WebSocket progress monitoring
   const {
@@ -67,175 +83,209 @@ export default function ADASPage() {
     isFinished: wsIsFinished,
     error: wsError,
     processingTime: wsProcessingTime,
-    isConnected: wsIsConnected
-  } = useVideoProgress(currentJobId, isProcessing)
+    isConnected: wsIsConnected,
+  } = useVideoProgress(currentJobId, isProcessing);
 
   // Update local state when WebSocket data changes
   useEffect(() => {
     if (currentJobId && isProcessing) {
-      setProcessingProgress(wsProgress)
+      setProcessingProgress(wsProgress);
 
       // Update processing message with progress
       if (wsProcessingTime !== null) {
-        const minutes = Math.floor(wsProcessingTime / 60)
-        const seconds = wsProcessingTime % 60
-        const timeString = minutes > 0
-          ? `${minutes}:${seconds.toString().padStart(2, '0')}`
-          : `${seconds}s`
-        setProcessingMsg(t('adas.analyzingProgress', { progress: wsProgress, time: timeString }))
+        const minutes = Math.floor(wsProcessingTime / 60);
+        const seconds = wsProcessingTime % 60;
+        const timeString =
+          minutes > 0
+            ? `${minutes}:${seconds.toString().padStart(2, "0")}`
+            : `${seconds}s`;
+        setProcessingMsg(
+          t("adas.analyzingProgress", {
+            progress: wsProgress,
+            time: timeString,
+          }),
+        );
       } else {
-        setProcessingMsg(t('adas.analyzingProgressNoTime', { progress: wsProgress }))
+        setProcessingMsg(
+          t("adas.analyzingProgressNoTime", { progress: wsProgress }),
+        );
       }
 
       // Handle completion
-      if (wsIsFinished && wsStatus === 'completed') {
-        console.log('✅ [WebSocket] Processing completed!')
-        setIsProcessing(false)
-        fetchProcessedVideo(currentJobId)
+      if (wsIsFinished && wsStatus === "completed") {
+        console.log("✅ [WebSocket] Processing completed!");
+        setIsProcessing(false);
+        fetchProcessedVideo(currentJobId);
       }
 
       // Handle errors
       if (wsError) {
-        console.error('❌ [WebSocket] Error:', wsError)
+        console.error("❌ [WebSocket] Error:", wsError);
         toast({
           title: "Lỗi kết nối WebSocket",
           description: wsError,
-          variant: "destructive"
-        })
+          variant: "destructive",
+        });
         // Fallback to polling if WebSocket fails
-        console.log('🔄 Falling back to polling...')
-        pollForResult(currentJobId)
+        console.log("🔄 Falling back to polling...");
+        pollForResult(currentJobId);
       }
     }
-  }, [wsProgress, wsStatus, wsIsFinished, wsError, wsProcessingTime, wsIsConnected, currentJobId, isProcessing])
+  }, [
+    wsProgress,
+    wsStatus,
+    wsIsFinished,
+    wsError,
+    wsProcessingTime,
+    wsIsConnected,
+    currentJobId,
+    isProcessing,
+  ]);
 
   useEffect(() => {
     return () => {
       if (previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(previewUrl)
+        URL.revokeObjectURL(previewUrl);
       }
-    }
-  }, [previewUrl])
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     console.log("[PlayerState]", {
       isProcessing,
       stage,
       previewUrl,
-    })
-  }, [isProcessing, stage, previewUrl])
+    });
+  }, [isProcessing, stage, previewUrl]);
 
   const handleFile = (f: File | null) => {
-    setResult(null)
-    setProcessingMsg("")
-    setFile(f)
-    if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl)
-    setPreviewUrl(f ? URL.createObjectURL(f) : null)
-  }
+    setResult(null);
+    setProcessingMsg("");
+    setFile(f);
+    if (previewUrl?.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(f ? URL.createObjectURL(f) : null);
+  };
 
   const uploadAndAnalyze = async () => {
     if (!file) {
-      toast({ title: t('adas.noVideoSelected'), description: t('adas.noVideoSelectedDesc'), variant: "destructive" })
-      return
+      toast({
+        title: t("adas.noVideoSelected"),
+        description: t("adas.noVideoSelectedDesc"),
+        variant: "destructive",
+      });
+      return;
     }
 
     // Show file size info
-    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2)
-    console.log(`📤 Uploading video: ${file.name} (${fileSizeMB} MB)`)
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    console.log(`📤 Uploading video: ${file.name} (${fileSizeMB} MB)`);
 
     try {
-      setUploading(true)
-      setIsProcessing(true)
-      setStage("processing")
-      setProcessingProgress(0)
-      setProcessingMsg(`Đang tải video lên server... (${fileSizeMB} MB)`)
+      setUploading(true);
+      setIsProcessing(true);
+      setStage("processing");
+      setProcessingProgress(0);
+      setProcessingMsg(`Đang tải video lên server... (${fileSizeMB} MB)`);
 
       // Step 1: Upload video with timeout
-      const formData = new FormData()
-      formData.append("file", file)
+      const formData = new FormData();
+      formData.append("file", file);
 
       // Create upload promise with timeout (5 minutes for large files)
-      const uploadTimeout = 5 * 60 * 1000 // 5 minutes
-      const uploadPromise = fetch(getApiUrl('/api/video/upload'), {
+      const uploadTimeout = 5 * 60 * 1000; // 5 minutes
+      const uploadPromise = fetch(getApiUrl("/api/video/upload"), {
         method: "POST",
         body: formData,
-      })
+      });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Upload timeout - Video quá lớn hoặc mạng chậm. Vui lòng thử lại với video nhỏ hơn.')), uploadTimeout)
-      )
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "Upload timeout - Video quá lớn hoặc mạng chậm. Vui lòng thử lại với video nhỏ hơn.",
+              ),
+            ),
+          uploadTimeout,
+        ),
+      );
 
       // Show upload progress message
       const progressInterval = setInterval(() => {
-        setProcessingMsg(prev => {
-          if (prev.includes('...')) {
-            return t('adas.uploadingVideoToServerWait', { size: fileSizeMB })
+        setProcessingMsg((prev) => {
+          if (prev.includes("...")) {
+            return t("adas.uploadingVideoToServerWait", { size: fileSizeMB });
           }
-          return prev + '.'
-        })
-      }, 1000)
+          return prev + ".";
+        });
+      }, 1000);
 
-      const uploadRes = await Promise.race([uploadPromise, timeoutPromise]) as Response
-      clearInterval(progressInterval)
+      const uploadRes = (await Promise.race([
+        uploadPromise,
+        timeoutPromise,
+      ])) as Response;
+      clearInterval(progressInterval);
 
       // Parse response
-      let uploadData: any
-      let errorMessage = ''
+      let uploadData: any;
+      let errorMessage = "";
 
       try {
-        uploadData = await uploadRes.json()
+        uploadData = await uploadRes.json();
       } catch (parseErr) {
-        console.error('❌ Failed to parse response:', parseErr)
-        throw new Error(t('adas.invalidServerResponse'))
+        console.error("❌ Failed to parse response:", parseErr);
+        throw new Error(t("adas.invalidServerResponse"));
       }
 
       // Check for errors
       if (!uploadRes.ok) {
         // Extract error message from backend
-        errorMessage = uploadData?.detail || uploadData?.message || `Upload failed with status ${uploadRes.status}`
+        errorMessage =
+          uploadData?.detail ||
+          uploadData?.message ||
+          `Upload failed with status ${uploadRes.status}`;
 
         if (uploadRes.status === 400) {
-          errorMessage = `${t('adas.videoFormatError')}: ${errorMessage}`
+          errorMessage = `${t("adas.videoFormatError")}: ${errorMessage}`;
         } else if (uploadRes.status === 413) {
-          errorMessage = t('adas.videoTooLarge')
+          errorMessage = t("adas.videoTooLarge");
         } else if (uploadRes.status === 500) {
-          errorMessage = t('adas.serverError')
+          errorMessage = t("adas.serverError");
         }
 
-        throw new Error(errorMessage)
+        throw new Error(errorMessage);
       }
 
-      const jobId = uploadData.job_id || uploadData.id
+      const jobId = uploadData.job_id || uploadData.id;
 
       if (!jobId) {
-        throw new Error(t('adas.noJobId'))
+        throw new Error(t("adas.noJobId"));
       }
 
-      console.log('✅ Upload OK - Job:', jobId.substring(0, 8))
-      setCurrentJobId(jobId)
-      setUploading(false)
+      console.log("✅ Upload OK - Job:", jobId.substring(0, 8));
+      setCurrentJobId(jobId);
+      setUploading(false);
 
       toast({
-        title: t('adas.uploadSuccess'),
-        description: t('adas.uploadSuccessDesc', { size: fileSizeMB })
-      })
+        title: t("adas.uploadSuccess"),
+        description: t("adas.uploadSuccessDesc", { size: fileSizeMB }),
+      });
 
       // Step 2: WebSocket will automatically start monitoring via useVideoProgress hook
-      setProcessingMsg(t('adas.connectingWebSocket'))
-
+      setProcessingMsg(t("adas.connectingWebSocket"));
     } catch (err: any) {
-      console.error('❌ [Upload] Error:', err)
+      console.error("❌ [Upload] Error:", err);
 
       // Determine error type and show appropriate message
-      let errorTitle = t('adas.uploadError')
-      let errorDescription = err.message || t('adas.uploadErrorDesc')
+      let errorTitle = t("adas.uploadError");
+      let errorDescription = err.message || t("adas.uploadErrorDesc");
 
-      if (err.message.includes('timeout')) {
-        errorTitle = t('adas.uploadTimeoutTitle')
-        errorDescription = t('adas.uploadTimeoutDesc', { size: fileSizeMB })
-      } else if (err.message.includes('Failed to fetch')) {
-        errorTitle = t('adas.connectionError')
-        errorDescription = t('adas.connectionErrorDesc')
+      if (err.message.includes("timeout")) {
+        errorTitle = t("adas.uploadTimeoutTitle");
+        errorDescription = t("adas.uploadTimeoutDesc", { size: fileSizeMB });
+      } else if (err.message.includes("Failed to fetch")) {
+        errorTitle = t("adas.connectionError");
+        errorDescription = t("adas.connectionErrorDesc");
       }
 
       toast({
@@ -243,211 +293,247 @@ export default function ADASPage() {
         description: errorDescription,
         variant: "destructive",
         duration: 8000, // Show longer for errors
-      })
+      });
 
-      setUploading(false)
-      setIsProcessing(false)
-      setStage("input")
-      setProcessingMsg("")
+      setUploading(false);
+      setIsProcessing(false);
+      setStage("input");
+      setProcessingMsg("");
     }
-  }
+  };
 
   // Fallback polling if WebSocket doesn't work (kept as backup)
   const pollForResult = async (jobId: string) => {
-    const maxAttempts = 450 // 15 minutes max (450 attempts × 2 seconds = 900 seconds = 15 minutes)
-    let attempts = 0
+    const maxAttempts = 450; // 15 minutes max (450 attempts × 2 seconds = 900 seconds = 15 minutes)
+    let attempts = 0;
 
     const poll = async () => {
       try {
-        const res = await fetch(getApiUrl(`/api/video/result/${jobId}`))
-        const data = await res.json()
+        const res = await fetch(getApiUrl(`/api/video/result/${jobId}`));
+        const data = await res.json();
 
         // Only log if progress changed or status changed
-        const newProgress = data.progress_percent || 0
-        if (attempts === 0 || newProgress !== processingProgress || data.status === 'completed') {
-          console.log(`[Job ${jobId.substring(0, 8)}] Status: ${data.status}, Progress: ${newProgress}%`)
+        const newProgress = data.progress_percent || 0;
+        if (
+          attempts === 0 ||
+          newProgress !== processingProgress ||
+          data.status === "completed"
+        ) {
+          console.log(
+            `[Job ${jobId.substring(0, 8)}] Status: ${data.status}, Progress: ${newProgress}%`,
+          );
         }
 
-        const elapsedSeconds = attempts * 2
-        const elapsedMinutes = Math.floor(elapsedSeconds / 60)
-        const remainingSeconds = elapsedSeconds % 60
-        const timeString = elapsedMinutes > 0
-          ? `${elapsedMinutes}:${remainingSeconds.toString().padStart(2, '0')}`
-          : `${elapsedSeconds}s`
+        const elapsedSeconds = attempts * 2;
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+        const remainingSeconds = elapsedSeconds % 60;
+        const timeString =
+          elapsedMinutes > 0
+            ? `${elapsedMinutes}:${remainingSeconds.toString().padStart(2, "0")}`
+            : `${elapsedSeconds}s`;
 
-        setProcessingProgress(newProgress)
-        setProcessingMsg(t('adas.analyzingProgress', { progress: newProgress, time: timeString }))
+        setProcessingProgress(newProgress);
+        setProcessingMsg(
+          t("adas.analyzingProgress", {
+            progress: newProgress,
+            time: timeString,
+          }),
+        );
 
-        if (data.status === 'completed') {
-          setIsProcessing(false)
-          fetchProcessedVideo(jobId)
-          return
+        if (data.status === "completed") {
+          setIsProcessing(false);
+          fetchProcessedVideo(jobId);
+          return;
         }
 
-        if (data.status === 'error') {
-          throw new Error(data.error_message || t('adas.processingFailed'))
+        if (data.status === "error") {
+          throw new Error(data.error_message || t("adas.processingFailed"));
         }
 
-        attempts++
-        if (attempts < maxAttempts && data.status !== 'completed') {
-          setTimeout(poll, 2000) // Poll every 2 seconds for faster updates
+        attempts++;
+        if (attempts < maxAttempts && data.status !== "completed") {
+          setTimeout(poll, 2000); // Poll every 2 seconds for faster updates
         } else if (attempts >= maxAttempts) {
-          const elapsedMinutes = Math.floor((attempts * 2) / 60)
-          throw new Error(`Processing timeout after ${elapsedMinutes} minutes. Video might be too long or server is overloaded. Please try a shorter video or contact support.`)
+          const elapsedMinutes = Math.floor((attempts * 2) / 60);
+          throw new Error(
+            `Processing timeout after ${elapsedMinutes} minutes. Video might be too long or server is overloaded. Please try a shorter video or contact support.`,
+          );
         }
-
       } catch (err: any) {
-        console.error('❌ [Poll] Error:', err)
-        setIsProcessing(false)
+        console.error("❌ [Poll] Error:", err);
+        setIsProcessing(false);
         toast({
-          title: t('adas.analysisError'),
+          title: t("adas.analysisError"),
           description: err.message,
-          variant: "destructive"
-        })
-        setStage("input")
+          variant: "destructive",
+        });
+        setStage("input");
       }
-    }
+    };
 
-    poll()
-  }
+    poll();
+  };
 
   // Fetch processed video URL
   const fetchProcessedVideo = async (jobId: string) => {
     try {
-      const res = await fetch(getApiUrl(`/api/video/result/${jobId}`))
-      const data = await res.json()
+      const res = await fetch(getApiUrl(`/api/video/result/${jobId}`));
+      const data = await res.json();
 
-      console.log('✅ Completed! Processing time:', data.processing_time_seconds, 's')
+      console.log(
+        "✅ Completed! Processing time:",
+        data.processing_time_seconds,
+        "s",
+      );
 
-      if (data.status === 'completed' && data.video_filename) {
+      if (data.status === "completed" && data.video_filename) {
         // Backend spec: GET /api/video/download/{job_id}/{filename}
         // Filename format: original_name_result.mp4
-        const resultFilename = data.video_filename.replace('.mp4', '_result.mp4')
-        const downloadUrl = getApiUrl(`/api/video/download/${jobId}/${resultFilename}`)
+        const resultFilename = data.video_filename.replace(
+          ".mp4",
+          "_result.mp4",
+        );
+        const downloadUrl = getApiUrl(
+          `/api/video/download/${jobId}/${resultFilename}`,
+        );
 
-
-        setProcessedVideoUrl(downloadUrl)
-        setPreviewUrl(downloadUrl)  // Auto-set video immediately
-        setShowCompletionDialog(true)
-        setStage("done")
+        setProcessedVideoUrl(downloadUrl);
+        setPreviewUrl(downloadUrl); // Auto-set video immediately
+        setShowCompletionDialog(true);
+        setStage("done");
 
         toast({
           title: "Phân tích hoàn tất!",
-          description: `Thời gian xử lý: ${data.processing_time_seconds || 0}s`
-        })
+          description: `Thời gian xử lý: ${data.processing_time_seconds || 0}s`,
+        });
       } else {
-        console.error('❌ [Result] Job not completed:', data)
-        throw new Error('Job not completed or missing filename')
+        console.error("❌ [Result] Job not completed:", data);
+        throw new Error("Job not completed or missing filename");
       }
 
-      setResult(data)
-
+      setResult(data);
     } catch (err: any) {
-      console.error('❌ [FetchResult] Error:', err)
+      console.error("❌ [FetchResult] Error:", err);
       toast({
-        title: t('adas.fetchResultError'),
+        title: t("adas.fetchResultError"),
         description: err.message,
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // User confirms to view processed video
   const viewProcessedVideo = () => {
-    setShowCompletionDialog(false)
+    setShowCompletionDialog(false);
     if (processedVideoUrl) {
-      setPreviewUrl(processedVideoUrl)
+      setPreviewUrl(processedVideoUrl);
     }
-  }
+  };
 
   // Open video selection dialog
   const useSampleVideo = async () => {
     try {
-      setLoadingVideos(true)
-      setShowVideoDialog(true)
+      setLoadingVideos(true);
+      setShowVideoDialog(true);
 
       // Backend: GET /api/video/list
-      const res = await fetch(getApiUrl(`${API_ENDPOINTS.VIDEOS_LIST}?limit=20`))
-      const data = await res.json()
+      const res = await fetch(
+        getApiUrl(`${API_ENDPOINTS.VIDEOS_LIST}?limit=20`),
+      );
+      const data = await res.json();
 
-      console.log('📹 [VideoList] Response:', data)
+      console.log("📹 [VideoList] Response:", data);
 
       // Parse response: { videos: [...], total: ... }
-      let videos: VideoItem[] = []
+      let videos: VideoItem[] = [];
       if (data?.videos && Array.isArray(data.videos)) {
-        videos = data.videos
+        videos = data.videos;
       } else if (Array.isArray(data)) {
-        videos = data
+        videos = data;
       }
 
-      setAvailableVideos(videos)
+      setAvailableVideos(videos);
 
       if (videos.length === 0) {
         toast({
           title: "Chưa có video",
           description: "Hệ thống chưa có video nào. Hãy upload video mới.",
-        })
+        });
       }
     } catch (err) {
-      console.error('❌ [VideoList] Error:', err)
+      console.error("❌ [VideoList] Error:", err);
       toast({
         title: "Lỗi lấy danh sách video",
         description: "Không thể kết nối tới backend.",
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
     } finally {
-      setLoadingVideos(false)
+      setLoadingVideos(false);
     }
-  }
+  };
 
   // Select a video from the list
   const selectVideo = (video: VideoItem) => {
     // If completed, check for result URL. Otherwise fallback to raw sample URL.
-    let playUrl = ""
+    let playUrl = "";
 
     // Construct Raw URL: /api/video/sample/{job_id}/{filename}
     // Construct Result URL: /api/video/download/{job_id}/{filename_result.mp4}
 
-    if (video.status === 'completed') {
-      const resultFilename = video.video_filename.replace('.mp4', '_result.mp4')
-      playUrl = getApiUrl(API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename))
+    if (video.status === "completed") {
+      const resultFilename = video.video_filename.replace(
+        ".mp4",
+        "_result.mp4",
+      );
+      playUrl = getApiUrl(
+        API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename),
+      );
 
       toast({
-        title: t('adas.selectedResultVideo'),
-        description: t('adas.selectedResultVideoDesc', { filename: video.video_filename }),
-      })
+        title: t("adas.selectedResultVideo"),
+        description: t("adas.selectedResultVideoDesc", {
+          filename: video.video_filename,
+        }),
+      });
 
       // Set stages to done so it shows up
-      setStage("done")
-      setIsProcessing(false)
-      setProcessedVideoUrl(playUrl)
-
+      setStage("done");
+      setIsProcessing(false);
+      setProcessedVideoUrl(playUrl);
     } else {
-      playUrl = getApiUrl(API_ENDPOINTS.VIDEO_SAMPLE(video.job_id, video.video_filename))
+      playUrl = getApiUrl(
+        API_ENDPOINTS.VIDEO_SAMPLE(video.job_id, video.video_filename),
+      );
 
       toast({
-        title: t('adas.selectedOriginalVideo'),
-        description: t('adas.selectedOriginalVideoDesc', { filename: video.video_filename }),
-      })
+        title: t("adas.selectedOriginalVideo"),
+        description: t("adas.selectedOriginalVideoDesc", {
+          filename: video.video_filename,
+        }),
+      });
 
       // Reset stages
-      setStage("input")
-      setIsProcessing(false)
-      setResult(null)
+      setStage("input");
+      setIsProcessing(false);
+      setResult(null);
     }
 
-    console.log('✅ [VideoSelect] Playing:', playUrl)
-    setPreviewUrl(playUrl)
-    setShowVideoDialog(false)
-    setProcessingMsg("")
-  }
+    console.log("✅ [VideoSelect] Playing:", playUrl);
+    setPreviewUrl(playUrl);
+    setShowVideoDialog(false);
+    setProcessingMsg("");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-primary text-fg-primary">
       <header className="flex items-center justify-between p-3 sm:p-5 border-b border-white/10 glass-card backdrop-blur-xl">
         <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon" className="text-fg-secondary hover:text-neon-cyan">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-fg-secondary hover:text-neon-cyan"
+            >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </Link>
@@ -464,18 +550,21 @@ export default function ADASPage() {
                 <span className="sm:hidden">Saved</span>
               </Badge>
             </div>
-            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider">
-              <Film className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">{t('adas.title')}</span>
-              <span className="sm:hidden">{t('adas.titleShort')}</span>
+            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider uppercase">
+              <Film className="w-8 h-8 text-neon-cyan" />
+              <span className="hidden sm:inline text-neon-cyan">
+                {t("adas.title")}
+              </span>
+              <span className="sm:hidden text-neon-cyan">
+                {t("adas.titleShort")}
+              </span>
             </h1>
             <p className="text-xs sm:text-sm text-fg-secondary">
-              {t('adas.subtitle')}
+              {t("adas.subtitle")}
             </p>
           </div>
         </div>
-        <div className="hidden lg:flex items-center gap-2">
-        </div>
+        <div className="hidden lg:flex items-center gap-2"></div>
       </header>
 
       <main className="flex-1 p-3 sm:p-4 lg:p-6">
@@ -488,7 +577,9 @@ export default function ADASPage() {
                     <Upload className="w-4 h-4" />
                     1) CHỌN VIDEO
                   </h3>
-                  <p className="text-xs text-fg-secondary mt-1">Upload video hoặc dùng video mẫu từ hệ thống</p>
+                  <p className="text-xs text-fg-secondary mt-1">
+                    Upload video hoặc dùng video mẫu từ hệ thống
+                  </p>
                 </div>
                 <div className="space-y-4">
                   <Input
@@ -516,31 +607,39 @@ export default function ADASPage() {
                           <PlayCircle className="h-4 w-4" />
                         )}
 
-                        <span className="hidden sm:inline">{t('adas.sampleVideo')}</span>
-                        <span className="sm:hidden">{t('adas.sampleVideoShort')}</span>
+                        <span className="hidden sm:inline">
+                          {t("adas.sampleVideo")}
+                        </span>
+                        <span className="sm:hidden">
+                          {t("adas.sampleVideoShort")}
+                        </span>
                       </span>
                     </Button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className={`rounded-lg glass-card border-2 p-3 ${file || previewUrl
-                      ? "border-neon-green/50"
-                      : "border-neon-red/50"
-                      }`}>
+                    <div
+                      className={`rounded-lg glass-card border-2 p-3 ${
+                        file || previewUrl
+                          ? "border-neon-green/50"
+                          : "border-neon-red/50"
+                      }`}
+                    >
                       <div className="text-xs text-fg-secondary font-medium tracking-wide">
-                        {t('adas.status')}
+                        {t("adas.status")}
                       </div>
 
                       <div
                         className={`flex items-center gap-2 text-sm font-medium
                             antialiased
                             transition-colors duration-300
-                            ${uploading
-                            ? "text-neon-yellow drop-shadow-[0_0_6px_rgba(250,204,21,0.45)]"
-                            : (file || previewUrl)
-                              ? "text-neon-green drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
-                              : "text-neon-red drop-shadow-[0_0_6px_rgba(239,68,68,0.45)]"
-                          }
+                            ${
+                              uploading
+                                ? "text-neon-yellow drop-shadow-[0_0_6px_rgba(250,204,21,0.45)]"
+                                : file || previewUrl
+                                  ? "text-neon-green drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
+                                  : "text-neon-red drop-shadow-[0_0_6px_rgba(239,68,68,0.45)]"
+                            }
                           `}
                       >
                         <Loader2
@@ -550,17 +649,24 @@ export default function ADASPage() {
                         />
                         <span className="leading-none mt-[5px]">
                           {uploading
-                            ? t('adas.analyzing')
-                            : (file || previewUrl)
-                              ? t('adas.ready')
-                              : t('adas.notReady')}
+                            ? t("adas.analyzing")
+                            : file || previewUrl
+                              ? t("adas.ready")
+                              : t("adas.notReady")}
                         </span>
                       </div>
-
                     </div>
                     <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
-                      <div className="text-xs text-fg-secondary font-medium">{t('adas.videoSource')}</div>
-                      <div className="font-semibold text-neon-green">{file ? t('adas.newUpload') : previewUrl ? t('adas.sampleVideo') : t('adas.notSelected')}</div>
+                      <div className="text-xs text-fg-secondary font-medium">
+                        {t("adas.videoSource")}
+                      </div>
+                      <div className="font-semibold text-neon-green">
+                        {file
+                          ? t("adas.newUpload")
+                          : previewUrl
+                            ? t("adas.sampleVideo")
+                            : t("adas.notSelected")}
+                      </div>
                     </div>
                   </div>
 
@@ -592,12 +698,12 @@ export default function ADASPage() {
                     {uploading || isProcessing ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {uploading ? t('adas.uploading') : t('adas.analyzing')}
+                        {uploading ? t("adas.uploading") : t("adas.analyzing")}
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        {t('adas.sendVideoAnalysis')}
+                        {t("adas.sendVideoAnalysis")}
                       </>
                     )}
                   </Button>
@@ -608,22 +714,33 @@ export default function ADASPage() {
                 <div className="mb-4">
                   <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
                     <ShieldCheck className="w-4 h-4" />
-                    {t('adas.storageProcessTitle')}
+                    {t("adas.storageProcessTitle")}
                   </h3>
-                  <p className="text-xs text-fg-secondary mt-1">{t('adas.storageProcessDesc')}</p>
+                  <p className="text-xs text-fg-secondary mt-1">
+                    {t("adas.storageProcessDesc")}
+                  </p>
                 </div>
                 <div className="text-sm text-fg-secondary space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50"><Upload className="w-3 h-3" />Upload</Badge>
-                    <span>{t('adas.step1Process')}</span>
+                    <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                      <Upload className="w-3 h-3" />
+                      Upload
+                    </Badge>
+                    <span>{t("adas.step1Process")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50"><Sparkles className="w-3 h-3" />AI</Badge>
-                    <span>{t('adas.step2Process')}</span>
+                    <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50">
+                      <Sparkles className="w-3 h-3" />
+                      AI
+                    </Badge>
+                    <span>{t("adas.step2Process")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50"><Database className="w-3 h-3" />System</Badge>
-                    <span>{t('adas.step3Process')}</span>
+                    <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50">
+                      <Database className="w-3 h-3" />
+                      System
+                    </Badge>
+                    <span>{t("adas.step3Process")}</span>
                   </div>
                 </div>
               </GlassCard>
@@ -633,8 +750,11 @@ export default function ADASPage() {
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-neon-green tracking-wide">{t('adas.step2Title')}</h3>
-                <Badge className="
+                <h3 className="text-xl font-bold text-neon-green tracking-wide">
+                  {t("adas.step2Title")}
+                </h3>
+                <Badge
+                  className="
                   gap-1
                   bg-red-500/10
                   text-red-400
@@ -642,13 +762,14 @@ export default function ADASPage() {
                   animate-pulse
                   [animation-duration:1s]
                   shadow-[0_0_12px_rgba(255,0,0,0.6)]
-                ">
+                "
+                >
                   <AlertTriangle className="h-3 w-3" />
-                  {t('adas.sampleDataSaved')}
+                  {t("adas.sampleDataSaved")}
                 </Badge>
               </div>
               <p className="text-xs text-fg-secondary mt-1">
-                {t('adas.step2Desc')}
+                {t("adas.step2Desc")}
               </p>
             </div>
             <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
@@ -659,13 +780,21 @@ export default function ADASPage() {
                     {/* Show different message based on upload vs processing state */}
                     {uploading ? (
                       <>
-                        <p className="text-lg font-semibold">{t('adas.uploadingVideo')}</p>
-                        <p className="text-sm text-fg-secondary">{t('adas.uploadingVideoDesc')}</p>
+                        <p className="text-lg font-semibold">
+                          {t("adas.uploadingVideo")}
+                        </p>
+                        <p className="text-sm text-fg-secondary">
+                          {t("adas.uploadingVideoDesc")}
+                        </p>
                       </>
                     ) : (
                       <>
-                        <p className="text-lg font-semibold">{t('adas.analyzingVideo')}</p>
-                        <p className="text-sm text-fg-secondary">{t('adas.analyzingVideoDesc')}</p>
+                        <p className="text-lg font-semibold">
+                          {t("adas.analyzingVideo")}
+                        </p>
+                        <p className="text-sm text-fg-secondary">
+                          {t("adas.analyzingVideoDesc")}
+                        </p>
                       </>
                     )}
 
@@ -696,12 +825,16 @@ export default function ADASPage() {
                     </div>
                     <div className="flex justify-between text-xs text-fg-secondary">
                       <span>{processingProgress}%</span>
-                      <span>{uploading ? 'Đang upload...' : 'Đang xử lý...'}</span>
+                      <span>
+                        {uploading ? "Đang upload..." : "Đang xử lý..."}
+                      </span>
                     </div>
                   </div>
 
                   {processingMsg && (
-                    <p className="text-sm text-neon-yellow max-w-md text-center px-4">{processingMsg}</p>
+                    <p className="text-sm text-neon-yellow max-w-md text-center px-4">
+                      {processingMsg}
+                    </p>
                   )}
                 </div>
               ) : previewUrl && stage === "done" ? (
@@ -721,18 +854,14 @@ export default function ADASPage() {
                     console.log("VIDEO URL:", previewUrl);
                   }}
                 >
-                  <source
-                    src="{previewUrl}"
-                    type="video/mp4"
-                  />
+                  <source src="{previewUrl}" type="video/mp4" />
                 </video>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
                   <Upload className="w-8 h-8 text-neon-cyan" />
-                  <p>{t('adas.noVideoMessage')}</p>
+                  <p>{t("adas.noVideoMessage")}</p>
                 </div>
               )}
-
             </div>
             {stage === "done" ? (
               <div className="mt-4 flex flex-wrap gap-3">
@@ -741,7 +870,7 @@ export default function ADASPage() {
                   className="gap-2 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  {t('adas.analyzeAnotherVideo')}
+                  {t("adas.analyzeAnotherVideo")}
                 </Button>
                 <Button
                   variant="outline"
@@ -749,7 +878,7 @@ export default function ADASPage() {
                   className="gap-2 glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  {t('common.back')}
+                  {t("common.back")}
                 </Button>
               </div>
             ) : (
@@ -763,12 +892,10 @@ export default function ADASPage() {
                     drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]
                     drop-shadow-[0_0_16px_rgba(255,0,0,1)]
                   "
-
                 />
-
-                Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy xuất ở bước "Video mẫu".
+                Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy
+                xuất ở bước "Video mẫu".
               </div>
-
             )}
           </GlassCard>
         </div>
@@ -780,10 +907,12 @@ export default function ADASPage() {
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
               <FileVideo className="w-6 h-6" />
-              {t('adas.selectSampleVideo')}
+              {t("adas.selectSampleVideo")}
             </DialogTitle>
             <DialogDescription className="text-fg-secondary">
-              {t('adas.selectSampleVideoDesc', { count: availableVideos.length })}
+              {t("adas.selectSampleVideoDesc", {
+                count: availableVideos.length,
+              })}
             </DialogDescription>
           </DialogHeader>
 
@@ -791,7 +920,9 @@ export default function ADASPage() {
             {loadingVideos ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
-                <span className="ml-3 text-fg-secondary">Đang tải danh sách video...</span>
+                <span className="ml-3 text-fg-secondary">
+                  Đang tải danh sách video...
+                </span>
               </div>
             ) : availableVideos.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 text-fg-secondary">
@@ -821,8 +952,8 @@ export default function ADASPage() {
                             <Clock className="w-3 h-3" />
                             <span>
                               {video.duration_seconds
-                                ? `${Math.floor(video.duration_seconds / 60)}:${(video.duration_seconds % 60).toString().padStart(2, '0')}`
-                                : 'N/A'}
+                                ? `${Math.floor(video.duration_seconds / 60)}:${(video.duration_seconds % 60).toString().padStart(2, "0")}`
+                                : "N/A"}
                             </span>
                           </div>
 
@@ -831,31 +962,42 @@ export default function ADASPage() {
                             <span>
                               {video.video_size_mb
                                 ? `${video.video_size_mb.toFixed(1)} MB`
-                                : 'N/A'}
+                                : "N/A"}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-1">
-                            {video.status === 'completed' ? (
-                              <Badge variant="outline" className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10">
+                            {video.status === "completed" ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10"
+                              >
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
-                                {t('adas.completed')}
+                                {t("adas.completed")}
                               </Badge>
-                            ) : video.status === 'processing' ? (
-                              <Badge variant="outline" className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10">
+                            ) : video.status === "processing" ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10"
+                              >
                                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                {t('adas.processing')}
+                                {t("adas.processing")}
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10">
-                                {t('adas.notStarted')}
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10"
+                              >
+                                {t("adas.notStarted")}
                               </Badge>
                             )}
                           </div>
 
                           {video.created_at && (
                             <div className="text-xs opacity-70">
-                              {new Date(video.created_at).toLocaleDateString('vi-VN')}
+                              {new Date(video.created_at).toLocaleDateString(
+                                "vi-VN",
+                              )}
                             </div>
                           )}
                         </div>
@@ -866,7 +1008,7 @@ export default function ADASPage() {
                         className="glass-card bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 hover:bg-neon-cyan/30 flex-shrink-0"
                       >
                         <PlayCircle className="w-4 h-4 mr-1" />
-                        {t('common.select')}
+                        {t("common.select")}
                       </Button>
                     </div>
                   </div>
@@ -878,31 +1020,38 @@ export default function ADASPage() {
       </Dialog>
 
       {/* Processing Completion Dialog */}
-      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+      <Dialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+      >
         <DialogContent className="glass-card border-2 border-neon-green/50">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-neon-green flex items-center gap-2">
               <CheckCircle2 className="w-6 h-6" />
-              {t('adas.analysisComplete')}
+              {t("adas.analysisComplete")}
             </DialogTitle>
             <DialogDescription className="text-fg-secondary text-base mt-2">
-              {t('adas.analysisCompleteDesc')}
+              {t("adas.analysisCompleteDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
             {result && (
               <div className="glass-card border border-neon-cyan/30 p-4 rounded-lg">
-                <h4 className="text-sm font-semibold text-neon-cyan mb-2">{t('adas.analysisInfo')}</h4>
+                <h4 className="text-sm font-semibold text-neon-cyan mb-2">
+                  {t("adas.analysisInfo")}
+                </h4>
                 <div className="text-xs text-fg-secondary space-y-1">
                   <div className="flex justify-between">
-                    <span>{t('adas.jobId')}:</span>
-                    <span className="font-mono text-neon-green">{currentJobId}</span>
+                    <span>{t("adas.jobId")}:</span>
+                    <span className="font-mono text-neon-green">
+                      {currentJobId}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>{t('adas.status')}:</span>
+                    <span>{t("adas.status")}:</span>
                     <Badge className="bg-neon-green/20 text-neon-green border-neon-green/50">
-                      {t('adas.completed')}
+                      {t("adas.completed")}
                     </Badge>
                   </div>
                 </div>
@@ -915,22 +1064,22 @@ export default function ADASPage() {
                 className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
               >
                 <PlayCircle className="w-5 h-5 mr-2" />
-                {t('adas.viewVideoNow')}
+                {t("adas.viewVideoNow")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setShowCompletionDialog(false)
-                  setStage("input")
+                  setShowCompletionDialog(false);
+                  setStage("input");
                 }}
                 className="glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
               >
-                {t('common.close')}
+                {t("common.close")}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div >
-  )
+    </div>
+  );
 }
