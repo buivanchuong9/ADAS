@@ -383,16 +383,27 @@ export default function SettingsPage() {
             enabled: true,
             format: "<b>{point.name}</b><br>{point.percentage:.1f}%",
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "11px",
-              fontWeight: "500",
+              fontWeight: "700",
               textOutline: "none",
             },
+            connectorColor: "#000000",
             distance: 10,
           },
-          borderWidth: 2,
           borderColor: "#050B14",
+        },
+        series: {
+          dataLabels: {
+            color: "#000000",
+            style: {
+              color: "#000000",
+              fontWeight: "700",
+              textOutline: "none",
+            },
+            connectorColor: "#000000",
+          },
         },
       },
       series: [
@@ -831,18 +842,14 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      showFPS ? "bg-neon-green/30" : "bg-white/10"
+                      showFPS ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
-                        showFPS ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
+                        showFPS ? "translate-x-7 bg-[#ff7a1a]" : "bg-gray-500"
                       }`}
-                      style={
-                        showFPS
-                          ? { boxShadow: "0 0 10px var(--neon-green)" }
-                          : {}
-                      }
+                      style={showFPS ? { boxShadow: "0 0 10px #ff7a1a" } : {}}
                     />
                   </button>
                 </div>
@@ -893,18 +900,14 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      showHUD ? "bg-neon-green/30" : "bg-white/10"
+                      showHUD ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
-                        showHUD ? "translate-x-7 bg-neon-green" : "bg-fg-muted"
+                        showHUD ? "translate-x-7 bg-[#ff7a1a]" : "bg-gray-500"
                       }`}
-                      style={
-                        showHUD
-                          ? { boxShadow: "0 0 10px var(--neon-green)" }
-                          : {}
-                      }
+                      style={showHUD ? { boxShadow: "0 0 10px #ff7a1a" } : {}}
                     />
                   </button>
                 </div>
@@ -937,20 +940,14 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      aiEnabled ? "bg-neon-green/30" : "bg-white/10"
+                      aiEnabled ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
-                        aiEnabled
-                          ? "translate-x-7 bg-neon-green"
-                          : "bg-fg-muted"
+                        aiEnabled ? "translate-x-7 bg-[#ff7a1a]" : "bg-gray-500"
                       }`}
-                      style={
-                        aiEnabled
-                          ? { boxShadow: "0 0 10px var(--neon-green)" }
-                          : {}
-                      }
+                      style={aiEnabled ? { boxShadow: "0 0 10px #ff7a1a" } : {}}
                     />
                   </button>
                 </div>
@@ -997,20 +994,18 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      voiceFeedback ? "bg-neon-green/30" : "bg-white/10"
+                      voiceFeedback ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                     disabled={!aiEnabled}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
                         voiceFeedback
-                          ? "translate-x-7 bg-neon-green"
-                          : "bg-fg-muted"
+                          ? "translate-x-7 bg-[#ff7a1a]"
+                          : "bg-gray-500"
                       }`}
                       style={
-                        voiceFeedback
-                          ? { boxShadow: "0 0 10px var(--neon-green)" }
-                          : {}
+                        voiceFeedback ? { boxShadow: "0 0 10px #ff7a1a" } : {}
                       }
                     />
                   </button>
@@ -1047,18 +1042,14 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      debugMode ? "bg-neon-red/30" : "bg-white/10"
+                      debugMode ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
-                        debugMode ? "translate-x-7 bg-neon-red" : "bg-fg-muted"
+                        debugMode ? "translate-x-7 bg-[#ff7a1a]" : "bg-gray-500"
                       }`}
-                      style={
-                        debugMode
-                          ? { boxShadow: "0 0 10px var(--neon-red)" }
-                          : {}
-                      }
+                      style={debugMode ? { boxShadow: "0 0 10px #ff7a1a" } : {}}
                     />
                   </button>
                 </div>
@@ -1080,19 +1071,17 @@ export default function SettingsPage() {
                       setHasChanges(true);
                     }}
                     className={`relative w-14 h-7 rounded-full transition-all ${
-                      perfMonitoring ? "bg-neon-green/30" : "bg-white/10"
+                      perfMonitoring ? "bg-[#ff7a1a]/30" : "bg-gray-300"
                     }`}
                   >
                     <div
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all ${
                         perfMonitoring
-                          ? "translate-x-7 bg-neon-green"
-                          : "bg-fg-muted"
+                          ? "translate-x-7 bg-[#ff7a1a]"
+                          : "bg-gray-500"
                       }`}
                       style={
-                        perfMonitoring
-                          ? { boxShadow: "0 0 10px var(--neon-green)" }
-                          : {}
+                        perfMonitoring ? { boxShadow: "0 0 10px #ff7a1a" } : {}
                       }
                     />
                   </button>

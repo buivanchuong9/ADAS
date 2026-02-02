@@ -153,10 +153,10 @@ export function HighchartsChart({
           type === "pie"
             ? "pie"
             : type === "bar"
-            ? "bar"
-            : type === "area"
-            ? "area"
-            : "line",
+              ? "bar"
+              : type === "area"
+                ? "area"
+                : "line",
         height: height,
         backgroundColor: "transparent",
         borderRadius: 12,
@@ -181,11 +181,14 @@ export function HighchartsChart({
             cursor: "pointer",
             dataLabels: {
               enabled: true,
+              color: "#000000",
               format: "<b>{point.name}</b>: {point.percentage:.1f} %",
               style: {
-                color: "#ffffff",
+                color: "#000000",
                 textOutline: "none",
+                fontWeight: "bold",
               },
+              connectorColor: "#000000",
             },
             title: {
               style: {
