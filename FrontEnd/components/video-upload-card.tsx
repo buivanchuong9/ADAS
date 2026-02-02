@@ -115,6 +115,11 @@ export function VideoUploadCard() {
             accept="video/*,.mp4,.avi,.mov,.mkv,.webm"
             onChange={handleFileSelect}
             disabled={uploading}
+            className="
+              cursor-pointer glass-card border-neon-cyan/30
+              text-fg-primary file:text-neon-cyan
+              video-file-input
+            "
           />
           {file && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

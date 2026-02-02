@@ -118,7 +118,8 @@ function Button({
         />
       ))}
       
-      <span className="relative z-10">{children}</span>
+      {/* Đảm bảo icon + text luôn nằm trên một hàng */}
+      <span className="relative z-10 flex items-center gap-2">{children}</span>
     </Comp>
   )
 }

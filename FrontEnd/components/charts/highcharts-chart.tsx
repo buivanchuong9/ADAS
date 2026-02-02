@@ -32,13 +32,7 @@ const premiumTheme: Highcharts.Options = {
     "#fee140", // Yellow
     "#0ba360", // Dark green
   ],
-  title: {
-    style: {
-      color: "#ffffff",
-      fontWeight: "600",
-      fontSize: "18px",
-    },
-  },
+
   subtitle: {
     style: {
       color: "#9ca3af",
@@ -159,10 +153,10 @@ export function HighchartsChart({
           type === "pie"
             ? "pie"
             : type === "bar"
-            ? "bar"
-            : type === "area"
-            ? "area"
-            : "line",
+              ? "bar"
+              : type === "area"
+                ? "area"
+                : "line",
         height: height,
         backgroundColor: "transparent",
         borderRadius: 12,
@@ -171,6 +165,7 @@ export function HighchartsChart({
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         },
       },
+      title: undefined,
       credits: {
         enabled: false,
       },
@@ -186,11 +181,14 @@ export function HighchartsChart({
             cursor: "pointer",
             dataLabels: {
               enabled: true,
+              color: "#000000",
               format: "<b>{point.name}</b>: {point.percentage:.1f} %",
               style: {
-                color: "#ffffff",
+                color: "#000000",
                 textOutline: "none",
+                fontWeight: "bold",
               },
+              connectorColor: "#000000",
             },
             title: {
               style: {
