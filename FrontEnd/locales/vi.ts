@@ -56,7 +56,6 @@ export default {
   // Home Page
   home: {
     title: "Advanced Driver Assistance System",
-    subtitle: "Real-time AI-powered safety monitoring with WebSocket streaming, automatic data collection, and intelligent alerts.",
     startDetection: "START DETECTION",
     viewDashboard: "View Dashboard",
     quickActions: "Thao Tác Nhanh",
@@ -82,11 +81,6 @@ export default {
     smartAlertsDesc: "Cảnh báo bằng giọng nói và hình ảnh",
     systemStarted: "Hệ thống khởi động thành công",
     systemStartedDesc: "Tất cả dịch vụ hoạt động",
-    dbConnected: "Kết nối cơ sở dữ liệu thành công",
-    dbConnectedDesc: "SQLite sẵn sàng",
-    apiOnline: "Backend API trực tuyến",
-    apiOnlineDesc: "Sẵn sàng nhận yêu cầu",
-    justNow: "Vừa xong",
     minutesAgo: "{count} phút trước",
     systemStatus: "Trạng thái hệ thống",
     activeCameras: "Camera hoạt động",
