@@ -203,11 +203,11 @@ export default function DashboardPage() {
                 {t("dashboard.subtitle")}
               </p>
             </div>
-            <Badge className="glass-card border-neon-green/50 text-neon-green px-4 py-2">
+            <Badge className="glass-card border-[#10b981]/50 text-[#10b981] px-4 py-2">
               <div className="flex items-center gap-2">
                 <div
-                  className="w-2 h-2 rounded-full bg-neon-green animate-pulse"
-                  style={{ boxShadow: "0 0 10px var(--neon-green)" }}
+                  className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"
+                  style={{ boxShadow: "0 0 10px #10b981" }}
                 />
                 {t("common.online")}
               </div>
