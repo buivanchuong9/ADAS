@@ -136,7 +136,8 @@ export default {
     dataRetentionDesc: "Số ngày lưu trữ dữ liệu phát hiện",
     days: "{count} ngày",
     note: "LƯU Ý",
-    noteText: "Một số cài đặt có thể ảnh hưởng đến hiệu suất hệ thống. Nếu bạn gặp vấn đề về độ trễ hoặc hiệu suất, hãy thử giảm chất lượng video, tăng số khung hình bỏ qua, hoặc tắt một số tính năng không cần thiết.",
+    noteText:
+      "Một số cài đặt có thể ảnh hưởng đến hiệu suất hệ thống. Nếu bạn gặp vấn đề về độ trễ hoặc hiệu suất, hãy thử giảm chất lượng video, tăng số khung hình bỏ qua, hoặc tắt một số tính năng không cần thiết.",
     systemPerformance: "Hiệu Suất Hệ Thống",
     detectionStats: "Thống Kê Phát Hiện 7 Ngày",
     aiUsage: "Sử Dụng AI Assistant",
@@ -193,23 +194,22 @@ export default {
     speedOverTime: "Tốc Độ Theo Thời Gian",
     fatigueOverTime: "Mức Mệt Mỏi Theo Thời Gian",
     safetyScoreComparison: "So Sánh Điểm An Toàn",
+
     recommendations: "Khuyến Nghị",
     increaseSafetyDistance: "Tăng Khoảng Cách An Toàn",
-    increaseSafetyDistanceDesc: "Bạn đã có 2 cảnh báo va chạm. Hãy tăng khoảng cách với xe phía trước.",
+    increaseSafetyDistanceDesc:
+      "Bạn đã có 2 cảnh báo va chạm. Hãy tăng khoảng cách với xe phía trước.",
     restRegularly: "Nghỉ Ngơi Thường Xuyên",
-    restRegularlyDesc: "Mức mệt mỏi tăng nhanh sau 1.5 giờ lái. Hãy nghỉ ngơi 15 phút.",
+    restRegularlyDesc:
+      "Mức mệt mỏi tăng nhanh sau 1.5 giờ lái. Hãy nghỉ ngơi 15 phút.",
     followSpeedLimit: "Tuân Thủ Giới Hạn Tốc Độ",
-    followSpeedLimitDesc: "Bạn đã vượt tốc độ 3 lần. Hãy tuân thủ giới hạn tốc độ để an toàn hơn.",
-    today: "Hôm Nay",
-    yesterday: "Hôm Qua",
-    threeDaysAgo: "3 Ngày Trước",
-    oneWeekAgo: "1 Tuần Trước",
+    followSpeedLimitDesc:
+      "Bạn đã vượt tốc độ 3 lần. Hãy tuân thủ giới hạn tốc độ để an toàn hơn.",
+
     speed: "Tốc Độ (km/h)",
     fatigue: "Mệt Mỏi (%)",
     safetyScoreLabel: "Điểm An Toàn",
-    speed: "Tốc Độ (km/h)",
-    fatigue: "Mệt Mỏi (%)",
-    safetyScoreLabel: "Điểm An Toàn",
+
     today: "Hôm Nay",
     yesterday: "Hôm Qua",
     threeDaysAgo: "3 Ngày Trước",
@@ -279,7 +279,8 @@ export default {
     notSelected: "Chưa chọn",
     image: "Ảnh",
     video: "Video",
-    selectAndDrag: "Chọn loại đối tượng bên dưới, sau đó click và kéo để vẽ khung",
+    selectAndDrag:
+      "Chọn loại đối tượng bên dưới, sau đó click và kéo để vẽ khung",
     addedBoundingBox: "Đã thêm khung chứa",
     addedDetection: "Đã thêm phát hiện {label}",
     noFileSelected: "Chưa chọn tệp",
@@ -299,26 +300,31 @@ export default {
 
   // ADAS Video Analysis
   adas: {
-    title: "ADAS VIDEO ANALYSIS",
-    titleShort: "ADAS ANALYSIS",
+    title: "PHÂN TÍCH VIDEO ADAS",
+    titleShort: "PHÂN TÍCH ADAS",
     subtitle: "Upload hoặc dùng video mẫu, AI phân tích và lưu vào hệ thống.",
     noVideoSelected: "Chưa chọn video",
     noVideoSelectedDesc: "Vui lòng chọn một file video để phân tích",
-    uploadTimeout: "Upload timeout - Video quá lớn hoặc mạng chậm. Vui lòng thử lại với video nhỏ hơn.",
+    uploadTimeout:
+      "Upload timeout - Video quá lớn hoặc mạng chậm. Vui lòng thử lại với video nhỏ hơn.",
     invalidServerResponse: "Server trả về dữ liệu không hợp lệ",
     videoFormatError: "Lỗi định dạng video",
     videoTooLarge: "Video quá lớn. Vui lòng chọn video nhỏ hơn 500MB.",
     serverError: "Lỗi server. Vui lòng thử lại sau.",
     noJobId: "Server không trả về job_id. Vui lòng thử lại.",
     uploadSuccess: "Upload thành công!",
-    uploadSuccessDesc: "Video đã tải lên ({size} MB). Đang kết nối WebSocket để theo dõi tiến trình...",
-    connectingWebSocket: "Đang kết nối WebSocket để theo dõi tiến trình phân tích...",
+    uploadSuccessDesc:
+      "Video đã tải lên ({size} MB). Đang kết nối WebSocket để theo dõi tiến trình...",
+    connectingWebSocket:
+      "Đang kết nối WebSocket để theo dõi tiến trình phân tích...",
     uploadError: "Lỗi upload",
     uploadErrorDesc: "Không thể tải video lên server.",
     uploadTimeoutTitle: "Upload quá lâu",
-    uploadTimeoutDesc: "Video {size} MB quá lớn hoặc mạng chậm. Vui lòng thử video nhỏ hơn hoặc kiểm tra kết nối mạng.",
+    uploadTimeoutDesc:
+      "Video {size} MB quá lớn hoặc mạng chậm. Vui lòng thử video nhỏ hơn hoặc kiểm tra kết nối mạng.",
     connectionError: "Lỗi kết nối",
-    connectionErrorDesc: "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.",
+    connectionErrorDesc:
+      "Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.",
     processingFailed: "Processing failed",
     analysisError: "Lỗi phân tích",
     analysisComplete: "Phân tích hoàn tất!",
@@ -347,13 +353,15 @@ export default {
     uploading: "Đang tải lên...",
     sendVideoAnalysis: "Gửi Video Phân Tích",
     storageProcessTitle: "QUY TRÌNH LƯU TRỮ",
-    storageProcessDesc: "Video đã phân tích sẽ vào hệ thống và sẵn sàng cho bước kế tiếp.",
+    storageProcessDesc:
+      "Video đã phân tích sẽ vào hệ thống và sẵn sàng cho bước kế tiếp.",
     step1Process: "Gửi video tới hệ thống",
     step2Process: "AI phân tích nội dung video",
-    step3Process: "Lưu kết quả vào hệ thống và có thể lấy lại bằng \"Video mẫu\"",
+    step3Process: 'Lưu kết quả vào hệ thống và có thể lấy lại bằng "Video mẫu"',
     step2Title: "2) XEM VIDEO ĐANG ĐƯỢC PHÂN TÍCH",
     sampleDataSaved: "Dữ liệu đã được lưu mẫu",
-    step2Desc: "Video sẽ được gửi tới AI và lưu vào hệ thống. Bạn có thể dùng video mẫu để tránh upload lớn.",
+    step2Desc:
+      "Video sẽ được gửi tới AI và lưu vào hệ thống. Bạn có thể dùng video mẫu để tránh upload lớn.",
     uploadingVideo: "Đang tải video lên server...",
     uploadingVideoDesc: "Vui lòng chờ, đang upload file",
     analyzingVideo: "Đang phân tích video...",
@@ -361,9 +369,11 @@ export default {
     processing: "Đang xử lý...",
     noVideoMessage: "Chưa có video. Upload hoặc dùng video mẫu.",
     analyzeAnotherVideo: "Phân tích video khác",
-    dataWillBeSaved: "Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy xuất ở bước \"Video mẫu\".",
+    dataWillBeSaved:
+      'Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy xuất ở bước "Video mẫu".',
     selectSampleVideo: "Chọn Video Mẫu",
-    selectSampleVideoDesc: "Chọn một video từ database để phân tích. Tổng cộng có {count} video.",
+    selectSampleVideoDesc:
+      "Chọn một video từ database để phân tích. Tổng cộng có {count} video.",
     loadingVideoList: "Đang tải danh sách video...",
     noVideosInDatabase: "Chưa có video nào trong database.",
     uploadNewVideoToStart: "Hãy upload video mới để bắt đầu.",
@@ -375,22 +385,24 @@ export default {
     analyzingProgress: "Đang phân tích... {progress}% ({time})",
     analyzingProgressNoTime: "Đang phân tích... {progress}%",
     uploadingVideoToServer: "Đang tải video lên server... ({size} MB)",
-    uploadingVideoToServerWait: "Đang tải video lên server ({size} MB) - Vui lòng chờ",
+    uploadingVideoToServerWait:
+      "Đang tải video lên server ({size} MB) - Vui lòng chờ",
   },
 
   // Driver Monitor
   driverMonitor: {
-    title: "DRIVER MONITOR",
-    titleShort: "DRIVER",
+    title: "PHÂN TÍCH VIDEO TÀI XẾ",
+    titleShort: "TÀI XẾ",
     subtitle: "Upload hoặc dùng video mẫu để giám sát tài xế.",
-    badge: "Driver Monitor",
-    badgeShort: "Monitor",
+    badge: "Giám Sát Tài Xế",
+    badgeShort: "Giám Sát",
     realtimeAI: "Realtime AI",
     ai: "AI",
     videoSelected: "Đã chọn video",
     videoSelectedDesc: "Đang sử dụng: {filename}",
     noVideoSelected: "Chưa chọn video",
-    noVideoSelectedDesc: "Vui lòng chọn video hoặc upload video mới trước khi bắt đầu giám sát.",
+    noVideoSelectedDesc:
+      "Vui lòng chọn video hoặc upload video mới trước khi bắt đầu giám sát.",
     monitoringStarted: "Bắt đầu giám sát",
     analyzingVideo: "Đang phân tích video...",
     videoPlayError: "Lỗi phát video",
@@ -402,28 +414,44 @@ export default {
     distractionDetection: "Phát hiện mất tập trung",
     eyeTracking: "Theo dõi trạng thái mắt",
     step2Title: "2) XEM VIDEO ĐANG ĐƯỢC GIÁM SÁT",
-    step2Desc: "Video sẽ được phân tích để phát hiện mệt mỏi và mất tập trung của tài xế.",
-    analyzingStatus: "Đang phân tích: Fatigue {fatigue}% | Distraction {distraction}% | Eyes {eyes} | Blink {blink}/min",
+    step2Desc:
+      "Video sẽ được phân tích để phát hiện mệt mỏi và mất tập trung của tài xế.",
+    analyzingStatus:
+      "Đang phân tích: Fatigue {fatigue}% | Distraction {distraction}% | Eyes {eyes} | Blink {blink}/min",
     eyesClosed: "CLOSED",
     eyesOpen: "OPEN",
     startMonitoring: "Bắt Đầu Giám Sát",
     stopMonitoring: "Dừng Giám Sát",
     selectAnotherVideo: "Chọn Video Khác",
-    selectSampleVideoDesc: "Chọn một video từ database để giám sát. Tổng cộng có {count} video.",
+    selectSampleVideoDesc:
+      "Chọn một video từ database để giám sát. Tổng cộng có {count} video.",
+    uploading: "Đang tải lên...",
+    uploadRequiredTitle: "Cần upload video",
+    uploadRequiredDesc:
+      "Vui lòng upload video để bắt đầu giám sát tài xế. Video mẫu chỉ dùng để xem trước.",
+    jobCompleted: "Hoàn thành",
+    jobFailed: "Thất bại",
+    apiError: "Lỗi API",
+    progressLabel: "Tiến trình: {percent}%",
+    jobNotFoundTitle: "Không tìm thấy job",
+    jobNotFoundDesc:
+      "GET /api/video/result trả về 404. Job driver-monitor có thể không được /api/video/result theo dõi. Kiểm tra backend có ghi job driver-monitor vào cùng hệ thống video/result hay không.",
   },
 
   // AI Assistant
   aiAssistant: {
-    title: "AI ASSISTANT",
-    subtitle: "Powered by advanced neural networks",
-    welcomeMessage: "Xin chào! Tôi là trợ lý ảo của hệ thống ADAS. Tôi có thể giúp bạn phân tích hành vi lái xe, giải thích các cảnh báo an toàn và đưa ra khuyến nghị. Tôi có thể hỗ trợ gì cho bạn? 🚗",
+    title: "TRỢ LÝ AI",
+    subtitle: "Hỗ trợ bởi mạng nơ-ron nâng cao",
+    welcomeMessage:
+      "Xin chào! Tôi là trợ lý ảo của hệ thống ADAS. Tôi có thể giúp bạn phân tích hành vi lái xe, giải thích các cảnh báo an toàn và đưa ra khuyến nghị. Tôi có thể hỗ trợ gì cho bạn? 🚗",
     suggestion1: "Bạn là ai?",
     suggestion2: "Giải thích cảnh báo lệch làn đường",
     suggestion3: "Làm sao để cải thiện điểm an toàn?",
     suggestion4: "Nguyên nhân gây ra cảnh báo mệt mỏi?",
     thinking: "Đang suy nghĩ...",
     inputPlaceholder: "Hỏi tôi bất cứ điều gì về ADAS...",
-    technicalError: "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau. 🔧",
+    technicalError:
+      "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau. 🔧",
     error: "Lỗi",
   },
 };
