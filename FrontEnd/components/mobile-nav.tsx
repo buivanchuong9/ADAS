@@ -116,7 +116,7 @@ export function MobileNav() {
             {/* Logo Section */}
             <div className="p-6 border-b border-white/10 shrink-0">
               <Link
-                href="/"
+                href="/dashboard"
                 className="flex flex-col items-center gap-3"
                 onClick={() => setIsOpen(false)}
               >

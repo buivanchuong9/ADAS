@@ -1,66 +1,105 @@
 // Centralized ADAS API endpoint paths (no domain)
 // Base URL is configured separately in api-config.ts
+
+// Common API prefix for non-swagger routes
+const API_PREFIX = '/api'
+
 export const API_ENDPOINTS = {
+  // =========================
   // System (from Swagger)
+  // =========================
   HEALTH: '/health',
   STATUS: '/health', // local "status" maps to ADAS health check
 
-  // Admin/analytics (from Swagger)
+  // =========================
+  // Admin / Analytics (from Swagger)
+  // =========================
   ADMIN_OVERVIEW: '/admin/overview',
   ADMIN_STATISTICS: '/admin/statistics',
   ADMIN_CHARTS: '/admin/charts',
-  ADMIN_VIDEO_TIMELINE: (videoId: string | number) => `/admin/video/${videoId}/timeline`,
+  ADMIN_VIDEO_TIMELINE: (videoId: string | number) =>
+    `/admin/video/${videoId}/timeline`,
 
-  // Vision / processing (from Swagger)
+  // =========================
+  // Vision / Processing (from Swagger)
+  // =========================
   VISION_VIDEO: '/vision/video',
+  VIDEO_PROCESS: (id: string | number) =>
+    `/vision/video/${id}/process`, // assumption if per-id processing exists
 
-  // The following are not in the minimal Swagger list shown, but are kept for current UI flows.
-  // BE must provide these routes; otherwise adapt to ADMIN_* as needed.
-  ALERTS_LATEST: '/api/alerts/latest', // assumption: backend provides
-  ALERTS_STATS: '/api/alerts/stats',   // assumption: backend provides
+  // =========================
+  // Alerts (assumption – not in Swagger)
+  // =========================
+  ALERTS_LATEST: `${API_PREFIX}/alerts/latest`,
+  ALERTS_STATS: `${API_PREFIX}/alerts/stats`,
 
-  DETECTIONS_SAVE: '/api/detections/save',     // assumption: backend provides
-  DETECTIONS_RECENT: '/api/detections/recent', // assumption: backend provides
-  DETECTIONS_STATS: '/admin/statistics',       // mapped to admin statistics
+  // =========================
+  // Detections (assumption)
+  // =========================
+  DETECTIONS_SAVE: `${API_PREFIX}/detections/save`,
+  DETECTIONS_RECENT: `${API_PREFIX}/detections/recent`,
+  DETECTIONS_STATS: '/admin/statistics', // mapped to admin statistics
 
-  EVENTS: '/api/events',            // assumption: backend provides
-  EVENTS_LIST: '/api/events/list',  // assumption: backend provides
+  // =========================
+  // Events (assumption)
+  // =========================
+  EVENTS: `${API_PREFIX}/events`,
+  EVENTS_LIST: `${API_PREFIX}/events/list`,
 
-  TRIPS: '/api/trips',              // assumption: backend provides
-  TRIPS_LIST: '/api/trips/list',    // assumption: backend provides
+  // =========================
+  // Trips (assumption)
+  // =========================
+  TRIPS: `${API_PREFIX}/trips`,
+  TRIPS_LIST: `${API_PREFIX}/trips/list`,
 
-  DATASET: '/api/dataset',          // assumption: backend provides
+  // =========================
+  // Dataset (assumption)
+  // =========================
+  DATASET: `${API_PREFIX}/dataset`,
 
-  MODELS_AVAILABLE: '/api/models/available',      // assumption: backend provides
-  MODELS_DOWNLOAD_ALL: '/api/models/download-all',// assumption: backend provides
-  MODEL_DOWNLOAD: (id: string) => `/api/models/download/${id}`, // assumption
-  MODEL_INFO: (id: string) => `/api/models/info/${id}`,         // assumption
-  MODEL_DELETE: (id: string) => `/api/models/delete/${id}`,     // assumption
+  // =========================
+  // Models (assumption)
+  // =========================
+  MODELS_AVAILABLE: `${API_PREFIX}/models/available`,
+  MODELS_DOWNLOAD_ALL: `${API_PREFIX}/models/download-all`,
+  MODEL_DOWNLOAD: (id: string) =>
+    `${API_PREFIX}/models/download/${id}`,
+  MODEL_INFO: (id: string) =>
+    `${API_PREFIX}/models/info/${id}`,
+  MODEL_DELETE: (id: string) =>
+    `${API_PREFIX}/models/delete/${id}`,
 
-  // WebSockets (not in Swagger page; kept for UI)
+  // =========================
+  // WebSockets (UI only – not Swagger)
+  // =========================
   WS_ADAS_STREAM: '/ws/adas/stream',
   WS_STREAM: '/ws/stream',
   WS_INFERENCE_VIDEO: '/ws/inference/video',
   WS_MODELS_WEBCAM: '/ws/models/webcam',
 
-  // Video
-  VIDEO_PROCESS: (id: string | number) => `/vision/video/${id}/process`, // assumption if processing per-id exists
-  VIDEO_UPLOAD: '/api/video/upload',
-  VIDEOS_LIST: '/api/video/list',
-  VIDEO_RESULT: (jobId: string | number) => `/api/video/result/${jobId}`,
-  VIDEO_DETAILS: (id: string | number) => `/api/video/result/${id}`,
+  // =========================
+  // Video (assumption)
+  // =========================
+  VIDEO_UPLOAD: `${API_PREFIX}/video/upload`,
+  VIDEOS_LIST: `${API_PREFIX}/video/list`,
+  VIDEO_RESULT: (jobId: string | number) =>
+    `${API_PREFIX}/video/result/${jobId}`,
+  VIDEO_DETAILS: (id: string | number) =>
+    `${API_PREFIX}/video/result/${id}`,
   VIDEO_DOWNLOAD: (jobId: string, filename: string) =>
-    `/api/video/download/${jobId}/${filename}`,
+    `${API_PREFIX}/video/download/${jobId}/${filename}`,
   VIDEO_SAMPLE: (jobId: string, filename: string) =>
-    `/api/video/sample/${jobId}/${filename}`,
+    `${API_PREFIX}/video/sample/${jobId}/${filename}`,
 
-    // 🔍 Driver monitoring
-  DRIVER_MONITOR_ANALYZE: '/api/driver-monitor/analyze',                  // POST
-  DRIVER_STATUS_SAVE: '/api/driver-status',                               // POST
-  DRIVER_STATUS_CURRENT: '/api/driver-status',                            // GET
-  DRIVER_STATUS_HISTORY: '/api/driver-status/history',                    // GET
-  DRIVER_MONITOR_DOWNLOAD: (jobId: string | number) => `/api/download/${jobId}`, // GET
+  // =========================
+  // Driver Monitoring (assumption)
+  // =========================
+  DRIVER_MONITOR_ANALYZE: `${API_PREFIX}/driver-monitor/analyze`, // POST
+  DRIVER_STATUS_SAVE: `${API_PREFIX}/driver-status`,              // POST
+  DRIVER_STATUS_CURRENT: `${API_PREFIX}/driver-status`,           // GET
+  DRIVER_STATUS_HISTORY: `${API_PREFIX}/driver-status/history`,   // GET
+  DRIVER_MONITOR_DOWNLOAD: (jobId: string | number) =>
+    `${API_PREFIX}/download/${jobId}`, // GET
 } as const
 
 export type ApiEndpointKey = keyof typeof API_ENDPOINTS
-
