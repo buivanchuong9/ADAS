@@ -402,7 +402,7 @@ export default function DriverMonitorPage() {
     <div className="flex flex-col min-h-screen bg-bg-primary text-fg-primary">
       <header className="flex items-center justify-between p-3 sm:p-5 border-b border-white/10 glass-card backdrop-blur-xl">
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button
               variant="ghost"
               size="icon"
