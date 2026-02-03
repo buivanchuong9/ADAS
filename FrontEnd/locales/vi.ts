@@ -21,14 +21,83 @@ export default {
     active: "Hoạt động",
     inactive: "Không hoạt động",
     select: "Chọn",
+    user: "Người dùng",
   },
 
   // Header
   header: {
     platformName: "ADAS Platform",
     greeting: "Xin chào,",
+    myAccount: "Tài khoản của tôi",
     logout: "Đăng xuất",
     login: "Đăng nhập",
+    profile: "Hồ sơ người dùng",
+  },
+
+  // User Profile
+  profile: {
+    title: "Hồ sơ Người Dùng",
+    subtitle: "Quản lý thông tin cá nhân",
+    personalInfo: "Thông Tin Cá Nhân",
+    drivingProfile: "Hồ sơ Lái Xe",
+    adasConfig: "Cấu hình ADAS",
+
+    // Labels
+    fullName: "Họ và Tên",
+    email: "Email",
+    role: "Vai trò",
+    experienceLevel: "Kinh nghiệm lái",
+    drivingStyle: "Phong cách lái",
+    vehicleType: "Loại phương tiện",
+    vehicleInfo: "Thông Tin Phương Tiện",
+    manufacturer: "Hãng sản xuất",
+    model: "Dòng xe (Model)",
+    modelYear: "Năm sản xuất",
+    licensePlate: "Biển số xe",
+
+    // ADAS Settings
+    settings: {
+      laneWarning: "Cảnh báo lệch làn (LDW)",
+      laneWarningDesc: "Cảnh báo khi xe rời làn đường không chủ đích",
+      collisionWarning: "Cảnh báo va chạm (FCW)",
+      collisionWarningDesc: "Cảnh báo khi khoảng cách với xe trước quá gần",
+      driverMonitoring: "Giám sát tài xế (DMS)",
+      driverMonitoringDesc: "Phát hiện mệt mỏi và mất tập trung",
+      sensitivity: "Độ nhạy cảnh báo",
+      outputType: "Kiểu cảnh báo",
+    },
+
+    // Values
+    roles: {
+      admin: "Quản trị viên",
+      driver: "Tài xế",
+      researcher: "Nhà nghiên cứu",
+      tester: "Người kiểm thử",
+    },
+    experience: {
+      beginner: "Mới lái",
+      intermediate: "Trung bình",
+      expert: "Lâu năm",
+    },
+    styles: {
+      calm: "Điềm tĩnh",
+      normal: "Bình thường",
+      aggressive: "Thể thao",
+    },
+    sensitivityLevel: {
+      low: "Thấp",
+      medium: "Trung bình",
+      high: "Cao",
+    },
+    outputModes: {
+      audio: "Âm thanh",
+      visual: "Hình ảnh",
+      both: "Cả hai",
+    },
+
+    saveSuccess: "Đã lưu hồ sơ thành công!",
+    saveError: "Có lỗi xảy ra khi lưu.",
+    saveChanges: "Lưu Thay Đổi",
   },
 
   // Navigation
