@@ -1,45 +1,97 @@
 "use client";
 
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+
+// chỉ import, KHÔNG gọi
+import "highcharts/highcharts-3d";
+import "highcharts/modules/cylinder";
+Highcharts.setOptions({
+  plotOptions: {
+  series: {
+    borderWidth: 0,
+
+    states: {
+      hover: {
+        brightness: 0.3
+      }
+    }
+  }
+}
+
+});
+
+import { useRef, useEffect } from "react";
+
 import { useLanguage } from "@/contexts/language-context";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Card } from "@/components/ui/card";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react";
 
-const speedData = [
-  { time: "0:00", speed: 0 },
-  { time: "0:15", speed: 45 },
-  { time: "0:30", speed: 60 },
-  { time: "0:45", speed: 55 },
-  { time: "1:00", speed: 70 },
-  { time: "1:15", speed: 65 },
-  { time: "1:30", speed: 50 },
-  { time: "1:45", speed: 40 },
-  { time: "2:00", speed: 0 },
-];
-
-const fatigueData = [
-  { time: "0:00", fatigue: 10 },
-  { time: "0:30", fatigue: 15 },
-  { time: "1:00", fatigue: 25 },
-  { time: "1:30", fatigue: 35 },
-  { time: "2:00", fatigue: 40 },
-];
 
 export default function Analytics() {
   const { t } = useLanguage();
+  const speedData = [
+    { time: "0:00", speed: 0 },
+    { time: "0:15", speed: 45 },
+    { time: "0:30", speed: 60 },
+    { time: "0:45", speed: 55 },
+    { time: "1:00", speed: 70 },
+    { time: "1:15", speed: 65 },
+    { time: "1:30", speed: 50 },
+    { time: "1:45", speed: 40 },
+    { time: "2:00", speed: 0 },
+  ];
+const speedChartRef = useRef<any>(null);
+
+useEffect(() => {
+
+  let hue = 0;
+
+  const interval = setInterval(() => {
+
+    hue = (hue + 2) % 360; // giảm tốc độ đổi màu
+
+    const color1 = `hsl(${hue}, 100%, 60%)`;
+    const color2 = `hsl(${(hue + 60) % 360}, 100%, 60%)`;
+
+    const speedChart = speedChartRef.current?.chart;
+    const fatigueChart = fatigueChartRef.current?.chart;
+    const safetyChart = safetyChartRef.current?.chart;
+
+    speedChart?.series[0].update({
+      color: color1,
+      shadow: { color: color1, width: 25 }
+    }, false);
+
+    fatigueChart?.series[0].update({
+      color: color2
+    }, false);
+
+    safetyChart?.series[0].update({
+      color: color1,
+      shadow: { color: color1, width: 25 }
+    }, false);
+
+    // ⭐ redraw 1 lần
+    Highcharts.charts.forEach(chart => chart?.redraw());
+
+  }, 180); // ⭐ tăng interval -> mượt hơn
+
+  return () => clearInterval(interval);
+
+}, []);
+
+
+
+  const fatigueData = [
+    { time: "0:00", fatigue: 10 },
+    { time: "0:30", fatigue: 15 },
+    { time: "1:00", fatigue: 25 },
+    { time: "1:30", fatigue: 35 },
+    { time: "2:00", fatigue: 40 },
+  ];
 
   const tripComparisonData = [
     { trip: t("analytics.today"), score: 85 },
@@ -47,6 +99,151 @@ export default function Analytics() {
     { trip: t("analytics.threeDaysAgo"), score: 82 },
     { trip: t("analytics.oneWeekAgo"), score: 75 },
   ];
+
+  // ================= CHART OPTIONS =================
+
+  const speedChartOptions = {
+  chart: {
+    type: "column",
+    options3d: {
+      enabled: true,
+      alpha: 15,
+      beta: 15,
+      depth: 50,
+      viewDistance: 25
+    }
+  },
+
+  title: { text: null },
+
+  xAxis: {
+    categories: speedData.map(d => d.time)
+  },
+
+  plotOptions: {
+    column: {
+  depth: 40,
+  borderRadius: 6,
+
+  shadow: {
+    color: "#00f5ff",
+    width: 25
+  }
+}
+  },
+
+  series: [
+  {
+    name: t("analytics.speed"),
+
+    data: speedData.map(d => ({
+      y: d.speed,
+
+      color: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, "#00f5ff"],
+          [1, "#0066ff"]
+        ]
+      }
+    }))
+  }
+]
+};
+
+
+  const fatigueChartOptions = {
+  chart: {
+    type: "pie",
+    options3d: {
+      enabled: true,
+      alpha: 45
+    }
+  },
+
+  title: { text: null },
+
+  plotOptions: {
+    pie: {
+  innerSize: 80,
+  depth: 45,
+
+  shadow: {
+    color: "#ff00ff",
+    width: 25
+  }
+}
+  },
+
+  series: [
+  {
+    name: t("analytics.fatigue"),
+    data: fatigueData.map((d, index) => ({
+      name: d.time,
+      y: d.fatigue,
+      color: [
+        "#ff00ff",
+        "#00f5ff",
+        "#00ff9f",
+        "#ffd400",
+        "#ff4d6d"
+      ][index]
+    }))
+  }
+]
+};
+
+
+ const safetyChartOptions = {
+  chart: {
+    type: "cylinder",
+    options3d: {
+      enabled: true,
+      alpha: 15,
+      beta: 15,
+      depth: 50,
+      viewDistance: 25,
+      
+    }
+  },
+
+  title: { text: null },
+
+  xAxis: {
+    categories: tripComparisonData.map(d => d.trip)
+  },
+
+  plotOptions: {
+    cylinder: {
+  depth: 40,
+  shadow: {
+    color: "#00ff9f",
+    width: 25
+  }
+}
+  },
+
+  series: [
+  {
+    name: t("analytics.safetyScoreLabel"),
+
+    data: tripComparisonData.map(d => ({
+      y: d.score,
+
+      color: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, "#00ff9f"],
+          [1, "#008f5a"]
+        ]
+      }
+    }))
+  }
+]
+};
+
+
+  
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -130,30 +327,12 @@ export default function Analytics() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {t("analytics.speedOverTime")}
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={speedData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="time" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #e5e7eb",
-                        color: "#1f2937",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="speed"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      dot={{ fill: "#3b82f6", r: 4 }}
-                      name={t("analytics.speed")}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <HighchartsReact
+  highcharts={Highcharts}
+  options={speedChartOptions}
+  ref={speedChartRef}
+/>
+
               </div>
             </Card>
 
@@ -162,30 +341,12 @@ export default function Analytics() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {t("analytics.fatigueOverTime")}
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={fatigueData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="time" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #e5e7eb",
-                        color: "#1f2937",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="fatigue"
-                      stroke="#ef4444"
-                      strokeWidth={2}
-                      dot={{ fill: "#ef4444", r: 4 }}
-                      name={t("analytics.fatigue")}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <HighchartsReact
+  highcharts={Highcharts}
+  options={fatigueChartOptions}
+ ref={speedChartRef}
+/>
+
               </div>
             </Card>
           </div>
@@ -196,27 +357,14 @@ export default function Analytics() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   {t("analytics.safetyScoreComparison")}
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={tripComparisonData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="trip" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #e5e7eb",
-                        color: "#1f2937",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar
-                      dataKey="score"
-                      fill="#6366f1"
-                      name={t("analytics.safetyScoreLabel")}
-                      radius={[8, 8, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <HighchartsReact
+  highcharts={Highcharts}
+  options={safetyChartOptions}
+ ref={speedChartRef}
+
+
+/>
+
               </div>
             </Card>
 

@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
-    "@ffmpeg/ffmpeg": "^0.12.15"
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "highcharts": "^12.5.0",
+    "highcharts-react-official": "^3.2.3"
   }
 }
