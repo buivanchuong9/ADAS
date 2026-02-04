@@ -15,11 +15,22 @@ jobs:
       NODE_VERSION: '18'
 
     steps:
+      # --- BƯỚC MỚI: Tự động dọn dẹp cấu hình lỗi cũ ---
+      - name: Force Cleanup Old Config
+        shell: powershell
+        run: |
+          # Xóa folder .git cũ để ép nó quên token chết đi
+          if (Test-Path .git) {
+            Remove-Item -Recurse -Force .git
+            Write-Host "Cleaned up old git config"
+          }
+
+      # --- Checkout code dùng Token mới ---
       - name: Checkout source
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
-          clean: false
+          clean: true
 
       - name: Clean root lockfile
         run: |
@@ -35,7 +46,6 @@ jobs:
 
       - name: Build frontend
         working-directory: ./FrontEnd
-        
         run: npm run build
 
       - name: Deploy to IIS
