@@ -15,7 +15,6 @@ jobs:
       NODE_VERSION: '18'
 
     steps:
-      # --- BƯỚC MỚI: Tự động dọn dẹp cấu hình lỗi cũ ---
       - name: Force Cleanup Old Config
         shell: powershell
         run: |
