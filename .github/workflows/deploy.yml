@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          clean: false
 
       - name: Clean root lockfile
         run: |
