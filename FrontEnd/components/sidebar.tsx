@@ -30,12 +30,6 @@ export function Sidebar() {
       description: t('nav.dashboardDesc'),
     },
     {
-      name: t('nav.liveDetection'),
-      href: "/",
-      icon: Video,
-      description: t('nav.liveDetectionDesc'),
-    },
-    {
       name: t('nav.adasMonitor'),
       href: "/adas",
       icon: Car,
@@ -88,7 +82,7 @@ export function Sidebar() {
         className="p-6 border-b relative z-10"
         style={{ borderColor: 'var(--border-subtle)' }}
       >
-        <Link href="/" className="flex flex-col items-center gap-3 group">
+        <Link href="/dashboard" className="flex flex-col items-center gap-3 group">
           <motion.div
             className="w-32 h-32 rounded-2xl overflow-hidden shadow-lg ring-2 ring-offset-2 ring-[var(--primary)]"
             style={{

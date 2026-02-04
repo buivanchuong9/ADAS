@@ -21,14 +21,83 @@ export default {
     active: "Active",
     inactive: "Inactive",
     select: "Select",
+    user: "User",
   },
 
   // Header
   header: {
     platformName: "ADAS Platform",
     greeting: "Hello,",
+    myAccount: "My Account",
     logout: "Logout",
     login: "Login",
+    profile: "User Profile",
+  },
+
+  // User Profile
+  profile: {
+    title: "User Profile",
+    subtitle: "Manage personal information",
+    personalInfo: "Personal Info",
+    drivingProfile: "Driving Profile",
+    adasConfig: "ADAS Configuration",
+
+    // Labels
+    fullName: "Full Name",
+    email: "Email",
+    role: "Role",
+    experienceLevel: "Experience Level",
+    drivingStyle: "Driving Style",
+    vehicleType: "Vehicle Type",
+    vehicleInfo: "Vehicle Information",
+    manufacturer: "Manufacturer",
+    model: "Model",
+    modelYear: "Model Year",
+    licensePlate: "License Plate",
+
+    // ADAS Settings
+    settings: {
+      laneWarning: "Lane Departure Warning (LDW)",
+      laneWarningDesc: "Alert when vehicle leaves lane unintentionally",
+      collisionWarning: "Forward Collision Warning (FCW)",
+      collisionWarningDesc: "Alert when distance to vehicle ahead is too close",
+      driverMonitoring: "Driver Monitoring System (DMS)",
+      driverMonitoringDesc: "Detect driver fatigue and distraction",
+      sensitivity: "Alert Sensitivity",
+      outputType: "Alert Output",
+    },
+
+    // Values
+    roles: {
+      admin: "Admin",
+      driver: "Driver",
+      researcher: "Researcher",
+      tester: "Tester",
+    },
+    experience: {
+      beginner: "Beginner",
+      intermediate: "Intermediate",
+      expert: "Expert",
+    },
+    styles: {
+      calm: "Calm",
+      normal: "Normal",
+      aggressive: "Aggressive",
+    },
+    sensitivityLevel: {
+      low: "Low",
+      medium: "Medium",
+      high: "High",
+    },
+    outputModes: {
+      audio: "Audio",
+      visual: "Visual",
+      both: "Both",
+    },
+
+    saveSuccess: "Profile saved successfully!",
+    saveError: "Error saving profile.",
+    saveChanges: "Save Changes",
   },
 
   // Navigation
