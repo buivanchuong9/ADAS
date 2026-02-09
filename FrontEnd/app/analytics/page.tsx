@@ -2,406 +2,378 @@
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-
-// chỉ import, KHÔNG gọi
 import "highcharts/highcharts-3d";
 import "highcharts/modules/cylinder";
-Highcharts.setOptions({
-  plotOptions: {
-  series: {
-    borderWidth: 0,
 
-    states: {
-      hover: {
-        brightness: 0.3
-      }
-    }
-  }
-}
-
-});
-
-import { useRef, useEffect } from "react";
-
+import { useRef, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react";
 
+/* ================= API BASE =================
+ * Recommended: set NEXT_PUBLIC_API_URL in .env.local to your backend base
+ * e.g. NEXT_PUBLIC_API_URL=https://adas-api.aiotlab.edu.vn
+ */
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://adas-api.aiotlab.edu.vn";
+
+/* ================= TYPES ================= */
+
+type ChartPoint = {
+  time?: string;
+  trip?: string;
+  speed?: number;
+  fatigue?: number;
+  score?: number;
+  color?: string;
+};
+
+type CardsType = {
+  distance?: number | string;
+  drivingTime?: number | string;
+  averageSpeed?: number | string;
+  safetyScore?: number | string;
+};
 
 export default function Analytics() {
   const { t } = useLanguage();
-  const speedData = [
-    { time: "0:00", speed: 0 },
-    { time: "0:15", speed: 45 },
-    { time: "0:30", speed: 60 },
-    { time: "0:45", speed: 55 },
-    { time: "1:00", speed: 70 },
-    { time: "1:15", speed: 65 },
-    { time: "1:30", speed: 50 },
-    { time: "1:45", speed: 40 },
-    { time: "2:00", speed: 0 },
-  ];
-const speedChartRef = useRef<any>(null);
 
-useEffect(() => {
+  /* ================= STATE ================= */
+  const [cards, setCards] = useState<CardsType>({});
+  const [speedData, setSpeedData] = useState<ChartPoint[]>([]);
+  const [fatigueData, setFatigueData] = useState<ChartPoint[]>([]);
+  const [tripComparisonData, setTripComparisonData] = useState<ChartPoint[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  let hue = 0;
+  const speedChartRef = useRef<any>(null);
+  const fatigueChartRef = useRef<any>(null);
 
-  const interval = setInterval(() => {
+  /* ================= HELPERS ================= */
+  const isJsonResponse = (res: Response) =>
+    res.headers?.get("content-type")?.includes("application/json");
 
-    hue = (hue + 2) % 360; // giảm tốc độ đổi màu
-
-    const color1 = `hsl(${hue}, 100%, 60%)`;
-    const color2 = `hsl(${(hue + 60) % 360}, 100%, 60%)`;
-
-    const speedChart = speedChartRef.current?.chart;
-    const fatigueChart = fatigueChartRef.current?.chart;
-    const safetyChart = safetyChartRef.current?.chart;
-
-    speedChart?.series[0].update({
-      color: color1,
-      shadow: { color: color1, width: 25 }
-    }, false);
-
-    fatigueChart?.series[0].update({
-      color: color2
-    }, false);
-
-    safetyChart?.series[0].update({
-      color: color1,
-      shadow: { color: color1, width: 25 }
-    }, false);
-
-    // ⭐ redraw 1 lần
-    Highcharts.charts.forEach(chart => chart?.redraw());
-
-  }, 180); // ⭐ tăng interval -> mượt hơn
-
-  return () => clearInterval(interval);
-
-}, []);
-
-
-
-  const fatigueData = [
-    { time: "0:00", fatigue: 10 },
-    { time: "0:30", fatigue: 15 },
-    { time: "1:00", fatigue: 25 },
-    { time: "1:30", fatigue: 35 },
-    { time: "2:00", fatigue: 40 },
-  ];
-
-  const tripComparisonData = [
-    { trip: t("analytics.today"), score: 85 },
-    { trip: t("analytics.yesterday"), score: 78 },
-    { trip: t("analytics.threeDaysAgo"), score: 82 },
-    { trip: t("analytics.oneWeekAgo"), score: 75 },
-  ];
-
-  // ================= CHART OPTIONS =================
-
-  const speedChartOptions = {
-  chart: {
-    type: "column",
-    options3d: {
-      enabled: true,
-      alpha: 15,
-      beta: 15,
-      depth: 50,
-      viewDistance: 25
+  const safeParseJson = async (res: Response) => {
+    try {
+      if (!res) return null;
+      if (isJsonResponse(res)) return await res.json();
+      return null;
+    } catch (e) {
+      console.warn("Failed parse json:", e);
+      return null;
     }
-  },
+  };
 
-  title: { text: null },
+  /* ================= FETCH API ================= */
+  useEffect(() => {
+    let mounted = true;
 
-  xAxis: {
-    categories: speedData.map(d => d.time)
-  },
+    async function fetchData() {
+      setLoading(true);
+      setErrorMsg(null);
 
-  plotOptions: {
-    column: {
-  depth: 40,
-  borderRadius: 6,
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
 
-  shadow: {
-    color: "#00f5ff",
-    width: 25
-  }
-}
-  },
+      try {
+        // Use allSettled so partial success is handled
+        const promises = [
+          fetch(`${API_BASE}/api/analytics/summary`, { headers }),
+          fetch(`${API_BASE}/api/analytics/speed-over-time`, { headers }),
+          fetch(`${API_BASE}/api/analytics/fatigue-over-time`, { headers }),
+          fetch(`${API_BASE}/api/analytics/safety-score-comparison`, { headers }),
+        ];
 
-  series: [
-  {
-    name: t("analytics.speed"),
+        const results = await Promise.allSettled(promises);
 
-    data: speedData.map(d => ({
-      y: d.speed,
+        // unwrap responses (could be rejected)
+        const responses = results.map((r) =>
+          r.status === "fulfilled" ? (r.value as Response) : null
+        );
 
-      color: {
-        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-        stops: [
-          [0, "#00f5ff"],
-          [1, "#0066ff"]
-        ]
+        // SUMMARY
+        const summaryRes = responses[0];
+        if (summaryRes && summaryRes.ok) {
+          const json = await safeParseJson(summaryRes);
+          console.log("SUMMARY API:", summaryRes.status, json);
+          if (mounted && json) {
+            setCards({
+              distance: json.total_distance ?? "-",
+              drivingTime: json.total_trips ?? "-",
+              averageSpeed: json.avg_speed ?? "-",
+              safetyScore: json.avg_safety_score ?? "-",
+            });
+          }
+        } else {
+          console.warn("SUMMARY missing or error:", summaryRes?.status);
+        }
+
+        // SPEED
+        const speedRes = responses[1];
+        if (speedRes) {
+          console.log("SPEED status:", speedRes.status);
+          const json = await safeParseJson(speedRes);
+          console.log("SPEED API RAW:", json);
+          let mappedSpeed: ChartPoint[] = [];
+          if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
+            mappedSpeed = json.labels.map((label: string, idx: number) => ({
+              time: label,
+              speed: Number(json.data?.[idx] ?? 0),
+            }));
+          } else {
+            console.warn("SPEED API format unexpected, will leave empty or set fallback");
+          }
+          if (mounted) {
+            console.table(mappedSpeed);
+            setSpeedData(mappedSpeed);
+          }
+        } else {
+          console.warn("SPEED fetch failed");
+        }
+
+        // FATIGUE
+        const fatigueRes = responses[2];
+        if (fatigueRes) {
+          console.log("FATIGUE status:", fatigueRes.status);
+          const json = await safeParseJson(fatigueRes);
+          console.log("FATIGUE API RAW:", json);
+          let mappedFatigue: ChartPoint[] = [];
+          if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
+            mappedFatigue = json.labels.map((label: string, idx: number) => ({
+              time: label,
+              fatigue: Number(json.data?.[idx] ?? 0),
+            }));
+          } else {
+            console.warn("FATIGUE API format unexpected, will leave empty or set fallback");
+          }
+          if (mounted) {
+            console.table(mappedFatigue);
+            setFatigueData(mappedFatigue);
+          }
+        } else {
+          console.warn("FATIGUE fetch failed");
+        }
+
+        // SAFETY
+        const safetyRes = responses[3];
+        if (safetyRes) {
+          console.log("SAFETY status:", safetyRes.status);
+          const json = await safeParseJson(safetyRes);
+          console.log("SAFETY API RAW:", json);
+          let mappedSafety: ChartPoint[] = [];
+          if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
+            mappedSafety = json.labels.map((label: string, idx: number) => ({
+              trip: label,
+              score: Number(json.data?.[idx] ?? 0),
+              color: (Array.isArray(json.colors) && json.colors[idx]) ? json.colors[idx] : "#10b981",
+            }));
+          } else {
+            console.warn("SAFETY API format unexpected, will leave empty or set fallback");
+          }
+          if (mounted) {
+            console.table(mappedSafety);
+            setTripComparisonData(mappedSafety);
+          }
+        } else {
+          console.warn("SAFETY fetch failed");
+        }
+      } catch (err) {
+        console.error("Analytics API error:", err);
+        if (mounted) setErrorMsg("Lỗi khi gọi API. Kiểm tra console.");
+      } finally {
+        if (mounted) setLoading(false);
       }
-    }))
-  }
-]
-};
+    }
 
+    fetchData();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  /* ================= NEON EFFECT (guarded) ================= */
+  useEffect(() => {
+    let hue = 0;
+    const interval = setInterval(() => {
+      hue = (hue + 2) % 360;
+      const color1 = `hsl(${hue},100%,60%)`;
+      const color2 = `hsl(${(hue + 60) % 360},100%,60%)`;
+
+      // only update if series exist (avoid runtime error)
+      try {
+        if (speedChartRef.current?.chart?.series?.length) {
+          speedChartRef.current.chart.series[0].update(
+            { color: color1, shadow: { color: color1, width: 25 } },
+            true
+          );
+        }
+        if (fatigueChartRef.current?.chart?.series?.length) {
+          fatigueChartRef.current.chart.series[0].update({ color: color2 }, true);
+        }
+      } catch (e) {
+        // swallow any update errors (safety)
+      }
+    }, 300); // 300ms to reduce redraw pressure
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* ================= DEBUG CHART DATA ================= */
+  useEffect(() => {
+    console.log("Speed Chart Data:", speedData);
+    console.log("Fatigue Chart Data:", fatigueData);
+    console.log("Safety Chart Data:", tripComparisonData);
+  }, [speedData, fatigueData, tripComparisonData]);
+
+  /* ================= CHART OPTIONS (3D added) ================= */
+  const speedChartOptions = {
+    chart: {
+      type: "line",
+      options3d: {
+        enabled: true,
+        alpha: 10,
+        beta: 15,
+        depth: 50,
+        viewDistance: 25,
+      },
+    },
+    title: { text: null },
+    xAxis: { categories: speedData.map((d) => d.time ?? "") },
+    plotOptions: {
+      line: {
+        // depth isn't a documented option for line but harmless to include
+        depth: 25,
+      },
+    },
+    series: [
+      {
+        name: t("analytics.speed"),
+        data: speedData.map((d) => d.speed ?? 0),
+      },
+    ],
+  };
 
   const fatigueChartOptions = {
-  chart: {
-    type: "pie",
-    options3d: {
-      enabled: true,
-      alpha: 45
-    }
-  },
+    chart: {
+      type: "line",
+      options3d: {
+        enabled: true,
+        alpha: 12,
+        beta: 10,
+        depth: 40,
+        viewDistance: 25,
+      },
+    },
+    title: { text: null },
+    xAxis: { categories: fatigueData.map((d) => d.time ?? "") },
+    plotOptions: {
+      line: {
+        depth: 20,
+      },
+    },
+    series: [
+      {
+        name: t("analytics.fatigue"),
+        data: fatigueData.map((d) => d.fatigue ?? 0),
+      },
+    ],
+  };
 
-  title: { text: null },
+  const safetyChartOptions = {
+    chart: {
+      type: "column",
+      options3d: {
+        enabled: true,
+        alpha: 15,
+        beta: 15,
+        depth: 60,
+        viewDistance: 25,
+      },
+    },
+    plotOptions: {
+      column: {
+        depth: 40,
+      },
+    },
+    title: { text: null },
+    xAxis: { categories: tripComparisonData.map((d) => d.trip ?? "") },
+    series: [
+      {
+        name: t("analytics.safetyScoreLabel"),
+        data: tripComparisonData.map((d) => ({ y: d.score ?? 0, color: d.color ?? "#10b981" })),
+      },
+    ],
+  };
 
-  plotOptions: {
-    pie: {
-  innerSize: 80,
-  depth: 45,
-
-  shadow: {
-    color: "#ff00ff",
-    width: 25
-  }
-}
-  },
-
-  series: [
-  {
-    name: t("analytics.fatigue"),
-    data: fatigueData.map((d, index) => ({
-      name: d.time,
-      y: d.fatigue,
-      color: [
-        "#ff00ff",
-        "#00f5ff",
-        "#00ff9f",
-        "#ffd400",
-        "#ff4d6d"
-      ][index]
-    }))
-  }
-]
-};
-
-
- const safetyChartOptions = {
-  chart: {
-    type: "cylinder",
-    options3d: {
-      enabled: true,
-      alpha: 15,
-      beta: 15,
-      depth: 50,
-      viewDistance: 25,
-      
-    }
-  },
-
-  title: { text: null },
-
-  xAxis: {
-    categories: tripComparisonData.map(d => d.trip)
-  },
-
-  plotOptions: {
-    cylinder: {
-  depth: 40,
-  shadow: {
-    color: "#00ff9f",
-    width: 25
-  }
-}
-  },
-
-  series: [
-  {
-    name: t("analytics.safetyScoreLabel"),
-
-    data: tripComparisonData.map(d => ({
-      y: d.score,
-
-      color: {
-        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-        stops: [
-          [0, "#00ff9f"],
-          [1, "#008f5a"]
-        ]
-      }
-    }))
-  }
-]
-};
-
-
-  
-
+  /* ================= UI ================= */
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <MobileNav />
       <Sidebar />
-
       <main className="flex-1 overflow-auto">
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-3xl font-bold text-neon-cyan tracking-wider uppercase">
-              {t("analytics.title")}
-            </h1>
-            <p className="text-sm text-fg-secondary mt-1">
-              {t("analytics.subtitle")}
-            </p>
+        <div className="p-6">
+          {/* TITLE */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-neon-cyan uppercase">{t("analytics.title")}</h1>
+            <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <Card className="bg-white border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">
-                      {t("analytics.distance")}
-                    </p>
-                    <p className="text-2xl font-bold text-blue-600">42.5 km</p>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-blue-500" />
-                </div>
-              </div>
+          {/* status */}
+          {loading && (
+            <div className="mb-4 text-sm text-gray-500">Đang tải dữ liệu...</div>
+          )}
+          {errorMsg && (
+            <div className="mb-4 text-sm text-red-600">Lỗi: {errorMsg}</div>
+          )}
+
+          {/* CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card className="p-4">
+              <p>{t("analytics.distance")}</p>
+              <p className="text-2xl font-bold text-blue-600">{cards.distance ?? "-"}</p>
+              <TrendingUp />
             </Card>
 
-            <Card className="bg-white border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">
-                      {t("analytics.drivingTime")}
-                    </p>
-                    <p className="text-2xl font-bold text-green-600">2h 15m</p>
-                  </div>
-                  <Clock className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
+            <Card className="p-4">
+              <p>{t("analytics.drivingTime")}</p>
+              <p className="text-2xl font-bold text-green-600">{cards.drivingTime ?? "-"}</p>
+              <Clock />
             </Card>
 
-            <Card className="bg-white border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">
-                      {t("analytics.averageSpeed")}
-                    </p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      54 km/h
-                    </p>
-                  </div>
-                  <Gauge className="w-8 h-8 text-purple-500" />
-                </div>
-              </div>
+            <Card className="p-4">
+              <p>{t("analytics.averageSpeed")}</p>
+              <p className="text-2xl font-bold text-purple-600">{cards.averageSpeed ?? "-"}</p>
+              <Gauge />
             </Card>
 
-            <Card className="bg-white border-2 border-orange-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1 font-medium">
-                      {t("analytics.safetyScore")}
-                    </p>
-                    <p className="text-2xl font-bold text-orange-600">85/100</p>
-                  </div>
-                  <AlertTriangle className="w-8 h-8 text-orange-500" />
-                </div>
-              </div>
+            <Card className="p-4">
+              <p>{t("analytics.safetyScore")}</p>
+              <p className="text-2xl font-bold text-orange-600">{cards.safetyScore ?? "-"}</p>
+              <AlertTriangle />
             </Card>
           </div>
 
+          {/* CHARTS */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card className="bg-white border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t("analytics.speedOverTime")}
-                </h3>
-                <HighchartsReact
-  highcharts={Highcharts}
-  options={speedChartOptions}
-  ref={speedChartRef}
-/>
-
-              </div>
+            <Card className="p-6">
+              <h3 className="mb-4">{t("analytics.speedOverTime")}</h3>
+              <HighchartsReact highcharts={Highcharts} options={speedChartOptions} ref={speedChartRef} />
             </Card>
 
-            <Card className="bg-white border-2 border-red-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t("analytics.fatigueOverTime")}
-                </h3>
-                <HighchartsReact
-  highcharts={Highcharts}
-  options={fatigueChartOptions}
- ref={speedChartRef}
-/>
-
-              </div>
+            <Card className="p-6">
+              <h3 className="mb-4">{t("analytics.fatigueOverTime")}</h3>
+              <HighchartsReact highcharts={Highcharts} options={fatigueChartOptions} ref={fatigueChartRef} />
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white border-2 border-indigo-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t("analytics.safetyScoreComparison")}
-                </h3>
-                <HighchartsReact
-  highcharts={Highcharts}
-  options={safetyChartOptions}
- ref={speedChartRef}
-
-
-/>
-
-              </div>
-            </Card>
-
-            <Card className="bg-white border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t("analytics.recommendations")}
-                </h3>
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">
-                      {t("analytics.increaseSafetyDistance")}
-                    </p>
-                    <p className="text-xs text-blue-700">
-                      {t("analytics.increaseSafetyDistanceDesc")}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <p className="text-sm font-semibold text-green-900 mb-1">
-                      {t("analytics.restRegularly")}
-                    </p>
-                    <p className="text-xs text-green-700">
-                      {t("analytics.restRegularlyDesc")}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-500">
-                    <p className="text-sm font-semibold text-orange-900 mb-1">
-                      {t("analytics.followSpeedLimit")}
-                    </p>
-                    <p className="text-xs text-orange-700">
-                      {t("analytics.followSpeedLimitDesc")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
+          {/* SAFETY */}
+          <Card className="p-6">
+            <h3 className="mb-4">{t("analytics.safetyScoreComparison")}</h3>
+            <HighchartsReact highcharts={Highcharts} options={safetyChartOptions} />
+          </Card>
         </div>
       </main>
     </div>
