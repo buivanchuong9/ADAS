@@ -98,7 +98,8 @@ export default function SettingsPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-neon-cyan tracking-wider">
+              <h1 className="text-4xl font-extrabold text-neon-cyan tracking-wide">
+
                 {t("settings.title")}
               </h1>
               <p className="text-sm text-fg-secondary mt-1 font-medium">
