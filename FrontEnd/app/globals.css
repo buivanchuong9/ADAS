@@ -576,8 +576,8 @@ textarea::placeholder {
 
 /* ===== OVERRIDE ANY REMAINING LIGHT MODE ===== */
 body,
-body * {
-  color: var(--fg-primary);
+body {
+  background: #0f172a;
 }
 
 a {
