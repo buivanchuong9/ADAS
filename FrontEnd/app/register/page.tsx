@@ -59,7 +59,8 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="min-h-screen w-full overflow-y-auto text-white [&_*]:!text-white">
+
             {/* Animated Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
                 {/* Animated gradient orbs */}
@@ -139,7 +140,8 @@ export default function RegisterPage() {
                         initial={{ x: -50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        className="relative rounded-2xl lg:rounded-3xl overflow-hidden min-h-[200px] sm:min-h-[300px] lg:min-h-[600px] border border-white/10"
+                        className="hidden lg:block relative rounded-2xl lg:rounded-3xl overflow-hidden min-h-[600px] border border-white/10"
+
                     >
                         {/* Image - Using background for better compatibility */}
                         <div
