@@ -1,14 +1,26 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { authService, UserInfo } from "@/lib/auth/auth.service";
 
 interface AuthContextType {
   user: UserInfo | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+  register: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
 }
 
@@ -28,7 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.access_token) {
           // Fetch user info from backend
-          const userInfo = await authService.getUserInfo(session.access_token);
+          const userInfo = await authService.getUserInfo(
+            session.access_token
+          );
 
           if (userInfo) {
             setUser(userInfo);
@@ -37,9 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error: any) {
         // Handle refresh token errors silently
-        if (error?.message?.includes('refresh_token_not_found') ||
-          error?.message?.includes('Invalid Refresh Token')) {
-          console.log('🔵 [AuthContext] Clearing invalid session...');
+        if (
+          error?.message?.includes("refresh_token_not_found") ||
+          error?.message?.includes("Invalid Refresh Token")
+        ) {
+          console.log("🔵 [AuthContext] Clearing invalid session...");
           await authService.signOut();
         } else {
           console.error("Error initializing auth:", error);
@@ -52,19 +68,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(
+    const {
+      data: { subscription },
+    } = authService.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.access_token) {
-          const userInfo = await authService.getUserInfo(session.access_token);
+        if (event === "SIGNED_IN" && session?.access_token) {
+          const userInfo = await authService.getUserInfo(
+            session.access_token
+          );
+
           if (userInfo) {
             setUser(userInfo);
             setIsAuthenticated(true);
           }
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === "SIGNED_OUT") {
           setUser(null);
           setIsAuthenticated(false);
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('✅ [AuthContext] Token refreshed successfully');
+        } else if (event === "TOKEN_REFRESHED") {
+          console.log(
+            "✅ [AuthContext] Token refreshed successfully"
+          );
         }
       }
     );
@@ -79,51 +102,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      console.log('🔵 [AuthContext] Login attempt for:', email)
+      console.log("🔵 [AuthContext] Login attempt for:", email);
 
       const result = await authService.signIn(email, password);
 
       if (!result.success) {
-        console.error('❌ [AuthContext] Login failed:', result.message)
+        console.error(
+          "❌ [AuthContext] Login failed:",
+          result.message
+        );
         return result;
       }
 
-      console.log('🔵 [AuthContext] Login successful, fetching user info...')
+      console.log(
+        "🔵 [AuthContext] Login successful, fetching user info..."
+      );
 
       // Fetch user info from backend
       const session = await authService.getSession();
-      if (session?.access_token) {
-        console.log('🔵 [AuthContext] Session found, access token available')
 
-        const userInfo = await authService.getUserInfo(session.access_token);
+      if (session?.access_token) {
+        console.log(
+          "🔵 [AuthContext] Session found, access token available"
+        );
+
+        const userInfo = await authService.getUserInfo(
+          session.access_token
+        );
 
         if (userInfo) {
-          console.log('✅ [AuthContext] User info retrieved, setting auth state')
+          console.log(
+            "✅ [AuthContext] User info retrieved, setting auth state"
+          );
+
           setUser(userInfo);
           setIsAuthenticated(true);
+
           return {
             success: true,
             message: "Đăng nhập thành công",
           };
         } else {
-          console.error('❌ [AuthContext] Failed to get user info from backend')
+          console.error(
+            "❌ [AuthContext] Failed to get user info from backend"
+          );
+
           return {
             success: false,
-            message: "Không thể lấy thông tin người dùng từ hệ thống",
+            message:
+              "Không thể lấy thông tin người dùng từ hệ thống",
           };
         }
       }
 
-      console.error('❌ [AuthContext] No session or access token found')
+      console.error(
+        "❌ [AuthContext] No session or access token found"
+      );
+
       return {
         success: false,
         message: "Đã xảy ra lỗi khi đăng nhập",
       };
     } catch (error: any) {
-      console.error('❌ [AuthContext] Login error:', error)
+      console.error("❌ [AuthContext] Login error:", error);
+
       return {
         success: false,
-        message: error.message || "Đã xảy ra lỗi khi đăng nhập",
+        message:
+          error.message || "Đã xảy ra lỗi khi đăng nhập",
       };
     }
   };
@@ -133,11 +179,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      console.log('🔵 [AuthContext] Registration attempt for:', email)
+      console.log(
+        "🔵 [AuthContext] Registration attempt for:",
+        email
+      );
 
       // Validate password length
       if (password.length < 6) {
-        console.warn('⚠️ [AuthContext] Password too short')
+        console.warn("⚠️ [AuthContext] Password too short");
+
         return {
           success: false,
           message: "Mật khẩu phải có ít nhất 6 ký tự",
@@ -147,46 +197,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await authService.signUp(email, password);
 
       if (result.success) {
-        console.log('✅ [AuthContext] Registration successful - user must now log in manually')
+        console.log(
+          "✅ [AuthContext] Registration successful - user must now log in manually"
+        );
       } else {
-        console.error('❌ [AuthContext] Registration failed:', result.message)
+        console.error(
+          "❌ [AuthContext] Registration failed:",
+          result.message
+        );
       }
 
       return result;
     } catch (error: any) {
-      console.error('❌ [AuthContext] Registration error:', error)
+      console.error(
+        "❌ [AuthContext] Registration error:",
+        error
+      );
+
       return {
         success: false,
-        message: error.message || "Đã xảy ra lỗi khi đăng ký",
+        message:
+          error.message || "Đã xảy ra lỗi khi đăng ký",
       };
     }
   };
 
   const logout = async () => {
     try {
-      console.log('🔵 [AuthContext] Starting logout...');
+      console.log("🔵 [AuthContext] Starting logout...");
 
       // Sign out from Supabase
       await authService.signOut();
-      console.log('✅ [AuthContext] Supabase signOut completed');
+
+      console.log(
+        "✅ [AuthContext] Supabase signOut completed"
+      );
 
       // Clear local state
       setUser(null);
       setIsAuthenticated(false);
-      console.log('✅ [AuthContext] Local state cleared');
+
+      console.log("✅ [AuthContext] Local state cleared");
 
       // Small delay to ensure state is updated
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 100)
+      );
 
-      // ✅ Redirect to login page
-      console.log('🔵 [AuthContext] Redirecting to /login...');
-      window.location.href = '/login';
+      // Redirect to login page
+      console.log(
+        "🔵 [AuthContext] Redirecting to /login..."
+      );
+
+      window.location.href = "/login";
     } catch (error) {
-      console.error('❌ [AuthContext] Logout error:', error);
+      console.error("❌ [AuthContext] Logout error:", error);
+
       // Even if there's an error, clear local state and redirect
       setUser(null);
       setIsAuthenticated(false);
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   };
 
@@ -208,9 +278,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error(
+      "useAuth must be used within an AuthProvider"
+    );
   }
+
   return context;
 }
-

@@ -44,7 +44,7 @@ export function Header() {
         {/* Left side - Logo/Title */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-            <User className="w-5 h-5 text-white" />
+            <User className="w-5 h-5 text-black" />
           </div>
           <div className="hidden sm:block">
             <h2
@@ -62,7 +62,7 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="cursor-pointer px-4 py-2 rounded-lg border-2 border-gray-400 bg-white/5 hover:bg-white/10 hover:border-gray-300 transition-all select-none">
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-black">
                     {t("header.greeting")} {displayName}
                   </span>
                 </div>

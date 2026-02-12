@@ -124,16 +124,13 @@ export default function AIAssistant() {
               <div
                 className="w-12 h-12 rounded-full glass-card flex items-center justify-center"
                 style={{
-                  borderColor: "#ff7a1a",
-                  boxShadow: "0 0 15px rgba(255, 122, 26, 0.5)",
+                  borderColor: "#ffffff",
+                  boxShadow: "0 0 15px rgba(0, 0, 0, 0.5)",
                 }}
               >
                 <Brain className="w-6 h-6 text-neon-cyan" />
               </div>
-              <div
-                className="absolute -top-1 -right-1 w-3 h-3 bg-[#10b981] rounded-full animate-pulse"
-                style={{ boxShadow: "0 0 10px #10b981" }}
-              />
+              
             </div>
             <div>
               <h1 className="text-2xl font-bold text-[#ff7a1a] tracking-wider">
@@ -221,7 +218,7 @@ export default function AIAssistant() {
                 key={idx}
                 onClick={() => handleSuggestionClick(suggestion)}
                 disabled={isLoading}
-                className="glass-card px-3 py-2 text-xs text-neon-cyan hover:glow-cyan transition-all duration-300 border border-transparent hover:border-neon-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="glass-card px-3 py-2 text-xs text-black hover:glow-cyan transition-all duration-300 border border-transparent hover:border-neon-cyan/50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="w-3 h-3 inline mr-1" />
                 {suggestion}

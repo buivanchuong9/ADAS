@@ -73,7 +73,7 @@ export default function HomePage() {
       chart: { type: "pie", backgroundColor: "transparent", height: 280 },
       title: {
         text: t("settings.aiUsage"),
-        style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
+        style: { color: "#000000", fontSize: "16px", fontWeight: "600" },
       },
       tooltip: {
         pointFormat: "<b>{point.percentage:.1f}%</b><br/>Số lượng: {point.y}",
@@ -108,7 +108,7 @@ export default function HomePage() {
       chart: { type: "column", backgroundColor: "transparent", height: 280 },
       title: {
         text: t("settings.confidenceDistribution"),
-        style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
+        style: { color: "#000000", fontSize: "16px", fontWeight: "600" },
       },
       xAxis: {
         categories: ["50-60%", "60-70%", "70-80%", "80-90%", "90-100%"],
@@ -129,7 +129,7 @@ export default function HomePage() {
       chart: { type: "spline", backgroundColor: "transparent", height: 280 },
       title: {
         text: t("settings.notificationTimeline"),
-        style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
+        style: { color: "#000000", fontSize: "16px", fontWeight: "600" },
       },
       xAxis: {
         categories: ["0h", "3h", "6h", "9h", "12h", "15h", "18h", "21h", "24h"],
@@ -210,7 +210,7 @@ export default function HomePage() {
     {
       name: t('settings.performanceLabel'),
       data: [65, 72, 68, 75, 80, 78, 85],
-      color: "#667eea",
+      color: "#000000",
     },
   ];
 
@@ -231,7 +231,7 @@ export default function HomePage() {
             {/* Hero Section - Dark Sci-Fi */}
             <motion.div
               variants={itemVariants}
-              className="relative overflow-hidden rounded-3xl glass-card scan-lines p-8 lg:p-10"
+              className="relative overflow-hidden rounded-3xl glass-card p-8 lg:p-10"
             >
               {/* Animated gradient orbs */}
               <motion.div
@@ -267,18 +267,18 @@ export default function HomePage() {
                   transition={{ delay: 0.3 }}
                 >
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                    <Shield className="w-6 h-6 text-white" />
+                    <Shield className="w-6 h-6 text-black" />
                   </div>
                   <Badge
                     variant="outline"
-                    className="border-neon-cyan/50 text-neon-cyan glass-card"
+                    className="border-neon-cyan/50 text-black glass-card"
                   >
                     v3.0 Professional
                   </Badge>
                 </motion.div>
 
                 <motion.h1
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold my-7 text-neon-cyan"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold my-7 "
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
@@ -370,7 +370,7 @@ export default function HomePage() {
                             transition={{ duration: 2, repeat: Infinity }}
                           />
                         )}
-                        <span className="text-xl font-bold text-foreground capitalize">
+                        <span className="text-xl font-bold text-black capitalize">
                           {stat.value}
                         </span>
                       </div>
@@ -422,7 +422,7 @@ export default function HomePage() {
         title: {
           text: t("dashboard.detectionTrendTitle"),
           style: {
-            color: "#ff7a1a",
+            color: "#000000",
             fontFamily: "var(--font-inter)",
             fontSize: "16px",
             fontWeight: "600",
@@ -440,7 +440,7 @@ export default function HomePage() {
           ],
           labels: {
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "11px",
             },
@@ -452,14 +452,14 @@ export default function HomePage() {
           title: {
             text: t("settings.detectionCount"),
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "12px",
             },
           },
           labels: {
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "11px",
             },
@@ -469,7 +469,7 @@ export default function HomePage() {
         tooltip: {
           shared: true,
           backgroundColor: "rgba(10, 22, 40, 0.95)",
-          borderColor: "#00E5FF",
+          bordercolor: "#000000",
           borderRadius: 8,
           style: {
             color: "#FFFFFF",
@@ -490,31 +490,31 @@ export default function HomePage() {
           {
             name: "Xe cộ",
             data: [45, 52, 48, 61, 58, 65, 72],
-            color: "#00E5FF",
+            color: "#000000",
             fillColor: {
-              linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
               stops: [
-                [0, "rgba(0, 229, 255, 0.3)"],
-                [1, "rgba(0, 229, 255, 0.05)"],
-              ],
+              [0, "rgba(17, 24, 39, 0.25)"],
+              [1, "rgba(17, 24, 39, 0.05)"],
+            ],
             },
           },
           {
             name: "Người đi bộ",
             data: [28, 31, 35, 29, 42, 38, 45],
-            color: "#00FFA3",
+            color: "#374151",
             fillColor: {
               linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
               stops: [
-                [0, "rgba(0, 255, 163, 0.3)"],
-                [1, "rgba(0, 255, 163, 0.05)"],
-              ],
+  [0, "rgba(55, 65, 81, 0.25)"],
+  [1, "rgba(55, 65, 81, 0.05)"],
+]
             },
           },
         ],
         legend: {
           itemStyle: {
-            color: "#111827",
+            color: "#000000",
             fontFamily: "var(--font-inter)",
             fontSize: "12px",
             fontWeight: "500",
@@ -542,7 +542,7 @@ export default function HomePage() {
         title: {
           text: t("dashboard.accuracyTrendTitle"),
           style: {
-            color: "#ff7a1a",
+            color: "#000000",
             fontFamily: "var(--font-inter)",
             fontSize: "16px",
             fontWeight: "600",
@@ -560,7 +560,7 @@ export default function HomePage() {
           ],
           labels: {
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "11px",
             },
@@ -572,14 +572,14 @@ export default function HomePage() {
           title: {
             text: "Độ chính xác (%)",
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "12px",
             },
           },
           labels: {
             style: {
-              color: "#111827",
+              color: "#000000",
               fontFamily: "var(--font-inter)",
               fontSize: "11px",
             },
@@ -590,7 +590,7 @@ export default function HomePage() {
         },
         tooltip: {
           backgroundColor: "rgba(10, 22, 40, 0.95)",
-          borderColor: "#00E5FF",
+          bordercolor: "#000000",
           borderRadius: 8,
           style: {
             color: "#FFFFFF",
@@ -612,7 +612,7 @@ export default function HomePage() {
           {
             name: t("settings.accuracy"),
             data: [96.5, 97.2, 96.8, 98.1, 97.9, 98.5, 98.3],
-            color: "#00FFA3",
+            color: "#000000",
             marker: {
               symbol: "circle",
             },
@@ -700,10 +700,10 @@ export default function HomePage() {
                           <div
                             className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
                           >
-                            <action.icon className="w-6 h-6 text-white" />
+                            <action.icon className="w-6 h-6 text-black" />
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            <div className="font-semibold text-black group-hover:text-primary transition-colors">
                               {action.title}
                             </div>
                             <div className="text-sm text-muted-foreground">
@@ -769,7 +769,7 @@ export default function HomePage() {
                             className={`w-5 h-5 ${iconColorClass}`}
                           />
                           <div className="flex-1">
-                            <div className="text-sm font-medium text-foreground">
+                            <div className="text-sm font-medium text-black">
                               {activity.text}
                             </div>
                             <div className="text-xs text-muted-foreground">

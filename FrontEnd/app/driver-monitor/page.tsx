@@ -413,7 +413,7 @@ export default function DriverMonitorPage() {
           </Link>
           <div>
             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-              <Badge className="gap-1 text-xs bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+              <Badge className="gap-1 text-xs bg-neon-cyan/20 text-black border-neon-cyan/50">
                 <Sparkles className="w-3 h-3" />
                 <span className="hidden sm:inline">
                   {t("driverMonitor.realtimeAI")}
@@ -430,9 +430,9 @@ export default function DriverMonitorPage() {
                 </span>
               </Badge>
             </div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider uppercase">
-              <Eye className="w-8 h-8 text-neon-cyan" />
-              <span className="hidden sm:inline text-neon-cyan">
+            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-black tracking-wider uppercase">
+              <Eye className="w-8 h-8 text-black" />
+              <span className="hidden sm:inline text-black">
                 {t("driverMonitor.title")}
               </span>
               <span className="sm:hidden text-neon-cyan">
@@ -453,7 +453,7 @@ export default function DriverMonitorPage() {
           <div className="space-y-4 xl:col-span-1">
             <GlassCard glow="cyan" className="p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
+                <h3 className="text-lg font-bold text-black flex items-center gap-2 tracking-wide">
                   <Upload className="w-4 h-4" />
                   {t("adas.step1Title")}
                 </h3>
@@ -477,7 +477,7 @@ export default function DriverMonitorPage() {
                   <Button
                     onClick={useSampleVideo}
                     disabled={loadingVideos || isMonitoring}
-                    className="flex-1 glass-card border-2 border-neon-cyan/50 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20 font-semibold"
+                    className="flex-1 glass-card border-2 border-neon-cyan/50 bg-neon-cyan/10 text-black hover:bg-neon-cyan/20 font-semibold"
                   >
                     <span className="flex items-center justify-center gap-2">
                       {loadingVideos ? (
@@ -629,7 +629,7 @@ export default function DriverMonitorPage() {
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-neon-green tracking-wide">
+                <h3 className="text-xl font-bold text-black tracking-wide">
                   {t("driverMonitor.step2Title")}
                 </h3>
                 {isMonitoring && (

@@ -317,7 +317,7 @@ export default function Analytics() {
         <div className="p-6">
           {/* TITLE */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-neon-cyan uppercase">{t("analytics.title")}</h1>
+            <h1 className="text-3xl font-bold text-black uppercase">{t("analytics.title")}</h1>
             <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
           </div>
 

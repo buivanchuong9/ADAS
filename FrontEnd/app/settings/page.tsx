@@ -98,7 +98,7 @@ export default function SettingsPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-extrabold text-neon-cyan tracking-wide">
+              <h1 className="text-4xl font-extrabold text-black tracking-wide">
 
                 {t("settings.title")}
               </h1>
@@ -142,12 +142,12 @@ export default function SettingsPage() {
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <GlassCard glow="cyan" className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <TrendingUp className="w-5 h-5 text-neon-cyan" />
-                <Badge className="glass-card border-neon-cyan/30 text-neon-cyan text-xs font-semibold">
+                <TrendingUp className="w-5 h-5 text-black" />
+                <Badge className="glass-card border-neon-cyan/30 text-black text-xs font-semibold">
                   +12%
                 </Badge>
               </div>
-              <div className="digital-number text-2xl font-bold text-neon-cyan mb-1">
+              <div className="digital-number text-2xl font-bold text-black mb-1">
                 3,247
               </div>
               <p className="text-xs text-fg-secondary font-medium">
@@ -157,12 +157,12 @@ export default function SettingsPage() {
 
             <GlassCard glow="green" className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <Activity className="w-5 h-5 text-neon-green" />
-                <Badge className="glass-card border-neon-green/30 text-neon-green text-xs font-semibold">
+                <Activity className="w-5 h-5 text-black" />
+                <Badge className="glass-card border-neon-green/30 text-black text-xs font-semibold">
                   {t("common.success")}
                 </Badge>
               </div>
-              <div className="digital-number text-2xl font-bold text-neon-green mb-1">
+              <div className="digital-number text-2xl font-bold text-black mb-1">
                 98.5%
               </div>
               <p className="text-xs text-fg-secondary font-medium">
@@ -172,12 +172,12 @@ export default function SettingsPage() {
 
             <GlassCard glow="yellow" className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <Brain className="w-5 h-5 text-neon-yellow" />
-                <Badge className="glass-card border-neon-yellow/30 text-neon-yellow text-xs font-semibold">
+                <Brain className="w-5 h-5 text-black" />
+                <Badge className="glass-card border-neon-yellow/30 text-black text-xs font-semibold">
                   {t("common.active")}
                 </Badge>
               </div>
-              <div className="digital-number text-2xl font-bold text-neon-yellow mb-1">
+              <div className="digital-number text-2xl font-bold text-black mb-1">
                 1,046
               </div>
               <p className="text-xs text-fg-secondary font-medium">
@@ -188,11 +188,11 @@ export default function SettingsPage() {
             <GlassCard className="p-6 border-neon-purple/30">
               <div className="flex items-center justify-between mb-3">
                 <Zap className="w-5 h-5 text-neon-purple" />
-                <Badge className="glass-card border-neon-purple/30 text-neon-purple text-xs font-semibold">
+                <Badge className="glass-card border-neon-purple/30 text-black text-xs font-semibold">
                   85%
                 </Badge>
               </div>
-              <div className="digital-number text-2xl font-bold text-neon-purple mb-1">
+              <div className="digital-number text-2xl font-bold text-black mb-1">
                 24 FPS
               </div>
               <p className="text-xs text-fg-secondary font-medium">
@@ -202,10 +202,10 @@ export default function SettingsPage() {
           </div>
 
           {/* System Settings */}
-          <GlassCard scanLines className="p-6">
+          <GlassCard className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Settings className="w-6 h-6 text-neon-cyan" />
-              <h2 className="text-xl font-bold text-neon-cyan tracking-wide">
+              <Settings className="w-6 h-6 text-black" />
+              <h2 className="text-xl font-bold text-black tracking-wide">
                 {t("settings.system")}
               </h2>
             </div>
@@ -236,10 +236,10 @@ export default function SettingsPage() {
           </GlassCard>
 
           {/* Display Settings */}
-          <GlassCard scanLines className="p-6">
+          <GlassCard className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Monitor className="w-6 h-6 text-neon-cyan" />
-              <h2 className="text-xl font-bold text-neon-cyan tracking-wide">
+              <h2 className="text-xl font-bold text-black tracking-wide">
                 {t("settings.display")}
               </h2>
             </div>
@@ -358,10 +358,10 @@ export default function SettingsPage() {
           </GlassCard>
 
           {/* AI Assistant Settings */}
-          <GlassCard scanLines className="p-6">
+          <GlassCard  className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Brain className="w-6 h-6 text-neon-cyan" />
-              <h2 className="text-xl font-bold text-neon-cyan tracking-wide">
+              <h2 className="text-xl font-bold text-black tracking-wide">
                 {t("settings.aiAssistant")}
               </h2>
             </div>
@@ -457,10 +457,10 @@ export default function SettingsPage() {
           </GlassCard>
 
           {/* Advanced Settings */}
-          <GlassCard scanLines className="p-6">
+          <GlassCard className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Sliders className="w-6 h-6 text-neon-cyan" />
-              <h2 className="text-xl font-bold text-neon-cyan tracking-wide">
+              <h2 className="text-xl font-bold text-black tracking-wide">
                 {t("settings.advanced")}
               </h2>
               <Badge className="glass-card border-neon-yellow/50 text-neon-yellow text-xs font-semibold">
@@ -568,7 +568,7 @@ export default function SettingsPage() {
                 <Gauge className="w-5 h-5 text-neon-cyan" />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-bold text-neon-cyan mb-2">
+                <h3 className="text-sm font-bold text-black mb-2">
                   {t("settings.note")}
                 </h3>
                 <p className="text-xs text-fg-secondary leading-relaxed font-medium">
