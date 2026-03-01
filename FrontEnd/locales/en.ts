@@ -287,6 +287,11 @@ export default {
     yesterday: "Yesterday",
     threeDaysAgo: "3 Days Ago",
     oneWeekAgo: "1 Week Ago",
+    periodWeek: "This Week",
+    periodMonth: "This Month",
+    periodAll: "All Time",
+    noDataChart: "No data",
+    dataFromApi: "Data from GET /api/analytics/safety-score-comparison",
   },
 
   // Events
@@ -484,7 +489,6 @@ export default {
     monitoringInfoDesc: "System analyzes driver behavior from video.",
     fatigueDetection: "Fatigue detection",
     distractionDetection: "Distraction detection",
-    eyeTracking: "Eye state tracking",
     step2Title: "2) VIEW VIDEO BEING MONITORED",
     step2Desc:
       "Video will be analyzed to detect driver fatigue and distraction.",

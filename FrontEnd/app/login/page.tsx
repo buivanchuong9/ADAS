@@ -54,7 +54,7 @@ export default function LoginPage() {
 
 
             {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900" />
+            <div className="absolute inset-0 bg-linear-to-br from-slate-950 via-blue-950 to-slate-900" />
 
             {mounted && [...Array(20)].map((_, i) => {
                 const startX = Math.random() * window.innerWidth;
@@ -94,7 +94,7 @@ export default function LoginPage() {
                             className="absolute inset-0 bg-cover bg-center"
                             style={{ backgroundImage: 'url(/AnhDangNhap.jpg)' }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-black/20" />
                         </div>
 
                         <div className="relative h-full flex flex-col justify-end p-12 z-20">
@@ -180,7 +180,7 @@ export default function LoginPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-14 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full h-14 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

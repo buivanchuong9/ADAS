@@ -11,14 +11,22 @@ import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react";
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
-/* ================= API BASE =================
- * Recommended: set NEXT_PUBLIC_API_URL in .env.local to your backend base
- * e.g. NEXT_PUBLIC_API_URL=https://adas-api.aiotlab.edu.vn
- */
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://adas-api.aiotlab.edu.vn";
-
-/* ================= TYPES ================= */
+/** GET /api/analytics/summary response */
+type SummaryApi = {
+  period?: string;
+  total_trips?: number;
+  total_distance?: number;
+  total_distance_km?: number;
+  driving_time?: number;
+  total_time_sec?: number;
+  avg_speed?: number;
+  avg_safety_score?: number;
+  total_alerts?: number;
+  total_critical_alerts?: number;
+};
 
 type ChartPoint = {
   time?: string;
@@ -40,6 +48,7 @@ export default function Analytics() {
   const { t } = useLanguage();
 
   /* ================= STATE ================= */
+  const [period, setPeriod] = useState<"today" | "week" | "month" | "all">("week");
   const [cards, setCards] = useState<CardsType>({});
   const [speedData, setSpeedData] = useState<ChartPoint[]>([]);
   const [fatigueData, setFatigueData] = useState<ChartPoint[]>([]);
@@ -65,6 +74,35 @@ export default function Analytics() {
     }
   };
 
+  const formatDrivingTime = (seconds: number): string => {
+    if (seconds < 60) return `${seconds} giây`;
+    const mins = Math.floor(seconds / 60);
+    if (mins < 60) return `${mins} phút`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m ? `${h} giờ ${m} phút` : `${h} giờ`;
+  };
+
+  const mapSummaryToCards = (json: SummaryApi | null): CardsType => {
+    if (!json) return {};
+    const distance = json.total_distance ?? json.total_distance_km;
+    const drivingTimeSec = json.driving_time ?? json.total_time_sec;
+    const drivingTimeStr =
+      drivingTimeSec != null
+        ? formatDrivingTime(drivingTimeSec)
+        : json.total_trips != null
+          ? `${json.total_trips} chuyến`
+          : "—";
+    const avgSpeed = json.avg_speed;
+    const safetyScore = json.avg_safety_score;
+    return {
+      distance: distance != null ? `${Number(distance).toFixed(1)} km` : "—",
+      drivingTime: drivingTimeStr,
+      averageSpeed: avgSpeed != null ? `${Number(avgSpeed).toFixed(1)} km/h` : "—",
+      safetyScore: safetyScore != null ? String(Math.round(Number(safetyScore))) : "—",
+    };
+  };
+
   /* ================= FETCH API ================= */
   useEffect(() => {
     let mounted = true;
@@ -78,106 +116,79 @@ export default function Analytics() {
       if (token) headers.Authorization = `Bearer ${token}`;
 
       try {
-        // Use allSettled so partial success is handled
+        const summaryUrl = getApiUrl(`${API_ENDPOINTS.ANALYTICS_SUMMARY}?period=${period}`);
+        const speedUrl = getApiUrl(API_ENDPOINTS.ANALYTICS_SPEED_OVER_TIME);
+        const fatigueUrl = getApiUrl(API_ENDPOINTS.ANALYTICS_FATIGUE_OVER_TIME);
+        const safetyUrl = getApiUrl(`${API_ENDPOINTS.ANALYTICS_SAFETY_SCORE_COMPARISON}?days=7`);
+
         const promises = [
-          fetch(`${API_BASE}/api/analytics/summary`, { headers }),
-          fetch(`${API_BASE}/api/analytics/speed-over-time`, { headers }),
-          fetch(`${API_BASE}/api/analytics/fatigue-over-time`, { headers }),
-          fetch(`${API_BASE}/api/analytics/safety-score-comparison`, { headers }),
+          fetch(summaryUrl, { headers }),
+          fetch(speedUrl, { headers }),
+          fetch(fatigueUrl, { headers }),
+          fetch(safetyUrl, { headers }),
         ];
 
         const results = await Promise.allSettled(promises);
-
-        // unwrap responses (could be rejected)
         const responses = results.map((r) =>
           r.status === "fulfilled" ? (r.value as Response) : null
         );
 
-        // SUMMARY
+        // 1) KPI cards — GET /api/analytics/summary
         const summaryRes = responses[0];
-        if (summaryRes && summaryRes.ok) {
-          const json = await safeParseJson(summaryRes);
-          console.log("SUMMARY API:", summaryRes.status, json);
-          if (mounted && json) {
-            setCards({
-              distance: json.total_distance ?? "-",
-              drivingTime: json.total_trips ?? "-",
-              averageSpeed: json.avg_speed ?? "-",
-              safetyScore: json.avg_safety_score ?? "-",
-            });
-          }
+        if (summaryRes?.ok) {
+          const json = (await safeParseJson(summaryRes)) as SummaryApi | null;
+          if (mounted) setCards(mapSummaryToCards(json));
         } else {
-          console.warn("SUMMARY missing or error:", summaryRes?.status);
+          if (mounted) setCards(mapSummaryToCards(null));
         }
 
-        // SPEED
+        // 2) Chart: Tốc độ theo thời gian — GET /api/analytics/speed-over-time
         const speedRes = responses[1];
-        if (speedRes) {
-          console.log("SPEED status:", speedRes.status);
+        if (speedRes?.ok) {
           const json = await safeParseJson(speedRes);
-          console.log("SPEED API RAW:", json);
           let mappedSpeed: ChartPoint[] = [];
           if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
             mappedSpeed = json.labels.map((label: string, idx: number) => ({
               time: label,
               speed: Number(json.data?.[idx] ?? 0),
             }));
-          } else {
-            console.warn("SPEED API format unexpected, will leave empty or set fallback");
           }
-          if (mounted) {
-            console.table(mappedSpeed);
-            setSpeedData(mappedSpeed);
-          }
+          if (mounted) setSpeedData(mappedSpeed);
         } else {
-          console.warn("SPEED fetch failed");
+          if (mounted) setSpeedData([]);
         }
 
-        // FATIGUE
+        // 3) Chart: Mức mệt mỏi theo thời gian — GET /api/analytics/fatigue-over-time
         const fatigueRes = responses[2];
-        if (fatigueRes) {
-          console.log("FATIGUE status:", fatigueRes.status);
+        if (fatigueRes?.ok) {
           const json = await safeParseJson(fatigueRes);
-          console.log("FATIGUE API RAW:", json);
           let mappedFatigue: ChartPoint[] = [];
           if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
             mappedFatigue = json.labels.map((label: string, idx: number) => ({
               time: label,
               fatigue: Number(json.data?.[idx] ?? 0),
             }));
-          } else {
-            console.warn("FATIGUE API format unexpected, will leave empty or set fallback");
           }
-          if (mounted) {
-            console.table(mappedFatigue);
-            setFatigueData(mappedFatigue);
-          }
+          if (mounted) setFatigueData(mappedFatigue);
         } else {
-          console.warn("FATIGUE fetch failed");
+          if (mounted) setFatigueData([]);
         }
 
-        // SAFETY
+        // 4) Chart: So sánh điểm an toàn — GET /api/analytics/safety-score-comparison
         const safetyRes = responses[3];
-        if (safetyRes) {
-          console.log("SAFETY status:", safetyRes.status);
+        if (safetyRes?.ok) {
           const json = await safeParseJson(safetyRes);
-          console.log("SAFETY API RAW:", json);
           let mappedSafety: ChartPoint[] = [];
           if (json && Array.isArray(json.labels) && Array.isArray(json.data)) {
             mappedSafety = json.labels.map((label: string, idx: number) => ({
               trip: label,
               score: Number(json.data?.[idx] ?? 0),
-              color: (Array.isArray(json.colors) && json.colors[idx]) ? json.colors[idx] : "#10b981",
+              color: Array.isArray(json.colors) && json.colors[idx] ? json.colors[idx] : "#10b981",
             }));
-          } else {
-            console.warn("SAFETY API format unexpected, will leave empty or set fallback");
           }
-          if (mounted) {
-            console.table(mappedSafety);
-            setTripComparisonData(mappedSafety);
-          }
+          if (mounted) setTripComparisonData(mappedSafety);
         } else {
-          console.warn("SAFETY fetch failed");
+          if (mounted) setTripComparisonData([]);
         }
       } catch (err) {
         console.error("Analytics API error:", err);
@@ -192,7 +203,7 @@ export default function Analytics() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [period]);
 
   /* ================= NEON EFFECT (guarded) ================= */
   useEffect(() => {
@@ -229,6 +240,14 @@ export default function Analytics() {
   }, [speedData, fatigueData, tripComparisonData]);
 
   /* ================= CHART OPTIONS (3D added) ================= */
+  const emptyLabel = t("analytics.noDataChart");
+  const speedCategories = speedData.length
+    ? speedData.map((d) => d.time ?? "")
+    : [emptyLabel, "—"];
+  const speedValues = speedData.length
+    ? speedData.map((d) => d.speed ?? 0)
+    : [0, 0];
+
   const speedChartOptions = {
     chart: {
       type: "line",
@@ -241,7 +260,7 @@ export default function Analytics() {
       },
     },
     title: { text: null },
-    xAxis: { categories: speedData.map((d) => d.time ?? "") },
+    xAxis: { categories: speedCategories },
     plotOptions: {
       line: {
         // depth isn't a documented option for line but harmless to include
@@ -251,10 +270,17 @@ export default function Analytics() {
     series: [
       {
         name: t("analytics.speed"),
-        data: speedData.map((d) => d.speed ?? 0),
+        data: speedValues,
       },
     ],
   };
+
+  const fatigueCategories = fatigueData.length
+    ? fatigueData.map((d) => d.time ?? "")
+    : [emptyLabel, "—"];
+  const fatigueValues = fatigueData.length
+    ? fatigueData.map((d) => d.fatigue ?? 0)
+    : [0, 0];
 
   const fatigueChartOptions = {
     chart: {
@@ -268,7 +294,7 @@ export default function Analytics() {
       },
     },
     title: { text: null },
-    xAxis: { categories: fatigueData.map((d) => d.time ?? "") },
+    xAxis: { categories: fatigueCategories },
     plotOptions: {
       line: {
         depth: 20,
@@ -277,10 +303,15 @@ export default function Analytics() {
     series: [
       {
         name: t("analytics.fatigue"),
-        data: fatigueData.map((d) => d.fatigue ?? 0),
+        data: fatigueValues,
       },
     ],
   };
+
+  const safetyCategories = tripComparisonData.length
+    ? tripComparisonData.map((d) => d.trip ?? "")
+    : [];
+  const safetyValues = tripComparisonData.map((d) => ({ y: d.score ?? 0, color: d.color ?? "#10b981" }));
 
   const safetyChartOptions = {
     chart: {
@@ -299,26 +330,43 @@ export default function Analytics() {
       },
     },
     title: { text: null },
-    xAxis: { categories: tripComparisonData.map((d) => d.trip ?? "") },
+    xAxis: { categories: safetyCategories },
+    yAxis: {
+      min: 0,
+      max: 100,
+      title: { text: null },
+    },
     series: [
       {
         name: t("analytics.safetyScoreLabel"),
-        data: tripComparisonData.map((d) => ({ y: d.score ?? 0, color: d.color ?? "#10b981" })),
+        data: safetyValues,
       },
     ],
   };
 
   /* ================= UI ================= */
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50">
       <MobileNav />
       <Sidebar />
       <main className="flex-1 overflow-auto">
         <div className="p-6">
-          {/* TITLE */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-neon-cyan uppercase">{t("analytics.title")}</h1>
-            <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
+          {/* TITLE + PERIOD */}
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-neon-cyan uppercase">{t("analytics.title")}</h1>
+              <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
+            </div>
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value as "today" | "week" | "month" | "all")}
+              className="rounded-lg border border-neon-cyan/50 bg-white/80 px-3 py-2 text-sm text-fg-primary focus:border-neon-cyan focus:outline-none"
+            >
+              <option value="today">{t("analytics.today")}</option>
+              <option value="week">{t("analytics.periodWeek")}</option>
+              <option value="month">{t("analytics.periodMonth")}</option>
+              <option value="all">{t("analytics.periodAll")}</option>
+            </select>
           </div>
 
           {/* status */}

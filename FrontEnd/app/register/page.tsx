@@ -62,7 +62,7 @@ export default function RegisterPage() {
         <div className="min-h-screen w-full overflow-y-auto text-white [&_*]:!text-white">
 
             {/* Animated Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
+            <div className="absolute inset-0 bg-linear-to-br from-slate-950 via-purple-950 to-slate-900">
                 {/* Animated gradient orbs */}
                 <motion.div
                     animate={{
@@ -149,7 +149,7 @@ export default function RegisterPage() {
                             style={{ backgroundImage: 'url(/AnhDangKy.jpg)' }}
                         >
                             {/* Subtle overlay gradient for text readability */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
                         </div>
 
                         {/* Content overlay */}
@@ -206,7 +206,7 @@ export default function RegisterPage() {
                                         <Sparkles className="w-4 h-4 text-purple-400" />
                                         <span className="text-sm text-purple-400 font-medium">ADAS Platform</span>
                                     </div>
-                                    <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                                    <h1 className="text-4xl font-bold bg-linear-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
                                         Đăng Ký
                                     </h1>
                                     <p className="text-white/50">Tạo tài khoản mới</p>
@@ -262,7 +262,7 @@ export default function RegisterPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-14 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full h-14 rounded-xl bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -281,9 +281,9 @@ export default function RegisterPage() {
                                     transition={{ delay: 0.7 }}
                                     className="flex items-center gap-4"
                                 >
-                                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                    <div className="flex-1 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
                                     <span className="text-xs text-white/40 font-medium">HOẶC</span>
-                                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                    <div className="flex-1 h-px bg-linear-to-r from-transparent via-white/20 to-transparent" />
                                 </motion.div>
 
                                 {/* Social Login */}

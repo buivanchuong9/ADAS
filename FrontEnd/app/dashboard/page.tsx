@@ -34,13 +34,11 @@ import {
   Camera,
   Cctv,
   BookOpen,
-
-} from "lucide-react"
-import Link from "next/link"
-import { HighchartsChart } from "@/components/charts/highcharts-chart"
-import { getApiUrl } from "@/lib/api-config"
-import { API_ENDPOINTS } from "@/lib/api-endpoints"
-
+} from "lucide-react";
+import Link from "next/link";
+import { HighchartsChart } from "@/components/charts/highcharts-chart";
+import { getApiUrl } from "@/lib/api-config";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -68,7 +66,10 @@ const itemVariants: Variants = {
 export default function HomePage() {
   const router = useRouter();
   const { t } = useLanguage();
-    const aiUsageOptions = useMemo(
+  const [aiUsageData, setAiUsageData] = useState<{ name: string; y: number }[]>(
+    [],
+  );
+  const aiUsageOptions = useMemo(
     () => ({
       chart: { type: "pie", backgroundColor: "transparent", height: 280 },
       title: {
@@ -84,24 +85,42 @@ export default function HomePage() {
           dataLabels: {
             enabled: true,
             format: "<b>{point.name}</b><br>{point.percentage:.1f}%",
+            style: {
+              color: "#111827",
+              textOutline: "none",
+            },
           },
         },
+      },
+      legend: {
+        itemStyle: { color: "#374151", fontWeight: "500" },
+        itemHoverStyle: { color: "#111827" },
       },
       series: [
         {
           name: "Queries",
-          data: [
-            { name: "Driving Support", y: 456 },
-            { name: "Data Analysis", y: 289 },
-            { name: "Alerts", y: 178 },
-            { name: "Other", y: 123 },
-          ],
+          data:
+            aiUsageData.length > 0
+              ? aiUsageData
+              : [
+                  { name: "Driving Support", y: 0 },
+                  { name: "Data Analysis", y: 0 },
+                  { name: "Alerts", y: 0 },
+                  { name: "Other", y: 0 },
+                ],
         },
       ],
       credits: { enabled: false },
     }),
-    [t],
+    [t, aiUsageData],
   );
+
+  const [confidenceStatsCategories, setConfidenceStatsCategories] = useState<
+    string[]
+  >(["50-60%", "60-70%", "70-80%", "80-90%", "90-100%"]);
+  const [confidenceStatsData, setConfidenceStatsData] = useState<number[]>([
+    0, 0, 0, 0, 0,
+  ]);
 
   const confidenceDistOptions = useMemo(
     () => ({
@@ -111,18 +130,46 @@ export default function HomePage() {
         style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
       },
       xAxis: {
-        categories: ["50-60%", "60-70%", "70-80%", "80-90%", "90-100%"],
+        categories: confidenceStatsCategories,
+        labels: { style: { color: "#374151" } },
+      },
+      yAxis: {
+        title: { text: "Số lượng / Độ tin cậy", style: { color: "#111827" } },
+        labels: { style: { color: "#374151" } },
+      },
+      legend: {
+        itemStyle: { color: "#374151", fontWeight: "500" },
+        itemHoverStyle: { color: "#111827" },
       },
       series: [
         {
           name: t("settings.detections"),
-          data: [89, 234, 567, 892, 1245],
+          data: confidenceStatsData,
         },
       ],
       credits: { enabled: false },
     }),
-    [t],
+    [t, confidenceStatsCategories, confidenceStatsData],
   );
+
+  const [notificationTimelineCategories, setNotificationTimelineCategories] =
+    useState<string[]>([
+      "0h",
+      "3h",
+      "6h",
+      "9h",
+      "12h",
+      "15h",
+      "18h",
+      "21h",
+      "24h",
+    ]);
+  const [notificationTimelineSeries, setNotificationTimelineSeries] = useState<
+    any[]
+  >([
+    { name: "Warnings", data: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
+    { name: "Critical", data: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  ]);
 
   const notificationTimelineOptions = useMemo(
     () => ({
@@ -132,87 +179,303 @@ export default function HomePage() {
         style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
       },
       xAxis: {
-        categories: ["0h", "3h", "6h", "9h", "12h", "15h", "18h", "21h", "24h"],
+        categories: notificationTimelineCategories,
+        labels: { style: { color: "#374151" } },
       },
-      series: [
-        { name: "Warnings", data: [12, 8, 15, 23, 34, 28, 19, 25, 18] },
-        { name: "Critical", data: [3, 2, 5, 8, 12, 9, 6, 7, 4] },
-      ],
+      yAxis: {
+        title: { text: "Số lượng", style: { color: "#111827" } },
+        labels: { style: { color: "#374151" } },
+      },
+      legend: {
+        itemStyle: { color: "#374151", fontWeight: "500" },
+        itemHoverStyle: { color: "#111827" },
+      },
+      series: notificationTimelineSeries,
       credits: { enabled: false },
     }),
-    [t],
+    [t, notificationTimelineCategories, notificationTimelineSeries],
   );
 
   const [stats, setStats] = useState({
-    systemStatus: t('common.online'),
+    systemStatus: t("common.online"),
     activeCameras: 0,
     totalDetections: 0,
     alertsToday: 0,
   });
 
+  // Additional Chart Data states
+  const [detectionTrendCategories, setDetectionTrendCategories] = useState<
+    string[]
+  >([]);
+  const [detectionTrendSeries, setDetectionTrendSeries] = useState<any[]>([]);
+
+  const [accuracyCategories, setAccuracyCategories] = useState<string[]>([
+    t("settings.monday"),
+    t("settings.tuesday"),
+    t("settings.wednesday"),
+    t("settings.thursday"),
+    t("settings.friday"),
+    t("settings.saturday"),
+    t("settings.sunday"),
+  ]);
+  const [accuracySeries, setAccuracySeries] = useState<any[]>([
+    {
+      name: t("settings.accuracy"),
+      data: [0, 0, 0, 0, 0, 0, 0],
+      color: "#00FFA3",
+      marker: { symbol: "circle" },
+    },
+  ]);
+
+  const [detectionChartData, setDetectionChartData] = useState<any[]>([
+    { name: t("settings.vehicles"), y: 0 },
+    { name: t("settings.people"), y: 0 },
+    { name: t("home.cycles"), y: 0 },
+    { name: t("settings.other"), y: 0 },
+  ]);
+
+  const [performanceChartData, setPerformanceChartData] = useState<any[]>([
+    {
+      name: t("settings.performanceLabel"),
+      data: [0, 0, 0, 0, 0, 0, 0],
+      color: "#667eea",
+    },
+  ]);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch health status with timeout
-        const statusRes = await fetch(getApiUrl(API_ENDPOINTS.HEALTH), {
-          signal: AbortSignal.timeout(5000), // 5 second timeout
-        }).catch(() => null);
+        // Prefer dashboard cards endpoint for top KPIs
+        let systemStatus = t("common.offline");
+        let activeCameras = 0;
+        let totalDetections = 0;
+        let alertsToday = 0;
 
-        let systemStatus = t('common.offline');
-        if (statusRes && statusRes.ok) {
-          const statusData = await statusRes.json().catch(() => ({}));
-          systemStatus = statusData.status === "success" ? t('common.online') : t('common.offline');
+        const cardsRes = await fetch(
+          getApiUrl(API_ENDPOINTS.ADMIN_DASHBOARD_CARDS),
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+
+        if (cardsRes && cardsRes.ok) {
+          const cards = await cardsRes.json().catch(() => ({}));
+          systemStatus = String(cards.system_status ?? t("common.offline"));
+          activeCameras = Number(cards.active_cameras ?? 0);
+          totalDetections = Number(cards.total_detections ?? 0);
+          alertsToday = Number(cards.today_alerts ?? 0);
+        } else {
+          // Fallback: health + statistics endpoints
+          const statusRes = await fetch(getApiUrl(API_ENDPOINTS.HEALTH), {
+            signal: AbortSignal.timeout(5000),
+          }).catch(() => null);
+
+          systemStatus = t("common.offline");
+          if (statusRes && statusRes.ok) {
+            const statusData = await statusRes.json().catch(() => ({}));
+            systemStatus =
+              statusData.status === "success"
+                ? t("common.online")
+                : t("common.offline");
+          }
+
+          const alertsRes = await fetch(
+            getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS),
+            {
+              signal: AbortSignal.timeout(5000),
+            },
+          ).catch(() => null);
+
+          if (alertsRes && alertsRes.ok) {
+            const alertsData = await alertsRes.json().catch(() => ({}));
+            alertsToday =
+              alertsData.data?.total_alerts || alertsData.total_alerts || 0;
+          }
         }
 
-        // Fetch alerts statistics with timeout
-        const alertsRes = await fetch(getApiUrl(API_ENDPOINTS.ADMIN_STATISTICS), {
-          signal: AbortSignal.timeout(5000), // 5 second timeout
-        }).catch(() => null);
+        // Fetch Detections Stats (for charts + optional totalDetections fallback)
+        const detectionsRes = await fetch(
+          getApiUrl(API_ENDPOINTS.DETECTIONS_STATS),
+          {
+            signal: AbortSignal.timeout(5000),
+          },
+        ).catch(() => null);
 
-        let alertsToday = 0;
-        if (alertsRes && alertsRes.ok) {
-          const alertsData = await alertsRes.json().catch(() => ({}));
-          alertsToday = alertsData.data?.total_alerts || alertsData.total_alerts || 0;
+        if (detectionsRes && detectionsRes.ok) {
+          const dStats = await detectionsRes.json().catch(() => ({}));
+          if (dStats.success && dStats.classes) {
+            const categories = dStats.classes.map((c: any) => c.class_name);
+            const data = dStats.classes.map((c: any) => c.avg_confidence);
+            setConfidenceStatsCategories(categories);
+            setConfidenceStatsData(data);
+          }
+          if (!totalDetections && dStats.total_detections) {
+            totalDetections = dStats.total_detections;
+          }
         }
 
         setStats({
           systemStatus,
-          activeCameras: systemStatus === t('common.online') ? 1 : 0,
-          totalDetections: 0,
+          activeCameras:
+            activeCameras || systemStatus === t("common.online") ? 1 : 0,
+          totalDetections,
           alertsToday,
         });
       } catch (err) {
         // Silently handle errors - backend may not be running
-        // Set offline state without logging errors
-        setStats({
-          systemStatus: t('common.offline'),
-          activeCameras: 0,
-          totalDetections: 0,
-          alertsToday: 0,
-        });
+        setStats((prev) => ({ ...prev, systemStatus: t("common.offline") }));
+      }
+    };
+
+    const fetchChartData = async () => {
+      try {
+        // AI Chat History
+        const chatRes = await fetch(
+          getApiUrl(API_ENDPOINTS.AI_CHAT_HISTORY) + "?limit=50",
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (chatRes && chatRes.ok) {
+          const chatData = await chatRes.json().catch(() => null);
+          if (chatData?.messages) {
+            // Assuming logic for messages distribution fallback
+            const distribution = {
+              "Driving Support": 0,
+              "Data Analysis": 0,
+              Alerts: 0,
+              Other: 0,
+            };
+            // Insert logic to parse messages structure if details are available
+            if (chatData.messages.length === 0) {
+              // Empty distribution
+            }
+            const mappedChatData = Object.entries(distribution).map(
+              ([k, v]) => ({ name: k, y: v as number }),
+            );
+            setAiUsageData(mappedChatData);
+          }
+        }
+
+        // Detection Trend (Realtime Trend & Notification Timeline share the same trend or similar pattern conceptually but data serves area chart)
+        const trendRes = await fetch(
+          getApiUrl(API_ENDPOINTS.DASHBOARD_CHART_DETECTION_TREND),
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (trendRes && trendRes.ok) {
+          const trendData = await trendRes.json().catch(() => null);
+          if (trendData?.labels && trendData?.datasets) {
+            setDetectionTrendCategories(trendData.labels);
+            // Also use for notification timeline for now to show real data if identical
+            setNotificationTimelineCategories(trendData.labels);
+
+            const mappedSeries = trendData.datasets.map((ds: any) => {
+              let fillColor: any;
+              let color: string;
+              if (ds.label.includes("Xe")) {
+                color = "#00E5FF";
+                fillColor = {
+                  linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                  stops: [
+                    [0, "rgba(0, 229, 255, 0.3)"],
+                    [1, "rgba(0, 229, 255, 0.05)"],
+                  ],
+                };
+              } else {
+                color = "#00FFA3";
+                fillColor = {
+                  linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                  stops: [
+                    [0, "rgba(0, 255, 163, 0.3)"],
+                    [1, "rgba(0, 255, 163, 0.05)"],
+                  ],
+                };
+              }
+              return {
+                name: ds.label,
+                data: ds.data,
+                color: color,
+                fillColor: fillColor,
+              };
+            });
+            setDetectionTrendSeries(mappedSeries);
+
+            // For spline notification
+            setNotificationTimelineSeries(
+              trendData.datasets.map((ds: any) => ({
+                name: ds.label,
+                data: ds.data,
+              })),
+            );
+          }
+        }
+
+        // Detection Accuracy
+        const accRes = await fetch(
+          getApiUrl(API_ENDPOINTS.DASHBOARD_CHART_DETECTION_ACCURACY),
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (accRes && accRes.ok) {
+          const accData = await accRes.json().catch(() => null);
+          if (accData?.labels && accData?.datasets) {
+            setAccuracyCategories(accData.labels);
+            setAccuracySeries(
+              accData.datasets.map((ds: any) => ({
+                name: ds.label || t("settings.accuracy"),
+                data: ds.data,
+                color: "#00FFA3",
+                marker: { symbol: "circle" },
+              })),
+            );
+          }
+        }
+
+        // Detection Distribution
+        const distRes = await fetch(
+          getApiUrl(API_ENDPOINTS.DASHBOARD_CHART_DETECTION_DISTRIBUTION),
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (distRes && distRes.ok) {
+          const distData = await distRes.json().catch(() => null);
+          if (distData?.labels && distData?.datasets?.[0]?.data) {
+            const colors = distData.datasets[0].backgroundColor || [];
+            const mappedDist = distData.labels.map(
+              (lbl: string, idx: number) => ({
+                name: lbl,
+                y: distData.datasets[0].data[idx],
+                color: colors[idx] || undefined,
+              }),
+            );
+            setDetectionChartData(mappedDist);
+          }
+        }
+
+        // System Performance
+        const perfRes = await fetch(
+          getApiUrl(API_ENDPOINTS.DASHBOARD_CHART_SYSTEM_PERFORMANCE),
+          { signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (perfRes && perfRes.ok) {
+          const perfData = await perfRes.json().catch(() => null);
+          if (perfData?.labels && perfData?.datasets?.[0]?.data) {
+            // Here Highcharts might want labels in xAxis, but HighchartsChart component typically takes series arrays without x value explicit mapping if structured like performanceChartData
+            const mappedPerf = perfData.datasets.map((ds: any) => ({
+              name: ds.label || t("settings.performanceLabel"),
+              data: ds.data,
+              color: ds.borderColor || "#667eea",
+            }));
+            setPerformanceChartData(mappedPerf);
+          }
+        }
+      } catch (err) {
+        // Handle silently
       }
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 30000); // Check every 30 seconds instead of 5
+    fetchChartData();
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchChartData();
+    }, 30000); // Check every 30 seconds instead of 5
     return () => clearInterval(interval);
-  }, []);
-
-  // Sample chart data
-  const detectionChartData = [
-    { name: t('settings.vehicles'), y: 45 },
-    { name: t('settings.people'), y: 25 },
-    { name: t('home.cycles'), y: 20 },
-    { name: t('settings.other'), y: 10 },
-  ];
-
-  const performanceChartData = [
-    {
-      name: t('settings.performanceLabel'),
-      data: [65, 72, 68, 75, 80, 78, 85],
-      color: "#667eea",
-    },
-  ];
+  }, [t]);
 
   return (
     <div className="flex flex-col h-screen bg-bg-primary overflow-hidden">
@@ -266,8 +529,8 @@ export default function HomePage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                    <Shield className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+                    <Shield className="w-6 h-6 text-black" />
                   </div>
                   <Badge
                     variant="outline"
@@ -278,12 +541,12 @@ export default function HomePage() {
                 </motion.div>
 
                 <motion.h1
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold my-7 text-neon-cyan"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-7 text-neon-cyan"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  {t('home.title')}
+                  {t("home.title")}
                 </motion.h1>
 
                 <motion.div
@@ -293,19 +556,16 @@ export default function HomePage() {
                   transition={{ delay: 0.6 }}
                 >
                   <Link href="/adas">
-                    <button
-                      className="btn-neon w-full sm:w-auto"
-                    >
+                    <button className="btn-neon w-full sm:w-auto">
                       <Zap className="w-5 h-5 mr-2 inline" />
-                      {t('home.startDetection')}
+                      {t("home.startDetection")}
                     </button>
                   </Link>
-                  
                 </motion.div>
               </div>
             </motion.div>
 
-{/* === END DASHBOARD CHARTS === */}
+            {/* === END DASHBOARD CHARTS === */}
 
             {/* System Status Cards - Premium Grid */}
             <motion.div
@@ -314,33 +574,33 @@ export default function HomePage() {
             >
               {[
                 {
-                  title: t('home.systemStatus'),
+                  title: t("home.systemStatus"),
                   value: stats.systemStatus,
                   icon: Activity,
                   color: "success",
-                  description: t('home.allSystemsOnline'),
+                  description: t("home.allSystemsOnline"),
                 },
                 {
-                  title: t('home.activeCameras'),
+                  title: t("home.activeCameras"),
                   value: stats.activeCameras.toString(),
                   icon: Cctv,
                   color: "primary",
-                  description: t('home.realTimeMonitoring'),
+                  description: t("home.realTimeMonitoring"),
                 },
                 {
-                  title: t('home.totalDetections'),
+                  title: t("home.totalDetections"),
                   value: stats.totalDetections.toLocaleString(),
                   icon: BookOpen,
                   color: "info",
-                  description: t('home.percentIncrease', { percent: 12 }),
+                  description: t("home.percentIncrease", { percent: 12 }),
                   trend: true,
                 },
                 {
-                  title: t('home.alertsToday'),
+                  title: t("home.alertsToday"),
                   value: stats.alertsToday.toString(),
                   icon: AlertTriangle,
                   color: "warning",
-                  description: t('home.safetyAlertsIssued'),
+                  description: t("home.safetyAlertsIssued"),
                 },
               ].map((stat, index) => (
                 <motion.div
@@ -363,10 +623,13 @@ export default function HomePage() {
                     </CardHeader>
                     <CardContent className="pb-8">
                       <div className="flex items-center gap-2 mb-2">
-                        {stat.title === t('home.systemStatus') && (
+                        {stat.title === t("home.systemStatus") && (
                           <motion.div
                             className="w-2 h-2 rounded-full bg-success"
-                            animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              opacity: [1, 0.7, 1],
+                            }}
                             transition={{ duration: 2, repeat: Infinity }}
                           />
                         )}
@@ -386,264 +649,253 @@ export default function HomePage() {
               ))}
             </motion.div>
             <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-  <GlassCard className="p-6">
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={aiUsageOptions}
-    />
-  </GlassCard>
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={aiUsageOptions}
+                />
+              </GlassCard>
 
-  <GlassCard className="p-6">
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={confidenceDistOptions}
-    />
-  </GlassCard>
-</div>
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={confidenceDistOptions}
+                />
+              </GlassCard>
+            </div>
 
-<GlassCard className="p-6">
-  <HighchartsReact
-    highcharts={Highcharts}
-    options={notificationTimelineOptions}
-  />
-</GlassCard>
+            <GlassCard className="p-6">
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={notificationTimelineOptions}
+              />
+            </GlassCard>
 
-{/* === DASHBOARD CHARTS (GỘP TỪ DASHBOARD) === */}
-<div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-  <GlassCard className="p-6">
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={{
-        chart: {
-          type: "area",
-          backgroundColor: "transparent",
-          height: 300,
-        },
-        title: {
-          text: t("dashboard.detectionTrendTitle"),
-          style: {
-            color: "#ff7a1a",
-            fontFamily: "var(--font-inter)",
-            fontSize: "16px",
-            fontWeight: "600",
-          },
-        },
-        xAxis: {
-          categories: [
-            "10:00",
-            "10:05",
-            "10:10",
-            "10:15",
-            "10:20",
-            "10:25",
-            "10:30",
-          ],
-          labels: {
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "11px",
-            },
-          },
-          lineColor: "rgba(255, 255, 255, 0.1)",
-          tickColor: "rgba(255, 255, 255, 0.1)",
-        },
-        yAxis: {
-          title: {
-            text: t("settings.detectionCount"),
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "12px",
-            },
-          },
-          labels: {
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "11px",
-            },
-          },
-          gridLineColor: "rgba(255, 255, 255, 0.05)",
-        },
-        tooltip: {
-          shared: true,
-          backgroundColor: "rgba(10, 22, 40, 0.95)",
-          borderColor: "#00E5FF",
-          borderRadius: 8,
-          style: {
-            color: "#FFFFFF",
-            fontFamily: "var(--font-inter)",
-            fontSize: "12px",
-          },
-        },
-        plotOptions: {
-          area: {
-            fillOpacity: 0.3,
-            marker: {
-              radius: 4,
-              lineWidth: 2,
-            },
-          },
-        },
-        series: [
-          {
-            name: "Xe cộ",
-            data: [45, 52, 48, 61, 58, 65, 72],
-            color: "#00E5FF",
-            fillColor: {
-              linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-              stops: [
-                [0, "rgba(0, 229, 255, 0.3)"],
-                [1, "rgba(0, 229, 255, 0.05)"],
-              ],
-            },
-          },
-          {
-            name: "Người đi bộ",
-            data: [28, 31, 35, 29, 42, 38, 45],
-            color: "#00FFA3",
-            fillColor: {
-              linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-              stops: [
-                [0, "rgba(0, 255, 163, 0.3)"],
-                [1, "rgba(0, 255, 163, 0.05)"],
-              ],
-            },
-          },
-        ],
-        legend: {
-          itemStyle: {
-            color: "#111827",
-            fontFamily: "var(--font-inter)",
-            fontSize: "12px",
-            fontWeight: "500",
-          },
-          itemHoverStyle: {
-            color: "#000000",
-          },
-        },
-        credits: {
-          enabled: false,
-        },
-      }}
-    />
-  </GlassCard>
+            {/* === DASHBOARD CHARTS (GỘP TỪ DASHBOARD) === */}
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={{
+                    chart: {
+                      type: "area",
+                      backgroundColor: "transparent",
+                      height: 300,
+                    },
+                    title: {
+                      text: t("dashboard.detectionTrendTitle"),
+                      style: {
+                        color: "#ff7a1a",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      },
+                    },
+                    xAxis: {
+                      categories:
+                        detectionTrendCategories.length > 0
+                          ? detectionTrendCategories
+                          : [
+                              "10:00",
+                              "10:05",
+                              "10:10",
+                              "10:15",
+                              "10:20",
+                              "10:25",
+                              "10:30",
+                            ],
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      lineColor: "rgba(255, 255, 255, 0.1)",
+                      tickColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                    yAxis: {
+                      title: {
+                        text: t("settings.detectionCount"),
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "12px",
+                        },
+                      },
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      gridLineColor: "rgba(255, 255, 255, 0.05)",
+                    },
+                    tooltip: {
+                      shared: true,
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      borderColor: "#00E5FF",
+                      borderRadius: 8,
+                      style: {
+                        color: "#FFFFFF",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                      },
+                    },
+                    plotOptions: {
+                      area: {
+                        fillOpacity: 0.3,
+                        marker: {
+                          radius: 4,
+                          lineWidth: 2,
+                        },
+                      },
+                    },
+                    series:
+                      detectionTrendSeries.length > 0
+                        ? detectionTrendSeries
+                        : [
+                            {
+                              name: "Xe cộ",
+                              data: [45, 52, 48, 61, 58, 65, 72],
+                              color: "#00E5FF",
+                              fillColor: {
+                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                stops: [
+                                  [0, "rgba(0, 229, 255, 0.3)"],
+                                  [1, "rgba(0, 229, 255, 0.05)"],
+                                ],
+                              },
+                            },
+                            {
+                              name: "Người đi bộ",
+                              data: [28, 31, 35, 29, 42, 38, 45],
+                              color: "#00FFA3",
+                              fillColor: {
+                                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                stops: [
+                                  [0, "rgba(0, 255, 163, 0.3)"],
+                                  [1, "rgba(0, 255, 163, 0.05)"],
+                                ],
+                              },
+                            },
+                          ],
+                    legend: {
+                      itemStyle: {
+                        color: "#111827",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                      },
+                      itemHoverStyle: {
+                        color: "#000000",
+                      },
+                    },
+                    credits: {
+                      enabled: false,
+                    },
+                  }}
+                />
+              </GlassCard>
 
-  <GlassCard className="p-6">
-    <HighchartsReact
-      highcharts={Highcharts}
-      options={{
-        chart: {
-          type: "spline",
-          backgroundColor: "transparent",
-          height: 300,
-        },
-        title: {
-          text: t("dashboard.accuracyTrendTitle"),
-          style: {
-            color: "#ff7a1a",
-            fontFamily: "var(--font-inter)",
-            fontSize: "16px",
-            fontWeight: "600",
-          },
-        },
-        xAxis: {
-          categories: [
-            t("settings.monday"),
-            t("settings.tuesday"),
-            t("settings.wednesday"),
-            t("settings.thursday"),
-            t("settings.friday"),
-            t("settings.saturday"),
-            t("settings.sunday"),
-          ],
-          labels: {
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "11px",
-            },
-          },
-          lineColor: "rgba(255, 255, 255, 0.1)",
-          tickColor: "rgba(255, 255, 255, 0.1)",
-        },
-        yAxis: {
-          title: {
-            text: "Độ chính xác (%)",
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "12px",
-            },
-          },
-          labels: {
-            style: {
-              color: "#111827",
-              fontFamily: "var(--font-inter)",
-              fontSize: "11px",
-            },
-          },
-          gridLineColor: "rgba(255, 255, 255, 0.05)",
-          min: 90,
-          max: 100,
-        },
-        tooltip: {
-          backgroundColor: "rgba(10, 22, 40, 0.95)",
-          borderColor: "#00E5FF",
-          borderRadius: 8,
-          style: {
-            color: "#FFFFFF",
-            fontFamily: "var(--font-inter)",
-            fontSize: "12px",
-          },
-          valueSuffix: "%",
-        },
-        plotOptions: {
-          spline: {
-            marker: {
-              radius: 4,
-              lineColor: "#050B14",
-              lineWidth: 2,
-            },
-          },
-        },
-        series: [
-          {
-            name: t("settings.accuracy"),
-            data: [96.5, 97.2, 96.8, 98.1, 97.9, 98.5, 98.3],
-            color: "#00FFA3",
-            marker: {
-              symbol: "circle",
-            },
-          },
-        ],
-        legend: {
-          enabled: false,
-        },
-        credits: {
-          enabled: false,
-        },
-      }}
-    />
-  </GlassCard>
-</div>
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={{
+                    chart: {
+                      type: "spline",
+                      backgroundColor: "transparent",
+                      height: 300,
+                    },
+                    title: {
+                      text: t("dashboard.accuracyTrendTitle"),
+                      style: {
+                        color: "#ff7a1a",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      },
+                    },
+                    xAxis: {
+                      categories: accuracyCategories,
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      lineColor: "rgba(255, 255, 255, 0.1)",
+                      tickColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                    yAxis: {
+                      title: {
+                        text: "Độ chính xác (%)",
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "12px",
+                        },
+                      },
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      gridLineColor: "rgba(255, 255, 255, 0.05)",
+                      min: 90,
+                      max: 100,
+                    },
+                    tooltip: {
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      borderColor: "#00E5FF",
+                      borderRadius: 8,
+                      style: {
+                        color: "#FFFFFF",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                      },
+                      valueSuffix: "%",
+                    },
+                    plotOptions: {
+                      spline: {
+                        marker: {
+                          radius: 4,
+                          lineColor: "#050B14",
+                          lineWidth: 2,
+                        },
+                      },
+                    },
+                    series: accuracySeries,
+                    legend: {
+                      enabled: false,
+                    },
+                    credits: {
+                      enabled: false,
+                    },
+                  }}
+                />
+              </GlassCard>
+            </div>
             {/* Charts Section */}
             <motion.div
               variants={itemVariants}
               className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
             >
               <HighchartsChart
-                title={t('home.detectionDistribution')}
-                description={t('home.detectionDistributionDesc')}
+                title={t("home.detectionDistribution")}
+                description={t("home.detectionDistributionDesc")}
                 type="pie"
                 data={detectionChartData}
                 height={300}
                 className="sm:pl-8"
               />
               <HighchartsChart
-                title={t('home.systemPerformance')}
-                description={t('home.systemPerformanceDesc')}
+                title={t("home.systemPerformance")}
+                description={t("home.systemPerformanceDesc")}
                 type="line"
                 data={performanceChartData}
                 height={300}
@@ -656,11 +908,12 @@ export default function HomePage() {
               className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
             >
               <Card glass className="xl:col-span-2 w-full">
-
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('home.quickActions')}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {t("home.quickActions")}
+                  </CardTitle>
                   <CardDescription>
-                    {t('home.quickActionsDesc')}
+                    {t("home.quickActionsDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-3 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -668,22 +921,22 @@ export default function HomePage() {
                     {
                       href: "/adas",
                       icon: Zap,
-                      title: t('home.startLiveDetection'),
-                      description: t('home.startLiveDetectionDesc'),
+                      title: t("home.startLiveDetection"),
+                      description: t("home.startLiveDetectionDesc"),
                       gradient: "from-primary to-primary/80",
                     },
                     {
                       href: "/driver-monitor",
                       icon: Eye,
-                      title: t('home.monitorDriver'),
-                      description: t('home.monitorDriverDesc'),
+                      title: t("home.monitorDriver"),
+                      description: t("home.monitorDriverDesc"),
                       gradient: "from-accent to-accent/80",
                     },
                     {
                       href: "/analytics",
                       icon: TrendingUp,
-                      title: t('home.viewAnalytics'),
-                      description: t('home.viewAnalyticsDesc'),
+                      title: t("home.viewAnalytics"),
+                      description: t("home.viewAnalyticsDesc"),
                       gradient: "from-info to-info/80",
                     },
                   ].map((action) => (
@@ -694,13 +947,13 @@ export default function HomePage() {
                     >
                       <Link
                         href={action.href}
-                        className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-white/5 to-white/0 border border-white/10 hover:border-primary/50 hover:from-white/10 hover:to-white/5 transition-all duration-300 group"
+                        className="flex items-center justify-between p-4 rounded-xl bg-linear-to-r from-black/5 to-transparent border border-border/50 hover:border-primary/50 hover:from-primary/5 hover:to-transparent transition-all duration-300 group"
                       >
                         <div className="flex items-center gap-4">
                           <div
-                            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+                            className={`w-12 h-12 rounded-xl bg-linear-to-br ${action.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
                           >
-                            <action.icon className="w-6 h-6 text-white" />
+                            <action.icon className="w-6 h-6 text-black" />
                           </div>
                           <div>
                             <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -725,14 +978,16 @@ export default function HomePage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl">{t('home.recentActivity')}</CardTitle>
+                      <CardTitle className="text-xl">
+                        {t("home.recentActivity")}
+                      </CardTitle>
                       <CardDescription>
-                        {t('home.recentActivityDesc')}
+                        {t("home.recentActivityDesc")}
                       </CardDescription>
                     </div>
                     <Link href="/events">
                       <Button variant="glass" size="sm">
-                        {t('home.viewAll')}
+                        {t("home.viewAll")}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -743,12 +998,11 @@ export default function HomePage() {
                     {[
                       {
                         icon: Clock,
-                        text: t('home.systemStarted'),
-                        subtext: t('home.systemStartedDesc'),
-                        time: t('home.justNow'),
+                        text: t("home.systemStarted"),
+                        subtext: t("home.systemStartedDesc"),
+                        time: t("home.justNow"),
                         color: "success",
                       },
-                      
                     ].map((activity, index) => {
                       const iconColorClass =
                         activity.color === "success"
@@ -763,7 +1017,7 @@ export default function HomePage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 1 + index * 0.1 }}
-                          className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-primary/30 hover:from-white/10 transition-all duration-300"
+                          className="flex items-center gap-4 p-4 rounded-xl bg-linear-to-r from-black/5 to-transparent border border-border/50 hover:border-primary/30 hover:from-primary/5 transition-all duration-300"
                         >
                           <activity.icon
                             className={`w-5 h-5 ${iconColorClass}`}

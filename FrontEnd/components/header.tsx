@@ -25,9 +25,9 @@ export function Header() {
 
   // Safe fallback for display name
   const displayName =
-    user?.username || user?.email?.split("@")[0] || t("common.user");
+    user?.username || user?.email?.split("@")[0] || t("common.user") || "User";
   const displayEmail = user?.email || "No email";
-  const userInitials = displayName.substring(0, 1).toUpperCase();
+  const userInitials = displayName?.substring(0, 1)?.toUpperCase() || "U";
 
   return (
     <motion.header
@@ -43,8 +43,8 @@ export function Header() {
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
         {/* Left side - Logo/Title */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-            <User className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+            <User className="w-5 h-5 text-black" />
           </div>
           <div className="hidden sm:block">
             <h2
@@ -61,8 +61,8 @@ export function Header() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer px-4 py-2 rounded-lg border-2 border-gray-400 bg-white/5 hover:bg-white/10 hover:border-gray-300 transition-all select-none">
-                  <span className="text-sm font-medium text-white">
+                <div className="cursor-pointer px-4 py-2 rounded-lg border-2 border-border bg-black/5 hover:bg-black/10 hover:border-primary/50 transition-all select-none">
+                  <span className="text-sm font-medium text-foreground">
                     {t("header.greeting")} {displayName}
                   </span>
                 </div>
