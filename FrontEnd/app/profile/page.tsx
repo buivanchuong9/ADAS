@@ -316,7 +316,7 @@ export default function ProfilePage() {
               {/* Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                  <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-accent">
                     {t("profile.title")}
                   </h1>
                   <p className="text-gray-400 mt-1">{t("profile.subtitle")}</p>
@@ -353,7 +353,7 @@ export default function ProfilePage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <div className="w-full h-full bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                           <User className="w-12 h-12 text-primary" />
                         </div>
                       )}

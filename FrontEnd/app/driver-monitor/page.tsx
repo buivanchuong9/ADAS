@@ -685,7 +685,7 @@ export default function DriverMonitorPage() {
                   <div className="w-full max-w-md px-8 space-y-2">
                     <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-neon-cyan/50">
                       <div
-                        className="h-full bg-gradient-to-r from-neon-cyan to-neon-green transition-all duration-500 ease-out"
+                        className="h-full bg-linear-to-r from-neon-cyan to-neon-green transition-all duration-500 ease-out"
                         style={{
                           width: `${Math.min(100, Math.max(0, progress))}%`,
                         }}
@@ -754,7 +754,7 @@ export default function DriverMonitorPage() {
                 <Button
                   onClick={startMonitoring}
                   disabled={!file}
-                  className="gap-2 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="gap-2 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PlayCircle className="w-4 h-4" />
                   {t("driverMonitor.startMonitoring")}

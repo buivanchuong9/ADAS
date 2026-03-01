@@ -9,6 +9,7 @@
 /* ===== LIGHT THEME (Default) ===== */
 :root,
 [data-theme="light"] {
+  color-scheme: light;
   /* Background Colors */
   --bg-body: #f5f7fb;
   --bg-primary: #f5f7fb;
@@ -574,10 +575,11 @@ textarea::placeholder {
   text-shadow: 0 0 20px currentColor;
 }
 
-/* ===== OVERRIDE ANY REMAINING LIGHT MODE ===== */
+/* ===== FORCE LIGHT BACKGROUND ===== */
 body,
 body {
-  background: #0f172a;
+  background: var(--bg-primary);
+  background-color: var(--bg-primary);
 }
 
 a {

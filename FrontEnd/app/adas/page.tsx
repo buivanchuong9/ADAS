@@ -819,7 +819,7 @@ export default function ADASPage() {
                   <div className="w-full max-w-md px-8 space-y-2">
                     <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-neon-cyan/50">
                       <div
-                        className="h-full bg-gradient-to-r from-neon-cyan to-neon-green transition-all duration-500 ease-out"
+                        className="h-full bg-linear-to-r from-neon-cyan to-neon-green transition-all duration-500 ease-out"
                         style={{ width: `${processingProgress}%` }}
                       />
                     </div>
@@ -867,7 +867,7 @@ export default function ADASPage() {
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
                   onClick={() => setStage("input")}
-                  className="gap-2 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
+                  className="gap-2 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
                 >
                   <RefreshCw className="w-4 h-4" />
                   {t("adas.analyzeAnotherVideo")}
@@ -1061,7 +1061,7 @@ export default function ADASPage() {
             <div className="flex gap-3">
               <Button
                 onClick={viewProcessedVideo}
-                className="flex-1 bg-gradient-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
+                className="flex-1 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
               >
                 <PlayCircle className="w-5 h-5 mr-2" />
                 {t("adas.viewVideoNow")}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-// Highcharts theme for premium look
+// Highcharts theme for light background
 const premiumTheme: Highcharts.Options = {
   chart: {
     backgroundColor: "transparent",
@@ -35,51 +35,51 @@ const premiumTheme: Highcharts.Options = {
 
   subtitle: {
     style: {
-      color: "#9ca3af",
+      color: "#6b7280",
     },
   },
   xAxis: {
-    gridLineColor: "rgba(255, 255, 255, 0.1)",
-    lineColor: "rgba(255, 255, 255, 0.2)",
-    minorGridLineColor: "rgba(255, 255, 255, 0.05)",
-    tickColor: "rgba(255, 255, 255, 0.2)",
+    gridLineColor: "rgba(0, 0, 0, 0.08)",
+    lineColor: "rgba(0, 0, 0, 0.15)",
+    minorGridLineColor: "rgba(0, 0, 0, 0.04)",
+    tickColor: "rgba(0, 0, 0, 0.15)",
     labels: {
       style: {
-        color: "#9ca3af",
+        color: "#374151",
       },
     },
     title: {
       style: {
-        color: "#ffffff",
+        color: "#111827",
       },
     },
   },
   yAxis: {
-    gridLineColor: "rgba(255, 255, 255, 0.1)",
-    lineColor: "rgba(255, 255, 255, 0.2)",
-    minorGridLineColor: "rgba(255, 255, 255, 0.05)",
-    tickColor: "rgba(255, 255, 255, 0.2)",
+    gridLineColor: "rgba(0, 0, 0, 0.08)",
+    lineColor: "rgba(0, 0, 0, 0.15)",
+    minorGridLineColor: "rgba(0, 0, 0, 0.04)",
+    tickColor: "rgba(0, 0, 0, 0.15)",
     labels: {
       style: {
-        color: "#9ca3af",
+        color: "#374151",
       },
     },
     title: {
       style: {
-        color: "#ffffff",
+        color: "#111827",
       },
     },
   },
   legend: {
     backgroundColor: "transparent",
     itemStyle: {
-      color: "#9ca3af",
+      color: "#374151",
     },
     itemHoverStyle: {
-      color: "#ffffff",
+      color: "#111827",
     },
     itemHiddenStyle: {
-      color: "#4b5563",
+      color: "#9ca3af",
     },
   },
   tooltip: {
@@ -96,20 +96,20 @@ const premiumTheme: Highcharts.Options = {
   plotOptions: {
     series: {
       dataLabels: {
-        color: "#ffffff",
+        color: "#111827",
       },
       marker: {
         lineColor: "#ffffff",
       },
     },
     boxplot: {
-      fillColor: "#505053",
+      fillColor: "#e5e7eb",
     },
     candlestick: {
-      lineColor: "white",
+      lineColor: "#111827",
     },
     errorbar: {
-      color: "white",
+      color: "#111827",
     },
   },
   credits: {
@@ -140,7 +140,7 @@ export function HighchartsChart({
   data,
   height = 300,
   className,
-  headerClassName = "text-white",
+  headerClassName = "text-foreground",
   options = {},
 }: HighchartsChartProps) {
   const chartRef = useRef<HighchartsReact.RefObject>(null);
@@ -192,12 +192,12 @@ export function HighchartsChart({
             },
             title: {
               style: {
-                color: "#ffffff",
+                color: "#111827",
               },
             },
             legend: {
               itemStyle: {
-                color: "#ffffff",
+                color: "#374151",
               },
             },
             showInLegend: true,
