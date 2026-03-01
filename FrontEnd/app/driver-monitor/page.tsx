@@ -311,6 +311,16 @@ export default function DriverMonitorPage() {
           }),
         );
 
+        // Update driver metrics from the result data if available
+        if (typeof data.fatigue_level === "number")
+          setFatigueLevel(Math.round(data.fatigue_level));
+        if (typeof data.distraction_level === "number")
+          setDistractionLevel(Math.round(data.distraction_level));
+        if (typeof data.eyes_closed === "boolean")
+          setEyesClosed(data.eyes_closed);
+        if (typeof data.blink_rate === "number")
+          setBlinkRate(Math.round(data.blink_rate));
+
         const st = (data.status || "").toLowerCase();
         if (st === "completed" || st === "failed" || st === "error") {
           setProcessingMsg("");
@@ -354,39 +364,6 @@ export default function DriverMonitorPage() {
       clearInterval(id);
     };
   }, [isMonitoring, jobId, t, toast]);
-
-  // Poll 2: /api/driver-status — fatigue, distraction, eyes_closed, blink_rate
-  useEffect(() => {
-    if (!isMonitoring) return;
-    let cancelled = false;
-
-    const pollDriverStatus = async () => {
-      try {
-        const res = await fetch(getApiUrl(API_ENDPOINTS.DRIVER_STATUS_CURRENT));
-        if (!res.ok) return;
-        const data = await res.json();
-        if (cancelled) return;
-        const st = data?.status ?? data;
-        if (!st) return;
-        if (typeof st.fatigue_level === "number")
-          setFatigueLevel(Math.round(st.fatigue_level));
-        if (typeof st.distraction_level === "number")
-          setDistractionLevel(Math.round(st.distraction_level));
-        if (typeof st.eyes_closed === "boolean") setEyesClosed(st.eyes_closed);
-        if (typeof st.blink_rate === "number")
-          setBlinkRate(Math.round(st.blink_rate));
-      } catch (err) {
-        if (!cancelled) console.error("[DriverStatus] poll error:", err);
-      }
-    };
-
-    pollDriverStatus();
-    const id = setInterval(pollDriverStatus, 1000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [isMonitoring]);
 
   // Stop monitoring
   const stopMonitoring = () => {
@@ -613,13 +590,6 @@ export default function DriverMonitorPage() {
                     Distraction
                   </Badge>
                   <span>{t("driverMonitor.distractionDetection")}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50">
-                    <ShieldCheck className="w-3 h-3" />
-                    Eyes
-                  </Badge>
-                  <span>{t("driverMonitor.eyeTracking")}</span>
                 </div>
               </div>
             </GlassCard>

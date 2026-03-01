@@ -283,6 +283,11 @@ export default {
     yesterday: "Hôm Qua",
     threeDaysAgo: "3 Ngày Trước",
     oneWeekAgo: "1 Tuần Trước",
+    periodWeek: "Tuần Này",
+    periodMonth: "Tháng Này",
+    periodAll: "Tất Cả",
+    noDataChart: "Chưa có dữ liệu",
+    dataFromApi: "Dữ liệu từ GET /api/analytics/safety-score-comparison",
   },
 
   // Events

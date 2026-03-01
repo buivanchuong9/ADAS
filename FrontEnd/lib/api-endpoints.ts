@@ -2,30 +2,38 @@
 // Base URL is configured separately in api-config.ts
 
 // Common API prefix for non-swagger routes
-const API_PREFIX = '/api'
+const API_PREFIX = "/api";
 
 export const API_ENDPOINTS = {
   // =========================
   // System (from Swagger)
   // =========================
-  HEALTH: '/health',
-  STATUS: '/health', // local "status" maps to ADAS health check
+  HEALTH: "/health",
+  STATUS: "/health", // local "status" maps to ADAS health check
 
   // =========================
   // Admin / Analytics (from Swagger)
   // =========================
-  ADMIN_OVERVIEW: '/admin/overview',
-  ADMIN_STATISTICS: '/admin/statistics',
-  ADMIN_CHARTS: '/admin/charts',
+  ADMIN_OVERVIEW: "/admin/overview",
+  ADMIN_STATISTICS: "/admin/statistics",
+  ADMIN_CHARTS: "/admin/charts",
   ADMIN_VIDEO_TIMELINE: (videoId: string | number) =>
     `/admin/video/${videoId}/timeline`,
+  ADMIN_DASHBOARD_CARDS: "/admin/dashboard/cards",
+
+  // =========================
+  // Analytics (dashboard KPIs + charts)
+  // =========================
+  ANALYTICS_SUMMARY: `${API_PREFIX}/analytics/summary`,
+  ANALYTICS_SPEED_OVER_TIME: `${API_PREFIX}/analytics/speed-over-time`,
+  ANALYTICS_FATIGUE_OVER_TIME: `${API_PREFIX}/analytics/fatigue-over-time`,
+  ANALYTICS_SAFETY_SCORE_COMPARISON: `${API_PREFIX}/analytics/safety-score-comparison`,
 
   // =========================
   // Vision / Processing (from Swagger)
   // =========================
-  VISION_VIDEO: '/vision/video',
-  VIDEO_PROCESS: (id: string | number) =>
-    `/vision/video/${id}/process`, // assumption if per-id processing exists
+  VISION_VIDEO: "/vision/video",
+  VIDEO_PROCESS: (id: string | number) => `/vision/video/${id}/process`, // assumption if per-id processing exists
 
   // =========================
   // Alerts (assumption – not in Swagger)
@@ -38,7 +46,19 @@ export const API_ENDPOINTS = {
   // =========================
   DETECTIONS_SAVE: `${API_PREFIX}/detections/save`,
   DETECTIONS_RECENT: `${API_PREFIX}/detections/recent`,
-  DETECTIONS_STATS: '/admin/statistics', // mapped to admin statistics
+  DETECTIONS_STATS: `${API_PREFIX}/detections/stats`, // mapped to admin statistics
+
+  // =========================
+  // Dashboard Charts
+  // =========================
+  AI_CHAT_HISTORY: `${API_PREFIX}/ai-chat/history`,
+  DASHBOARD_CHART_DETECTION_TREND: "/admin/dashboard/charts/detection-trend",
+  DASHBOARD_CHART_DETECTION_ACCURACY:
+    "/admin/dashboard/charts/detection-accuracy",
+  DASHBOARD_CHART_DETECTION_DISTRIBUTION:
+    "/admin/dashboard/charts/detection-distribution",
+  DASHBOARD_CHART_SYSTEM_PERFORMANCE:
+    "/admin/dashboard/charts/system-performance",
 
   // =========================
   // Events (assumption)
@@ -62,30 +82,26 @@ export const API_ENDPOINTS = {
   // =========================
   MODELS_AVAILABLE: `${API_PREFIX}/models/available`,
   MODELS_DOWNLOAD_ALL: `${API_PREFIX}/models/download-all`,
-  MODEL_DOWNLOAD: (id: string) =>
-    `${API_PREFIX}/models/download/${id}`,
-  MODEL_INFO: (id: string) =>
-    `${API_PREFIX}/models/info/${id}`,
-  MODEL_DELETE: (id: string) =>
-    `${API_PREFIX}/models/delete/${id}`,
+  MODEL_DOWNLOAD: (id: string) => `${API_PREFIX}/models/download/${id}`,
+  MODEL_INFO: (id: string) => `${API_PREFIX}/models/info/${id}`,
+  MODEL_DELETE: (id: string) => `${API_PREFIX}/models/delete/${id}`,
 
   // =========================
   // WebSockets (UI only – not Swagger)
   // =========================
-  WS_ADAS_STREAM: '/ws/adas/stream',
-  WS_STREAM: '/ws/stream',
-  WS_INFERENCE_VIDEO: '/ws/inference/video',
-  WS_MODELS_WEBCAM: '/ws/models/webcam',
+  WS_ADAS_STREAM: "/ws/adas/stream",
+  WS_STREAM: "/ws/stream",
+  WS_INFERENCE_VIDEO: "/ws/inference/video",
+  WS_MODELS_WEBCAM: "/ws/models/webcam",
 
   // =========================
   // Video (assumption)
   // =========================
   VIDEO_UPLOAD: `${API_PREFIX}/video/upload`,
-  VIDEOS_LIST: `${API_PREFIX}/video/list`,
+  VIDEOS_LIST: `${API_PREFIX}/videos/list`,
   VIDEO_RESULT: (jobId: string | number) =>
     `${API_PREFIX}/video/result/${jobId}`,
-  VIDEO_DETAILS: (id: string | number) =>
-    `${API_PREFIX}/video/result/${id}`,
+  VIDEO_DETAILS: (id: string | number) => `${API_PREFIX}/video/result/${id}`,
   VIDEO_DOWNLOAD: (jobId: string, filename: string) =>
     `${API_PREFIX}/video/download/${jobId}/${filename}`,
   VIDEO_SAMPLE: (jobId: string, filename: string) =>
@@ -95,11 +111,11 @@ export const API_ENDPOINTS = {
   // Driver Monitoring (assumption)
   // =========================
   DRIVER_MONITOR_ANALYZE: `${API_PREFIX}/driver-monitor/analyze`, // POST
-  DRIVER_STATUS_SAVE: `${API_PREFIX}/driver-status`,              // POST
-  DRIVER_STATUS_CURRENT: `${API_PREFIX}/driver-status`,           // GET
-  DRIVER_STATUS_HISTORY: `${API_PREFIX}/driver-status/history`,   // GET
+  DRIVER_STATUS_SAVE: `${API_PREFIX}/driver-status`, // POST
+  DRIVER_STATUS_CURRENT: `${API_PREFIX}/driver-status`, // GET
+  DRIVER_STATUS_HISTORY: `${API_PREFIX}/driver-status/history`, // GET
   DRIVER_MONITOR_DOWNLOAD: (jobId: string | number) =>
     `${API_PREFIX}/download/${jobId}`, // GET
-} as const
+} as const;
 
-export type ApiEndpointKey = keyof typeof API_ENDPOINTS
+export type ApiEndpointKey = keyof typeof API_ENDPOINTS;

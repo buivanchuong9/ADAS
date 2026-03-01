@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,8 @@ type VideoItem = {
   created_at: string;
   duration_seconds?: number | null;
   video_size_mb?: number | null;
+  video_url?: string | null;
+  full_result_video_url?: string | null;
 };
 
 export default function ADASPage() {
@@ -69,7 +71,44 @@ export default function ADASPage() {
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(
     null,
   );
-  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+
+  // Fallback polling flag
+  const pollingRef = useRef<boolean>(false);
+
+  // ref lưu thời điểm bắt đầu phân tích (không bị reset bởi re-render)
+  const analysisStartedAtRef = useRef<number>(0);
+  // ref để timer interval luôn đọc được progress mới nhất (tránh stale closure)
+  const processingProgressRef = useRef<number>(0);
+  useEffect(() => {
+    processingProgressRef.current = processingProgress;
+  }, [processingProgress]);
+
+  useEffect(() => {
+    if (!isProcessing || uploading) return;
+    analysisStartedAtRef.current = Date.now();
+
+    const interval = setInterval(() => {
+      const elapsed = Math.floor(
+        (Date.now() - analysisStartedAtRef.current) / 1000,
+      );
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      const timeString =
+        minutes > 0
+          ? `${minutes}:${seconds.toString().padStart(2, "0")}`
+          : `${elapsed}s`;
+      // Dùng ref thay vì state để tránh stale closure
+      setProcessingMsg(
+        t("adas.analyzingProgress", {
+          progress: processingProgressRef.current,
+          time: timeString,
+        }),
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isProcessing, uploading]);
 
   // Video selection modal state
   const [showVideoDialog, setShowVideoDialog] = useState(false);
@@ -84,52 +123,36 @@ export default function ADASPage() {
     error: wsError,
     processingTime: wsProcessingTime,
     isConnected: wsIsConnected,
-  } = useVideoProgress(currentJobId, isProcessing);
+  } = useVideoProgress(currentJobId, isProcessing && !pollingRef.current);
 
   // Update local state when WebSocket data changes
   useEffect(() => {
     if (currentJobId && isProcessing) {
-      setProcessingProgress(wsProgress);
+      if (!pollingRef.current) {
+        setProcessingProgress(wsProgress);
 
-      // Update processing message with progress
-      if (wsProcessingTime !== null) {
-        const minutes = Math.floor(wsProcessingTime / 60);
-        const seconds = wsProcessingTime % 60;
-        const timeString =
-          minutes > 0
-            ? `${minutes}:${seconds.toString().padStart(2, "0")}`
-            : `${seconds}s`;
-        setProcessingMsg(
-          t("adas.analyzingProgress", {
-            progress: wsProgress,
-            time: timeString,
-          }),
-        );
-      } else {
-        setProcessingMsg(
-          t("adas.analyzingProgressNoTime", { progress: wsProgress }),
-        );
-      }
+        // Handle completion
+        if (wsIsFinished && wsStatus === "completed") {
+          console.log("✅ [WebSocket] Processing completed!");
+          setIsProcessing(false);
+          fetchProcessedVideo(currentJobId);
+        }
 
-      // Handle completion
-      if (wsIsFinished && wsStatus === "completed") {
-        console.log("✅ [WebSocket] Processing completed!");
-        setIsProcessing(false);
-        fetchProcessedVideo(currentJobId);
+        // Handle errors
+        if (wsError) {
+          console.error("❌ [WebSocket] Error:", wsError);
+          toast({
+            title: t("adas.analysisError") || "WebSocket Timeout/Error",
+            description: "Chuyển sang chế độ lấy dữ liệu dự phòng...",
+          });
+          // Fallback to polling if WebSocket fails
+          console.log("🔄 Falling back to polling...");
+          pollingRef.current = true;
+          pollForResult(currentJobId);
+        }
       }
-
-      // Handle errors
-      if (wsError) {
-        console.error("❌ [WebSocket] Error:", wsError);
-        toast({
-          title: "Lỗi kết nối WebSocket",
-          description: wsError,
-          variant: "destructive",
-        });
-        // Fallback to polling if WebSocket fails
-        console.log("🔄 Falling back to polling...");
-        pollForResult(currentJobId);
-      }
+    } else if (!isProcessing) {
+      pollingRef.current = false;
     }
   }, [
     wsProgress,
@@ -306,31 +329,32 @@ export default function ADASPage() {
   const pollForResult = async (jobId: string) => {
     const maxAttempts = 450; // 15 minutes max (450 attempts × 2 seconds = 900 seconds = 15 minutes)
     let attempts = 0;
+    const startTime = Date.now();
 
     const poll = async () => {
       try {
-        const res = await fetch(getApiUrl(`/api/video/result/${jobId}`));
+        const res = await fetch(getApiUrl(API_ENDPOINTS.VIDEO_RESULT(jobId)));
+        if (!res.ok) {
+          throw new Error(`HTTP Error ${res.status}`);
+        }
         const data = await res.json();
 
         // Only log if progress changed or status changed
-        const newProgress = data.progress_percent || 0;
-        if (
-          attempts === 0 ||
-          newProgress !== processingProgress ||
-          data.status === "completed"
-        ) {
+        const newProgress = data.progress_percent || data.progress || 0;
+        if (attempts === 0 || data.status === "completed") {
           console.log(
             `[Job ${jobId.substring(0, 8)}] Status: ${data.status}, Progress: ${newProgress}%`,
           );
         }
-
-        const elapsedSeconds = attempts * 2;
-        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-        const remainingSeconds = elapsedSeconds % 60;
+        const elapsed = Math.floor(
+          (Date.now() - (analysisStartedAtRef.current || Date.now())) / 1000,
+        );
+        const elapsedMinutes = Math.floor(elapsed / 60);
+        const remainingSeconds = elapsed % 60;
         const timeString =
           elapsedMinutes > 0
             ? `${elapsedMinutes}:${remainingSeconds.toString().padStart(2, "0")}`
-            : `${elapsedSeconds}s`;
+            : `${elapsed}s`;
 
         setProcessingProgress(newProgress);
         setProcessingMsg(
@@ -377,38 +401,63 @@ export default function ADASPage() {
   // Fetch processed video URL
   const fetchProcessedVideo = async (jobId: string) => {
     try {
-      const res = await fetch(getApiUrl(`/api/video/result/${jobId}`));
+      const res = await fetch(getApiUrl(API_ENDPOINTS.VIDEO_RESULT(jobId)));
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}`);
+      }
       const data = await res.json();
 
       console.log(
         "✅ Completed! Processing time:",
         data.processing_time_seconds,
         "s",
+        "| Data:",
+        data,
       );
 
-      if (data.status === "completed" && data.video_filename) {
-        // Backend spec: GET /api/video/download/{job_id}/{filename}
-        // Filename format: original_name_result.mp4
-        const resultFilename = data.video_filename.replace(
-          ".mp4",
-          "_result.mp4",
-        );
-        const downloadUrl = getApiUrl(
-          `/api/video/download/${jobId}/${resultFilename}`,
-        );
+      if (data.status === "completed") {
+        let downloadUrl: string;
+
+        // Ưu tiên pattern đang hoạt động ở driver-monitor:
+        // 1. video_filename + _result.mp4
+        // 2. full_result_video_url / video_url từ API
+        // 3. result_path
+        // 4. fallback result.mp4
+        if (data.video_filename) {
+          const resultFilename = String(data.video_filename).replace(
+            /\.mp4$/i,
+            "_result.mp4",
+          );
+          downloadUrl = getApiUrl(
+            API_ENDPOINTS.VIDEO_DOWNLOAD(jobId, resultFilename),
+          );
+          console.log("✅ Using video_filename pattern:", downloadUrl);
+        } else if (data.full_result_video_url || data.video_url) {
+          const p = String(data.full_result_video_url || data.video_url);
+          downloadUrl = p.startsWith("http") ? p : getApiUrl(p);
+          console.log("✅ Using API video URL:", downloadUrl);
+        } else if (data.result_path) {
+          const p = String(data.result_path);
+          downloadUrl = p.startsWith("http") ? p : getApiUrl(p);
+          console.log("✅ Using result_path:", downloadUrl);
+        } else {
+          downloadUrl = getApiUrl(
+            API_ENDPOINTS.VIDEO_DOWNLOAD(jobId, "result.mp4"),
+          );
+          console.log("⚠️ Fallback result.mp4:", downloadUrl);
+        }
 
         setProcessedVideoUrl(downloadUrl);
-        setPreviewUrl(downloadUrl); // Auto-set video immediately
-        setShowCompletionDialog(true);
+        setPreviewUrl(downloadUrl);
         setStage("done");
 
         toast({
           title: "Phân tích hoàn tất!",
-          description: `Thời gian xử lý: ${data.processing_time_seconds || 0}s`,
+          description: `Thời gian xử lý: ${Math.floor(data.processing_time_seconds || 0)}s`,
         });
       } else {
         console.error("❌ [Result] Job not completed:", data);
-        throw new Error("Job not completed or missing filename");
+        throw new Error("Job not completed");
       }
 
       setResult(data);
@@ -419,14 +468,6 @@ export default function ADASPage() {
         description: err.message,
         variant: "destructive",
       });
-    }
-  };
-
-  // User confirms to view processed video
-  const viewProcessedVideo = () => {
-    setShowCompletionDialog(false);
-    if (processedVideoUrl) {
-      setPreviewUrl(processedVideoUrl);
     }
   };
 
@@ -474,20 +515,29 @@ export default function ADASPage() {
 
   // Select a video from the list
   const selectVideo = (video: VideoItem) => {
-    // If completed, check for result URL. Otherwise fallback to raw sample URL.
+    // If completed, ưu tiên dùng URL từ video object nếu có
+    // Fallback về build URL thủ công
     let playUrl = "";
 
-    // Construct Raw URL: /api/video/sample/{job_id}/{filename}
-    // Construct Result URL: /api/video/download/{job_id}/{filename_result.mp4}
-
     if (video.status === "completed") {
-      const resultFilename = video.video_filename.replace(
-        ".mp4",
-        "_result.mp4",
-      );
-      playUrl = getApiUrl(
-        API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename),
-      );
+      // Ưu tiên: full_result_video_url > video_url > manual build
+      if (video.full_result_video_url) {
+        playUrl = video.full_result_video_url.startsWith("http")
+          ? video.full_result_video_url
+          : getApiUrl(video.full_result_video_url);
+        console.log("✅ [VideoSelect] Using full_result_video_url:", playUrl);
+      } else if (video.video_url) {
+        playUrl = video.video_url.startsWith("http")
+          ? video.video_url
+          : getApiUrl(video.video_url);
+        console.log("✅ [VideoSelect] Using video_url:", playUrl);
+      } else {
+        // Fallback: backend luôn dùng result.mp4 (filename param bị ignored)
+        playUrl = getApiUrl(
+          API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, "result.mp4"),
+        );
+        console.log("⚠️ [VideoSelect] Fallback result.mp4 URL:", playUrl);
+      }
 
       toast({
         title: t("adas.selectedResultVideo"),
@@ -837,7 +887,7 @@ export default function ADASPage() {
                     </p>
                   )}
                 </div>
-              ) : previewUrl && stage === "done" ? (
+              ) : previewUrl ? (
                 <video
                   key={previewUrl}
                   controls
@@ -854,7 +904,7 @@ export default function ADASPage() {
                     console.log("VIDEO URL:", previewUrl);
                   }}
                 >
-                  <source src="{previewUrl}" type="video/mp4" />
+                  <source src={previewUrl} type="video/mp4" />
                 </video>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
@@ -1016,68 +1066,6 @@ export default function ADASPage() {
               </div>
             )}
           </ScrollArea>
-        </DialogContent>
-      </Dialog>
-
-      {/* Processing Completion Dialog */}
-      <Dialog
-        open={showCompletionDialog}
-        onOpenChange={setShowCompletionDialog}
-      >
-        <DialogContent className="glass-card border-2 border-neon-green/50">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-neon-green flex items-center gap-2">
-              <CheckCircle2 className="w-6 h-6" />
-              {t("adas.analysisComplete")}
-            </DialogTitle>
-            <DialogDescription className="text-fg-secondary text-base mt-2">
-              {t("adas.analysisCompleteDesc")}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            {result && (
-              <div className="glass-card border border-neon-cyan/30 p-4 rounded-lg">
-                <h4 className="text-sm font-semibold text-neon-cyan mb-2">
-                  {t("adas.analysisInfo")}
-                </h4>
-                <div className="text-xs text-fg-secondary space-y-1">
-                  <div className="flex justify-between">
-                    <span>{t("adas.jobId")}:</span>
-                    <span className="font-mono text-neon-green">
-                      {currentJobId}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{t("adas.status")}:</span>
-                    <Badge className="bg-neon-green/20 text-neon-green border-neon-green/50">
-                      {t("adas.completed")}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <Button
-                onClick={viewProcessedVideo}
-                className="flex-1 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
-              >
-                <PlayCircle className="w-5 h-5 mr-2" />
-                {t("adas.viewVideoNow")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowCompletionDialog(false);
-                  setStage("input");
-                }}
-                className="glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
-              >
-                {t("common.close")}
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

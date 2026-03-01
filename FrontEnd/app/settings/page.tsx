@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -17,7 +17,6 @@ import {
   Mail,
   Smartphone,
   Gauge,
-  Save,
   RotateCcw,
   ChevronDown,
   TrendingUp,
@@ -62,15 +61,6 @@ export default function SettingsPage() {
   const [dataRetention, setDataRetention] = useState(30);
 
   const [hasChanges, setHasChanges] = useState(false);
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-
-  const handleSave = () => {
-    setShowSaveConfirm(true);
-    setTimeout(() => {
-      setShowSaveConfirm(false);
-      setHasChanges(false);
-    }, 2000);
-  };
 
   const handleReset = () => {
     setLanguage("vi");
@@ -114,30 +104,9 @@ export default function SettingsPage() {
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("settings.reset")}</span>
               </button>
-              <button
-                onClick={handleSave}
-                disabled={!hasChanges}
-                className={`glass-card px-4 py-2 rounded-lg transition-all flex items-center gap-2 font-semibold ${
-                  hasChanges
-                    ? "border-neon-green/50 text-neon-green hover:glow-green"
-                    : "border-white/10 text-fg-muted cursor-not-allowed"
-                }`}
-              >
-                <Save className="w-4 h-4" />
-                <span className="hidden sm:inline">{t("settings.save")}</span>
-              </button>
             </div>
           </div>
 
-          {/* Save Confirmation */}
-          {showSaveConfirm && (
-            <div className="glass-card border-neon-green/50 glow-green p-4 flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
-              <span className="text-neon-green font-semibold">
-                {t("settings.saved")}
-              </span>
-            </div>
-          )}
           {/* Quick Stats */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <GlassCard glow="cyan" className="p-6">
@@ -185,7 +154,7 @@ export default function SettingsPage() {
               </p>
             </GlassCard>
 
-            <GlassCard className="p-6 border-neon-purple/30">
+            <GlassCard glow="yellow" className="p-6">
               <div className="flex items-center justify-between mb-3">
                 <Zap className="w-5 h-5 text-neon-purple" />
                 <Badge className="glass-card border-neon-purple/30 text-neon-purple text-xs font-semibold">
