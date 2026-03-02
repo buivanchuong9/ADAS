@@ -8,14 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getApiUrl } from "@/lib/api-config";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import {
@@ -33,18 +25,6 @@ import {
   CheckCircle2,
   Database,
 } from "lucide-react";
-
-type VideoItem = {
-  id: number;
-  job_id: string;
-  video_filename: string;
-  video_path: string;
-  status: string;
-  progress_percent?: number;
-  created_at: string;
-  duration_seconds?: number | null;
-  video_size_mb?: number | null;
-};
 
 export default function DriverMonitorPage() {
   const { toast } = useToast();
@@ -65,13 +45,8 @@ export default function DriverMonitorPage() {
   const consecutive404Ref = useRef(0);
   const startedAtRef = useRef(0);
 
-  // Video selection state (tái sử dụng từ tab ADAS)
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const [showVideoDialog, setShowVideoDialog] = useState(false);
-  const [availableVideos, setAvailableVideos] = useState<VideoItem[]>([]);
-  const [loadingVideos, setLoadingVideos] = useState(false);
 
   // Cleanup video URL on unmount
   useEffect(() => {
@@ -82,87 +57,12 @@ export default function DriverMonitorPage() {
     };
   }, [videoUrl]);
 
-  // Load video list when dialog opens
-  const loadVideoList = async () => {
-    try {
-      setLoadingVideos(true);
-      const res = await fetch(
-        getApiUrl(`${API_ENDPOINTS.VIDEOS_LIST}?limit=20`),
-      );
-      const data = await res.json();
-
-      let videos: VideoItem[] = [];
-      if (data?.videos && Array.isArray(data.videos)) {
-        videos = data.videos;
-      } else if (Array.isArray(data)) {
-        videos = data;
-      }
-
-      setAvailableVideos(videos);
-
-      if (videos.length === 0) {
-        toast({
-          title: t("adas.noVideos"),
-          description: t("adas.noVideosDesc"),
-        });
-      }
-    } catch (err) {
-      console.error("❌ [VideoList] Error:", err);
-      toast({
-        title: t("adas.videoListError"),
-        description: t("adas.videoListErrorDesc"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingVideos(false);
-    }
-  };
-
-  // Open video selection dialog
-  const useSampleVideo = async () => {
-    setShowVideoDialog(true);
-    await loadVideoList();
-  };
-
   // Handle file upload
   const handleFile = (f: File | null) => {
     setFile(f);
     if (videoUrl?.startsWith("blob:")) URL.revokeObjectURL(videoUrl);
     setVideoUrl(f ? URL.createObjectURL(f) : null);
-    setSelectedVideo(null);
     setIsMonitoring(false);
-  };
-
-  // Select video from list
-  const selectVideo = (video: VideoItem) => {
-    let playUrl = "";
-
-    if (video.status === "completed") {
-      const resultFilename = video.video_filename.replace(
-        ".mp4",
-        "_result.mp4",
-      );
-      playUrl = getApiUrl(
-        API_ENDPOINTS.VIDEO_DOWNLOAD(video.job_id, resultFilename),
-      );
-    } else {
-      playUrl = getApiUrl(
-        API_ENDPOINTS.VIDEO_SAMPLE(video.job_id, video.video_filename),
-      );
-    }
-
-    setVideoUrl(playUrl);
-    setSelectedVideo(video);
-    setFile(null);
-    setShowVideoDialog(false);
-    setIsMonitoring(false);
-
-    toast({
-      title: t("driverMonitor.videoSelected"),
-      description: t("driverMonitor.videoSelectedDesc", {
-        filename: video.video_filename,
-      }),
-    });
   };
 
   // Start monitoring: POST /api/driver-monitor/analyze (chỉ khi có file upload)
@@ -389,24 +289,6 @@ export default function DriverMonitorPage() {
             </Button>
           </Link>
           <div>
-            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-              <Badge className="gap-1 text-xs bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
-                <Sparkles className="w-3 h-3" />
-                <span className="hidden sm:inline">
-                  {t("driverMonitor.realtimeAI")}
-                </span>
-                <span className="sm:hidden">{t("driverMonitor.ai")}</span>
-              </Badge>
-              <Badge className="gap-1 text-xs bg-neon-green/20 text-neon-green border-neon-green/50">
-                <ShieldCheck className="w-3 h-3" />
-                <span className="hidden sm:inline">
-                  {t("driverMonitor.badge")}
-                </span>
-                <span className="sm:hidden">
-                  {t("driverMonitor.badgeShort")}
-                </span>
-              </Badge>
-            </div>
             <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider uppercase">
               <Eye className="w-8 h-8 text-neon-cyan" />
               <span className="hidden sm:inline text-neon-cyan">
@@ -450,27 +332,7 @@ export default function DriverMonitorPage() {
                     video-file-input
                   "
                 />
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button
-                    onClick={useSampleVideo}
-                    disabled={loadingVideos || isMonitoring}
-                    className="flex-1 glass-card border-2 border-neon-cyan/50 bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan/20 font-semibold"
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      {loadingVideos ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <PlayCircle className="h-4 w-4" />
-                      )}
-                      <span className="hidden sm:inline">
-                        {t("adas.sampleVideo")}
-                      </span>
-                      <span className="sm:hidden">
-                        {t("adas.sampleVideoShort")}
-                      </span>
-                    </span>
-                  </Button>
-                </div>
+                <div className="flex flex-col sm:flex-row gap-2" />
 
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div
@@ -519,11 +381,7 @@ export default function DriverMonitorPage() {
                       {t("adas.videoSource")}
                     </div>
                     <div className="font-semibold text-neon-green">
-                      {file
-                        ? t("adas.newUpload")
-                        : videoUrl
-                          ? t("adas.sampleVideo")
-                          : t("adas.notSelected")}
+                      {file ? t("adas.newUpload") : t("adas.notSelected")}
                     </div>
                   </div>
                 </div>
@@ -707,18 +565,26 @@ export default function DriverMonitorPage() {
                   <source src={videoUrl} type="video/mp4" />
                 </video>
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-fg-secondary gap-2">
-                  <Upload className="w-8 h-8 text-neon-cyan" />
-                  <p>{t("adas.noVideoMessage")}</p>
-                </div>
+                <video
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-contain"
+                  style={{ maxHeight: "600px" }}
+                  onError={(e) => {
+                    const err = e.currentTarget.error;
+                    console.log("PREVIEW VIDEO ERROR CODE:", err?.code);
+                    console.log("PREVIEW VIDEO ERROR MSG:", err?.message);
+                  }}
+                >
+                  <source src="/driver-monitor-preview.mp4" type="video/mp4" />
+                </video>
               )}
             </div>
             {isUploading || isMonitoring ? (
-              <div className="mt-4 text-sm text-fg-secondary flex items-center gap-2">
-                <AlertTriangle className="h-10 w-10 text-red-500 animate-pulse [animation-duration:0.8s] drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
-                Dữ liệu sau phân tích sẽ được lưu vào hệ thống và có thể truy
-                xuất ở bước &quot;Video mẫu&quot;.
-              </div>
+              <div className="mt-4" />
             ) : videoUrl && !isMonitoring ? (
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
@@ -734,7 +600,6 @@ export default function DriverMonitorPage() {
                   onClick={() => {
                     setVideoUrl(null);
                     setFile(null);
-                    setSelectedVideo(null);
                   }}
                   className="gap-2 glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
                 >
@@ -747,127 +612,6 @@ export default function DriverMonitorPage() {
         </div>
       </main>
 
-      {/* Video Selection Dialog - Tái sử dụng từ tab ADAS */}
-      <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
-        <DialogContent className="glass-card border-2 border-neon-cyan/50">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-2xl font-bold text-neon-cyan flex items-center gap-2">
-              <FileVideo className="w-6 h-6" />
-              {t("adas.selectSampleVideo")}
-            </DialogTitle>
-            <DialogDescription className="text-fg-secondary">
-              {t("driverMonitor.selectSampleVideoDesc", {
-                count: availableVideos.length,
-              })}
-            </DialogDescription>
-          </DialogHeader>
-
-          <ScrollArea className="flex-1 min-h-0 pr-4 overflow-x-hidden">
-            {loadingVideos ? (
-              <div className="flex items-center justify-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-neon-cyan" />
-                <span className="ml-3 text-fg-secondary">
-                  {t("adas.loadingVideoList")}
-                </span>
-              </div>
-            ) : availableVideos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 text-fg-secondary">
-                <FileVideo className="w-12 h-12 mb-3 text-neon-cyan/50" />
-                <p>Chưa có video nào trong database.</p>
-                <p className="text-sm mt-1">Hãy upload video mới để bắt đầu.</p>
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {availableVideos.map((video) => (
-                  <div
-                    key={video.id}
-                    onClick={() => selectVideo(video)}
-                    className="w-full text-left glass-card border-2 border-neon-cyan/30 hover:border-neon-cyan hover:bg-neon-cyan/5 transition-all p-4 rounded-lg group cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileVideo className="w-5 h-5 text-neon-cyan shrink-0" />
-                          <h4 className="font-semibold text-fg-primary truncate group-hover:text-neon-cyan transition-colors">
-                            {video.video_filename || `Video #${video.id}`}
-                          </h4>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-fg-secondary">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>
-                              {video.duration_seconds
-                                ? `${Math.floor(
-                                    video.duration_seconds / 60,
-                                  )}:${(video.duration_seconds % 60)
-                                    .toString()
-                                    .padStart(2, "0")}`
-                                : "N/A"}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <Database className="w-3 h-3" />
-                            <span>
-                              {video.video_size_mb
-                                ? `${video.video_size_mb.toFixed(1)} MB`
-                                : "N/A"}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            {video.status === "completed" ? (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] h-5 border-neon-green text-neon-green bg-neon-green/10"
-                              >
-                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                {t("adas.completed")}
-                              </Badge>
-                            ) : video.status === "processing" ? (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] h-5 border-neon-yellow text-neon-yellow bg-neon-yellow/10"
-                              >
-                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                {t("adas.processing")}
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] h-5 border-neon-cyan text-neon-cyan bg-neon-cyan/10"
-                              >
-                                {t("adas.notStarted")}
-                              </Badge>
-                            )}
-                          </div>
-
-                          {video.created_at && (
-                            <div className="text-xs opacity-70">
-                              {new Date(video.created_at).toLocaleDateString(
-                                "vi-VN",
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <Button
-                        size="sm"
-                        className="glass-card bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 hover:bg-neon-cyan/30 shrink-0"
-                      >
-                        <PlayCircle className="w-4 h-4" />
-                        {t("common.select")}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

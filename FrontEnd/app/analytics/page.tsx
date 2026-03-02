@@ -9,6 +9,7 @@ import { useRef, useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { Header } from "@/components/header";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, Clock, Gauge, AlertTriangle } from "lucide-react";
 import { getApiUrl } from "@/lib/api-config";
@@ -346,11 +347,13 @@ export default function Analytics() {
 
   /* ================= UI ================= */
   return (
-    <div className="flex h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50">
-      <MobileNav />
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">
+    <div className="flex h-screen bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 flex-col">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        <MobileNav />
+        <Sidebar />
+        <main className="flex-1 overflow-auto">
+          <div className="p-6">
           {/* TITLE + PERIOD */}
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -423,7 +426,8 @@ export default function Analytics() {
             <HighchartsReact highcharts={Highcharts} options={safetyChartOptions} />
           </Card>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

@@ -2,43 +2,54 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 
 const INTRO_KEY = 'adas_intro_completed';
-const ALLOWED_PATHS = ['/intro', '/login', '/register'];
+const INTRO_ALLOWED_PATHS = ['/intro', '/login', '/register'];
+const AUTH_PUBLIC_PATHS = ['/intro', '/overview', '/login', '/register'];
 
 /**
- * IntroGuard ensures users see the intro screen first
- * before accessing any other pages in the app
+ * IntroGuard ensures users thấy intro trước
+ * và đồng thời chặn truy cập các tab khi chưa đăng nhập
  */
 export function IntroGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
+    const { isAuthenticated, loading } = useAuth();
     const [isChecking, setIsChecking] = useState(true);
     const [shouldRender, setShouldRender] = useState(false);
 
     useEffect(() => {
-        // Skip check if already on allowed paths
-        if (ALLOWED_PATHS.includes(pathname)) {
-            setShouldRender(true);
+        // Chờ auth context khởi tạo xong
+        if (loading) return;
+
+        // 1. Kiểm tra Intro trước
+        if (!INTRO_ALLOWED_PATHS.includes(pathname)) {
+            const introCompleted = sessionStorage.getItem(INTRO_KEY);
+
+            if (!introCompleted) {
+                console.log('🔵 [IntroGuard] Redirecting to /intro - intro not completed');
+                router.replace('/intro');
+                setShouldRender(false);
+                setIsChecking(false);
+                return;
+            }
+        }
+
+        // 2. Kiểm tra đăng nhập
+        if (!isAuthenticated && !AUTH_PUBLIC_PATHS.includes(pathname)) {
+            console.log('🔵 [IntroGuard] Redirecting to /login - not authenticated');
+            router.replace('/login');
+            setShouldRender(false);
             setIsChecking(false);
             return;
         }
 
-        // Check if intro has been completed
-        const introCompleted = sessionStorage.getItem(INTRO_KEY);
-
-        if (!introCompleted) {
-            console.log('🔵 [IntroGuard] Redirecting to /intro - intro not completed');
-            router.replace('/intro'); // Use replace instead of push to avoid back button issues
-            setShouldRender(false);
-        } else {
-            setShouldRender(true);
-        }
-
+        setShouldRender(true);
         setIsChecking(false);
-    }, [pathname, router]);
+    }, [pathname, router, isAuthenticated, loading]);
 
-    // Don't render anything while checking or if should redirect
+    // Không render gì khi đang kiểm tra hoặc cần redirect
     if (isChecking || !shouldRender) {
         return null;
     }

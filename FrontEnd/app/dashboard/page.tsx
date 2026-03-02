@@ -152,50 +152,6 @@ export default function HomePage() {
     [t, confidenceStatsCategories, confidenceStatsData],
   );
 
-  const [notificationTimelineCategories, setNotificationTimelineCategories] =
-    useState<string[]>([
-      "0h",
-      "3h",
-      "6h",
-      "9h",
-      "12h",
-      "15h",
-      "18h",
-      "21h",
-      "24h",
-    ]);
-  const [notificationTimelineSeries, setNotificationTimelineSeries] = useState<
-    any[]
-  >([
-    { name: "Warnings", data: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
-    { name: "Critical", data: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
-  ]);
-
-  const notificationTimelineOptions = useMemo(
-    () => ({
-      chart: { type: "spline", backgroundColor: "transparent", height: 280 },
-      title: {
-        text: t("settings.notificationTimeline"),
-        style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
-      },
-      xAxis: {
-        categories: notificationTimelineCategories,
-        labels: { style: { color: "#374151" } },
-      },
-      yAxis: {
-        title: { text: "Số lượng", style: { color: "#111827" } },
-        labels: { style: { color: "#374151" } },
-      },
-      legend: {
-        itemStyle: { color: "#374151", fontWeight: "500" },
-        itemHoverStyle: { color: "#111827" },
-      },
-      series: notificationTimelineSeries,
-      credits: { enabled: false },
-    }),
-    [t, notificationTimelineCategories, notificationTimelineSeries],
-  );
-
   const [stats, setStats] = useState({
     systemStatus: t("common.online"),
     activeCameras: 0,
@@ -353,7 +309,7 @@ export default function HomePage() {
           }
         }
 
-        // Detection Trend (Realtime Trend & Notification Timeline share the same trend or similar pattern conceptually but data serves area chart)
+        // Detection Trend
         const trendRes = await fetch(
           getApiUrl(API_ENDPOINTS.DASHBOARD_CHART_DETECTION_TREND),
           { signal: AbortSignal.timeout(5000) },
@@ -362,8 +318,6 @@ export default function HomePage() {
           const trendData = await trendRes.json().catch(() => null);
           if (trendData?.labels && trendData?.datasets) {
             setDetectionTrendCategories(trendData.labels);
-            // Also use for notification timeline for now to show real data if identical
-            setNotificationTimelineCategories(trendData.labels);
 
             const mappedSeries = trendData.datasets.map((ds: any) => {
               let fillColor: any;
@@ -395,14 +349,6 @@ export default function HomePage() {
               };
             });
             setDetectionTrendSeries(mappedSeries);
-
-            // For spline notification
-            setNotificationTimelineSeries(
-              trendData.datasets.map((ds: any) => ({
-                name: ds.label,
-                data: ds.data,
-              })),
-            );
           }
         }
 
@@ -664,13 +610,6 @@ export default function HomePage() {
               </GlassCard>
             </div>
 
-            <GlassCard className="p-6">
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={notificationTimelineOptions}
-              />
-            </GlassCard>
-
             {/* === DASHBOARD CHARTS (GỘP TỪ DASHBOARD) === */}
             <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
               <GlassCard className="p-6">
@@ -921,8 +860,8 @@ export default function HomePage() {
                     {
                       href: "/adas",
                       icon: Zap,
-                      title: t("home.startLiveDetection"),
-                      description: t("home.startLiveDetectionDesc"),
+                      title: t("home.monitorDriving"),
+                      description: t("home.monitorDrivingDesc"),
                       gradient: "from-primary to-primary/80",
                     },
                     {
