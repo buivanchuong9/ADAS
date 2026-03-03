@@ -142,7 +142,7 @@ export default {
     viewAnalyticsDesc: "Thông tin chi tiết hiệu suất",
     websocketStreaming: "Phát Trực Tiếp WebSocket Thời Gian Thực",
     websocketStreamingDesc: "Xử lý video độ trễ thấp",
-    aiDetection: "Phát Hiện AI YOLOv11",
+    aiDetection: "Phát Hiện AI UFLD",
     aiDetectionDesc: "Nhận dạng đối tượng hiện đại nhất",
     autoDataCollection: "Thu Thập Dữ Liệu Tự Động",
     autoDataCollectionDesc: "Cải thiện mô hình liên tục",

@@ -102,7 +102,7 @@ export function VideoUploadCard() {
           Upload Video cho Training
         </CardTitle>
         <CardDescription>
-          Upload video để hệ thống tự động trích xuất frames và cải thiện model YOLO
+          Upload video để hệ thống tự động trích xuất frames và cải thiện model UFLD
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -222,7 +222,7 @@ export function VideoUploadCard() {
             <p className="font-semibold mb-2">ℹ️ Hệ thống sẽ tự động:</p>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
               <li>Trích xuất frames từ video (1 frame/giây)</li>
-              <li>Chạy YOLO detector để tạo pseudo-labels</li>
+              <li>Chạy UFLD detector để tạo pseudo-labels</li>
               <li>Lưu frames + labels vào dataset</li>
               <li>Sẵn sàng cho incremental training</li>
               <li>Cải thiện độ chính xác model theo thời gian</li>

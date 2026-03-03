@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Clock,
   FileVideo,
+  XCircle,
 } from "lucide-react";
 import { useVideoProgress } from "@/hooks/use-video-progress";
 
@@ -40,7 +41,6 @@ export default function ADASPage() {
   const [uploading, setUploading] = useState(false);
   const [processingMsg, setProcessingMsg] = useState<string>("");
   const [result, setResult] = useState<VisionResponse | null>(null);
-  const [stage, setStage] = useState<"input" | "processing" | "done">("input");
 
   // Video processing state
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
@@ -49,6 +49,13 @@ export default function ADASPage() {
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(
     null,
   );
+
+  const normalizeProgress = (value: number | undefined | null): number => {
+    if (typeof value !== "number" || Number.isNaN(value)) return 0;
+    if (value < 0) return 0;
+    if (value > 100) return 100;
+    return Math.round(value);
+  };
 
   // Fallback polling flag
   const pollingRef = useRef<boolean>(false);
@@ -102,7 +109,7 @@ export default function ADASPage() {
   useEffect(() => {
     if (currentJobId && isProcessing) {
       if (!pollingRef.current) {
-        setProcessingProgress(wsProgress);
+        setProcessingProgress(normalizeProgress(wsProgress));
 
         // Handle completion
         if (wsIsFinished && wsStatus === "completed") {
@@ -149,10 +156,9 @@ export default function ADASPage() {
   useEffect(() => {
     console.log("[PlayerState]", {
       isProcessing,
-      stage,
       previewUrl,
     });
-  }, [isProcessing, stage, previewUrl]);
+  }, [isProcessing, previewUrl]);
 
   const handleFile = (f: File | null) => {
     setResult(null);
@@ -179,7 +185,6 @@ export default function ADASPage() {
     try {
       setUploading(true);
       setIsProcessing(true);
-      setStage("processing");
       setProcessingProgress(0);
       setProcessingMsg(`Đang tải video lên server... (${fileSizeMB} MB)`);
 
@@ -293,7 +298,6 @@ export default function ADASPage() {
 
       setUploading(false);
       setIsProcessing(false);
-      setStage("input");
       setProcessingMsg("");
     }
   };
@@ -313,7 +317,9 @@ export default function ADASPage() {
         const data = await res.json();
 
         // Only log if progress changed or status changed
-        const newProgress = data.progress_percent || data.progress || 0;
+        const newProgress = normalizeProgress(
+          data.progress_percent ?? data.progress ?? 0,
+        );
         if (attempts === 0 || data.status === "completed") {
           console.log(
             `[Job ${jobId.substring(0, 8)}] Status: ${data.status}, Progress: ${newProgress}%`,
@@ -364,7 +370,6 @@ export default function ADASPage() {
           description: err.message,
           variant: "destructive",
         });
-        setStage("input");
       }
     };
 
@@ -422,11 +427,20 @@ export default function ADASPage() {
 
         setProcessedVideoUrl(downloadUrl);
         setPreviewUrl(downloadUrl);
-        setStage("done");
+
+        const doneTime = Math.floor(data.processing_time_seconds || 0);
+        setProcessingMsg(
+          doneTime > 0
+            ? `Phân tích thành công (${doneTime}s)`
+            : "Phân tích thành công",
+        );
 
         toast({
           title: "Phân tích hoàn tất!",
-          description: `Thời gian xử lý: ${Math.floor(data.processing_time_seconds || 0)}s`,
+          description:
+            doneTime > 0
+              ? `Thời gian xử lý: ${doneTime}s`
+              : undefined,
         });
       } else {
         console.error("❌ [Result] Job not completed:", data);
@@ -442,6 +456,18 @@ export default function ADASPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const resetAnalysis = () => {
+    setFile(null);
+    setPreviewUrl(null);
+    setProcessedVideoUrl(null);
+    setResult(null);
+    setCurrentJobId(null);
+    setProcessingMsg("");
+    setProcessingProgress(0);
+    setIsProcessing(false);
+    setUploading(false);
   };
 
   return (
@@ -477,8 +503,7 @@ export default function ADASPage() {
 
       <main className="flex-1 p-3 sm:p-4 lg:p-6">
         <div className="grid gap-4 sm:gap-6 xl:grid-cols-3">
-          {stage === "input" ? (
-            <div className="space-y-4 xl:col-span-1">
+          <div className="space-y-4 xl:col-span-1">
               <GlassCard glow="cyan" className="p-6">
                 <div className="mb-4">
                   <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
@@ -519,7 +544,7 @@ export default function ADASPage() {
                             antialiased
                             transition-colors duration-300
                             ${
-                              uploading
+                              uploading || isProcessing
                                 ? "text-neon-yellow drop-shadow-[0_0_6px_rgba(250,204,21,0.45)]"
                                 : file || previewUrl
                                   ? "text-neon-green drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
@@ -527,16 +552,20 @@ export default function ADASPage() {
                             }
                           `}
                       >
-                        <Loader2
-                          className={`h-3.5 w-3.5
-                              ${uploading ? "animate-spin opacity-90" : "opacity-70"}
-                            `}
-                        />
+                        {uploading || isProcessing ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin opacity-90" />
+                        ) : file || previewUrl ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-neon-green" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5 text-neon-red" />
+                        )}
                         <span className="leading-none mt-[5px]">
-                          {uploading
+                          {uploading || isProcessing
                             ? t("adas.analyzing")
                             : file || previewUrl
-                              ? t("adas.ready")
+                              ? processedVideoUrl
+                                ? "Phân tích xong"
+                                : "Sẵn sàng"
                               : t("adas.notReady")}
                         </span>
                       </div>
@@ -553,20 +582,12 @@ export default function ADASPage() {
 
                   {processingMsg && (
                     <div className="text-sm text-fg-primary flex items-center gap-2 rounded-md glass-card border-2 border-neon-yellow/50 px-3 py-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-neon-yellow" />
+                      {uploading || isProcessing ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-neon-yellow" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4 text-neon-green" />
+                      )}
                       {processingMsg}
-                    </div>
-                  )}
-
-                  {result && (
-                    <div className="text-sm space-y-1 glass-card border-2 border-neon-green/50 p-3 rounded">
-                      <div className="flex items-center gap-2 text-neon-green">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Kết quả
-                      </div>
-                      <pre className="text-xs whitespace-pre-wrap break-all text-fg-secondary">
-                        {JSON.stringify(result, null, 2)}
-                      </pre>
                     </div>
                   )}
 
@@ -626,7 +647,6 @@ export default function ADASPage() {
                 </div>
               </GlassCard>
             </div>
-          ) : null}
 
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
@@ -740,10 +760,10 @@ export default function ADASPage() {
                 </video>
               )}
             </div>
-            {stage === "done" ? (
+            {processedVideoUrl && !isProcessing ? (
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
-                  onClick={() => setStage("input")}
+                  onClick={resetAnalysis}
                   className="gap-2 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
                 >
                   <RefreshCw className="w-4 h-4" />

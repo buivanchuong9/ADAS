@@ -24,6 +24,7 @@ import {
   FileVideo,
   CheckCircle2,
   Database,
+  XCircle,
 } from "lucide-react";
 
 export default function DriverMonitorPage() {
@@ -47,6 +48,14 @@ export default function DriverMonitorPage() {
 
   const [file, setFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [hasCompleted, setHasCompleted] = useState(false);
+
+  const normalizeProgress = (value: number | undefined | null): number => {
+    if (typeof value !== "number" || Number.isNaN(value)) return 0;
+    if (value < 0) return 0;
+    if (value > 100) return 100;
+    return Math.round(value);
+  };
 
   // Cleanup video URL on unmount
   useEffect(() => {
@@ -63,6 +72,7 @@ export default function DriverMonitorPage() {
     if (videoUrl?.startsWith("blob:")) URL.revokeObjectURL(videoUrl);
     setVideoUrl(f ? URL.createObjectURL(f) : null);
     setIsMonitoring(false);
+    setHasCompleted(false);
   };
 
   // Start monitoring: POST /api/driver-monitor/analyze (chỉ khi có file upload)
@@ -120,18 +130,21 @@ export default function DriverMonitorPage() {
       if (!newJobId) throw new Error("Missing job_id in response");
 
       setJobId(newJobId);
-      const pct =
+      const pctRaw =
         typeof data.progress_percent === "number"
           ? data.progress_percent
           : typeof (data as any).progress === "number"
             ? (data as any).progress
             : 0;
+      const pct = normalizeProgress(pctRaw);
       setProgress(pct);
       setFatigueLevel(0);
       setDistractionLevel(0);
       setEyesClosed(false);
       setBlinkRate(0);
-      setProcessingMsg(t("adas.analyzingProgressNoTime", { progress: pct }));
+      setProcessingMsg(
+        t("adas.analyzingProgressNoTime", { progress: pct }),
+      );
       startedAtRef.current = Date.now();
 
       setIsMonitoring(true);
@@ -191,25 +204,32 @@ export default function DriverMonitorPage() {
         const data = await res.json();
         if (cancelled) return;
 
-        const pct =
+        const pctRaw =
           typeof data.progress_percent === "number"
             ? data.progress_percent
             : typeof data.progress === "number"
               ? data.progress
               : undefined;
-        if (typeof pct === "number") setProgress(pct);
+        if (typeof pctRaw === "number") {
+          const pct = normalizeProgress(pctRaw);
+          setProgress(pct);
 
-        const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
-        const timeStr =
-          elapsed >= 60
-            ? `${Math.floor(elapsed / 60)}:${(elapsed % 60).toString().padStart(2, "0")}`
-            : `${elapsed}s`;
-        setProcessingMsg(
-          t("adas.analyzingProgress", {
-            progress: typeof pct === "number" ? pct : 0,
-            time: timeStr,
-          }),
-        );
+          const elapsed = Math.floor(
+            (Date.now() - startedAtRef.current) / 1000,
+          );
+          const timeStr =
+            elapsed >= 60
+              ? `${Math.floor(elapsed / 60)}:${(elapsed % 60)
+                  .toString()
+                  .padStart(2, "0")}`
+              : `${elapsed}s`;
+          setProcessingMsg(
+            t("adas.analyzingProgress", {
+              progress: pct,
+              time: timeStr,
+            }),
+          );
+        }
 
         // Update driver metrics from the result data if available
         if (typeof data.fatigue_level === "number")
@@ -223,7 +243,19 @@ export default function DriverMonitorPage() {
 
         const st = (data.status || "").toLowerCase();
         if (st === "completed" || st === "failed" || st === "error") {
-          setProcessingMsg("");
+          if (st === "completed") {
+            const doneTime = Math.floor(
+              (data.processing_time_seconds ?? 0) as number,
+            );
+            setProcessingMsg(
+              doneTime > 0
+                ? `Phân tích thành công (${doneTime}s)`
+                : "Phân tích thành công",
+            );
+            setHasCompleted(true);
+          } else {
+            setProcessingMsg("");
+          }
           setIsMonitoring(false);
           if (st === "completed") {
             if (data.video_filename) {
@@ -358,20 +390,20 @@ export default function DriverMonitorPage() {
                           }
                         `}
                     >
-                      <Loader2
-                        className={`h-3.5 w-3.5
-                            ${
-                              isMonitoring
-                                ? "animate-spin opacity-90"
-                                : "opacity-70"
-                            }
-                          `}
-                      />
+                      {isMonitoring ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin opacity-90" />
+                      ) : file || videoUrl ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-neon-green" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5 text-neon-red" />
+                      )}
                       <span className="leading-none mt-[5px]">
                         {isMonitoring
                           ? t("driverMonitor.monitoring")
                           : file || videoUrl
-                            ? t("adas.ready")
+                            ? hasCompleted
+                              ? "Phân tích xong"
+                              : "Sẵn sàng"
                             : t("adas.notReady")}
                       </span>
                     </div>
@@ -389,7 +421,11 @@ export default function DriverMonitorPage() {
                 {/* Start/Stop Monitoring Button */}
                 {processingMsg && (
                   <div className="text-sm text-fg-primary flex items-center gap-2 rounded-md glass-card border-2 border-neon-yellow/50 px-3 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-neon-yellow" />
+                    {isMonitoring || isUploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-neon-yellow" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 text-neon-green" />
+                    )}
                     {processingMsg}
                   </div>
                 )}

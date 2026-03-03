@@ -144,7 +144,7 @@ export default {
     viewAnalyticsDesc: "Detailed performance information",
     websocketStreaming: "Real-Time WebSocket Streaming",
     websocketStreamingDesc: "Low-latency video processing",
-    aiDetection: "AI YOLOv11 Detection",
+    aiDetection: "AI UFLD Detection",
     aiDetectionDesc: "State-of-the-art object recognition",
     autoDataCollection: "Automatic Data Collection",
     autoDataCollectionDesc: "Continuous model improvement",
