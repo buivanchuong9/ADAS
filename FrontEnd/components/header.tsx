@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
-import { LogIn, LogOut, User, UserCircle } from "lucide-react";
+import { LogIn, LogOut, UserCircle, CarFront, User, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -42,9 +42,9 @@ export function Header() {
     >
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
         {/* Left side - Logo/Title */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/dashboard" className="flex items-center gap-3 group">
           <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-            <User className="w-5 h-5 text-black" />
+            <CarFront className="w-5 h-5 text-black" />
           </div>
           <div className="hidden sm:block">
             <h2
@@ -61,11 +61,19 @@ export function Header() {
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer px-4 py-2 rounded-lg border-2 border-border bg-black/5 hover:bg-black/10 hover:border-primary/50 transition-all select-none">
-                  <span className="text-sm font-medium text-foreground">
+                <button
+                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border bg-white/80 shadow-sm hover:bg-white hover:border-primary/40 transition-all select-none"
+                  type="button"
+                  style={{ borderColor: "var(--border-subtle)" }}
+                >
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#FFF5EB] text-[#FF7A1A]">
+                    <User className="w-4 h-4" />
+                  </span>
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap">
                     {t("header.greeting")} {displayName}
                   </span>
-                </div>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"

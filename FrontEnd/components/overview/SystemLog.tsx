@@ -5,7 +5,7 @@ import styles from './SystemLog.module.css';
 
 const LOG_MESSAGES = [
     { text: '[INFO] Initializing System Core...', type: 'info' },
-    { text: '[INFO] Loading YOLOv11n weights (6.4MB)...', type: 'info' },
+    { text: '[INFO] Loading Ultra Fast Lane Detection (UFLD) weights (6.4MB)...', type: 'info' },
     { text: '[OK] Model loaded successfully in 0.4s', type: 'ok' },
     { text: '[INFO] Connecting to Camera Input...', type: 'info' },
     { text: '[OK] Video Stream Established: 1080p', type: 'ok' },
