@@ -49,11 +49,15 @@ export default function Analytics() {
   const { t } = useLanguage();
 
   /* ================= STATE ================= */
-  const [period, setPeriod] = useState<"today" | "week" | "month" | "all">("week");
+  const [period, setPeriod] = useState<"today" | "week" | "month" | "all">(
+    "week",
+  );
   const [cards, setCards] = useState<CardsType>({});
   const [speedData, setSpeedData] = useState<ChartPoint[]>([]);
   const [fatigueData, setFatigueData] = useState<ChartPoint[]>([]);
-  const [tripComparisonData, setTripComparisonData] = useState<ChartPoint[]>([]);
+  const [tripComparisonData, setTripComparisonData] = useState<ChartPoint[]>(
+    [],
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -76,12 +80,14 @@ export default function Analytics() {
   };
 
   const formatDrivingTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds} giây`;
+    if (seconds < 60) return t("analytics.timeSeconds", { n: seconds });
     const mins = Math.floor(seconds / 60);
-    if (mins < 60) return `${mins} phút`;
+    if (mins < 60) return t("analytics.timeMinutes", { n: mins });
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    return m ? `${h} giờ ${m} phút` : `${h} giờ`;
+    return m
+      ? t("analytics.timeHoursMinutes", { h, m })
+      : t("analytics.timeHours", { h });
   };
 
   const mapSummaryToCards = (json: SummaryApi | null): CardsType => {
@@ -92,15 +98,17 @@ export default function Analytics() {
       drivingTimeSec != null
         ? formatDrivingTime(drivingTimeSec)
         : json.total_trips != null
-          ? `${json.total_trips} chuyến`
+          ? t("analytics.trips", { n: json.total_trips })
           : "—";
     const avgSpeed = json.avg_speed;
     const safetyScore = json.avg_safety_score;
     return {
       distance: distance != null ? `${Number(distance).toFixed(1)} km` : "—",
       drivingTime: drivingTimeStr,
-      averageSpeed: avgSpeed != null ? `${Number(avgSpeed).toFixed(1)} km/h` : "—",
-      safetyScore: safetyScore != null ? String(Math.round(Number(safetyScore))) : "—",
+      averageSpeed:
+        avgSpeed != null ? `${Number(avgSpeed).toFixed(1)} km/h` : "—",
+      safetyScore:
+        safetyScore != null ? String(Math.round(Number(safetyScore))) : "—",
     };
   };
 
@@ -112,15 +120,22 @@ export default function Analytics() {
       setLoading(true);
       setErrorMsg(null);
 
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
       if (token) headers.Authorization = `Bearer ${token}`;
 
       try {
-        const summaryUrl = getApiUrl(`${API_ENDPOINTS.ANALYTICS_SUMMARY}?period=${period}`);
+        const summaryUrl = getApiUrl(
+          `${API_ENDPOINTS.ANALYTICS_SUMMARY}?period=${period}`,
+        );
         const speedUrl = getApiUrl(API_ENDPOINTS.ANALYTICS_SPEED_OVER_TIME);
         const fatigueUrl = getApiUrl(API_ENDPOINTS.ANALYTICS_FATIGUE_OVER_TIME);
-        const safetyUrl = getApiUrl(`${API_ENDPOINTS.ANALYTICS_SAFETY_SCORE_COMPARISON}?days=7`);
+        const safetyUrl = getApiUrl(
+          `${API_ENDPOINTS.ANALYTICS_SAFETY_SCORE_COMPARISON}?days=7`,
+        );
 
         const promises = [
           fetch(summaryUrl, { headers }),
@@ -131,7 +146,7 @@ export default function Analytics() {
 
         const results = await Promise.allSettled(promises);
         const responses = results.map((r) =>
-          r.status === "fulfilled" ? (r.value as Response) : null
+          r.status === "fulfilled" ? (r.value as Response) : null,
         );
 
         // 1) KPI cards — GET /api/analytics/summary
@@ -184,7 +199,10 @@ export default function Analytics() {
             mappedSafety = json.labels.map((label: string, idx: number) => ({
               trip: label,
               score: Number(json.data?.[idx] ?? 0),
-              color: Array.isArray(json.colors) && json.colors[idx] ? json.colors[idx] : "#10b981",
+              color:
+                Array.isArray(json.colors) && json.colors[idx]
+                  ? json.colors[idx]
+                  : "#10b981",
             }));
           }
           if (mounted) setTripComparisonData(mappedSafety);
@@ -193,7 +211,7 @@ export default function Analytics() {
         }
       } catch (err) {
         console.error("Analytics API error:", err);
-        if (mounted) setErrorMsg("Lỗi khi gọi API. Kiểm tra console.");
+        if (mounted) setErrorMsg(t("analytics.apiError"));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -219,11 +237,14 @@ export default function Analytics() {
         if (speedChartRef.current?.chart?.series?.length) {
           speedChartRef.current.chart.series[0].update(
             { color: color1, shadow: { color: color1, width: 25 } },
-            true
+            true,
           );
         }
         if (fatigueChartRef.current?.chart?.series?.length) {
-          fatigueChartRef.current.chart.series[0].update({ color: color2 }, true);
+          fatigueChartRef.current.chart.series[0].update(
+            { color: color2 },
+            true,
+          );
         }
       } catch (e) {
         // swallow any update errors (safety)
@@ -312,7 +333,10 @@ export default function Analytics() {
   const safetyCategories = tripComparisonData.length
     ? tripComparisonData.map((d) => d.trip ?? "")
     : [];
-  const safetyValues = tripComparisonData.map((d) => ({ y: d.score ?? 0, color: d.color ?? "#10b981" }));
+  const safetyValues = tripComparisonData.map((d) => ({
+    y: d.score ?? 0,
+    color: d.color ?? "#10b981",
+  }));
 
   const safetyChartOptions = {
     chart: {
@@ -354,78 +378,93 @@ export default function Analytics() {
         <Sidebar />
         <main className="flex-1 overflow-auto">
           <div className="p-6">
-          {/* TITLE + PERIOD */}
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-neon-cyan uppercase">{t("analytics.title")}</h1>
-              <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
+            {/* TITLE + PERIOD */}
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-neon-cyan uppercase">
+                  {t("analytics.title")}
+                </h1>
+                <p className="text-sm mt-1">{t("analytics.subtitle")}</p>
+              </div>
             </div>
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value as "today" | "week" | "month" | "all")}
-              className="rounded-lg border border-neon-cyan/50 bg-white/80 px-3 py-2 text-sm text-fg-primary focus:border-neon-cyan focus:outline-none"
-            >
-              <option value="today">{t("analytics.today")}</option>
-              <option value="week">{t("analytics.periodWeek")}</option>
-              <option value="month">{t("analytics.periodMonth")}</option>
-              <option value="all">{t("analytics.periodAll")}</option>
-            </select>
-          </div>
 
-          {/* status */}
-          {loading && (
-            <div className="mb-4 text-sm text-gray-500">Đang tải dữ liệu...</div>
-          )}
-          {errorMsg && (
-            <div className="mb-4 text-sm text-red-600">Lỗi: {errorMsg}</div>
-          )}
+            {/* status */}
+            {loading && (
+              <div className="mb-4 text-sm text-gray-500">
+                {t("analytics.loadingData")}
+              </div>
+            )}
+            {errorMsg && (
+              <div className="mb-4 text-sm text-red-600">
+                {t("common.error")}: {errorMsg}
+              </div>
+            )}
 
-          {/* CARDS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <Card className="p-4">
-              <p>{t("analytics.distance")}</p>
-              <p className="text-2xl font-bold text-blue-600">{cards.distance ?? "-"}</p>
-              <TrendingUp />
-            </Card>
+            {/* CARDS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <Card className="p-4">
+                <p>{t("analytics.distance")}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {cards.distance ?? "-"}
+                </p>
+                <TrendingUp />
+              </Card>
 
-            <Card className="p-4">
-              <p>{t("analytics.drivingTime")}</p>
-              <p className="text-2xl font-bold text-green-600">{cards.drivingTime ?? "-"}</p>
-              <Clock />
-            </Card>
+              <Card className="p-4">
+                <p>{t("analytics.drivingTime")}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {cards.drivingTime ?? "-"}
+                </p>
+                <Clock />
+              </Card>
 
-            <Card className="p-4">
-              <p>{t("analytics.averageSpeed")}</p>
-              <p className="text-2xl font-bold text-purple-600">{cards.averageSpeed ?? "-"}</p>
-              <Gauge />
-            </Card>
+              <Card className="p-4">
+                <p>{t("analytics.averageSpeed")}</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {cards.averageSpeed ?? "-"}
+                </p>
+                <Gauge />
+              </Card>
 
-            <Card className="p-4">
-              <p>{t("analytics.safetyScore")}</p>
-              <p className="text-2xl font-bold text-orange-600">{cards.safetyScore ?? "-"}</p>
-              <AlertTriangle />
-            </Card>
-          </div>
+              <Card className="p-4">
+                <p>{t("analytics.safetyScore")}</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {cards.safetyScore ?? "-"}
+                </p>
+                <AlertTriangle />
+              </Card>
+            </div>
 
-          {/* CHARTS */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* CHARTS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <Card className="p-6">
+                <h3 className="mb-4">{t("analytics.speedOverTime")}</h3>
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={speedChartOptions}
+                  ref={speedChartRef}
+                />
+              </Card>
+
+              <Card className="p-6">
+                <h3 className="mb-4">{t("analytics.fatigueOverTime")}</h3>
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={fatigueChartOptions}
+                  ref={fatigueChartRef}
+                />
+              </Card>
+            </div>
+
+            {/* SAFETY */}
             <Card className="p-6">
-              <h3 className="mb-4">{t("analytics.speedOverTime")}</h3>
-              <HighchartsReact highcharts={Highcharts} options={speedChartOptions} ref={speedChartRef} />
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="mb-4">{t("analytics.fatigueOverTime")}</h3>
-              <HighchartsReact highcharts={Highcharts} options={fatigueChartOptions} ref={fatigueChartRef} />
+              <h3 className="mb-4">{t("analytics.safetyScoreComparison")}</h3>
+              <HighchartsReact
+                highcharts={Highcharts}
+                options={safetyChartOptions}
+              />
             </Card>
           </div>
-
-          {/* SAFETY */}
-          <Card className="p-6">
-            <h3 className="mb-4">{t("analytics.safetyScoreComparison")}</h3>
-            <HighchartsReact highcharts={Highcharts} options={safetyChartOptions} />
-          </Card>
-        </div>
         </main>
       </div>
     </div>

@@ -39,6 +39,7 @@ import Link from "next/link";
 import { HighchartsChart } from "@/components/charts/highcharts-chart";
 import { getApiUrl } from "@/lib/api-config";
 import { API_ENDPOINTS } from "@/lib/api-endpoints";
+import { RadarCanvas } from "@/components/radar-canvas";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -77,7 +78,7 @@ export default function HomePage() {
         style: { color: "#ff7a1a", fontSize: "16px", fontWeight: "600" },
       },
       tooltip: {
-        pointFormat: "<b>{point.percentage:.1f}%</b><br/>Số lượng: {point.y}",
+        pointFormat: `<b>{point.percentage:.1f}%</b><br/>${t("home.tooltipQuantity")}: {point.y}`,
       },
       plotOptions: {
         pie: {
@@ -134,7 +135,10 @@ export default function HomePage() {
         labels: { style: { color: "#374151" } },
       },
       yAxis: {
-        title: { text: "Số lượng / Độ tin cậy", style: { color: "#111827" } },
+        title: {
+          text: `${t("home.tooltipQuantity")} / ${t("settings.accuracy")}`,
+          style: { color: "#111827" },
+        },
         labels: { style: { color: "#374151" } },
       },
       legend: {
@@ -190,11 +194,21 @@ export default function HomePage() {
     { name: t("settings.other"), y: 0 },
   ]);
 
+  const [performanceCategories, setPerformanceCategories] = useState<string[]>(
+    [],
+  );
   const [performanceChartData, setPerformanceChartData] = useState<any[]>([
     {
       name: t("settings.performanceLabel"),
       data: [0, 0, 0, 0, 0, 0, 0],
-      color: "#667eea",
+      color: "#00FFA3",
+      fillColor: {
+        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+        stops: [
+          [0, "rgba(0, 255, 163, 0.3)"],
+          [1, "rgba(0, 255, 163, 0.05)"],
+        ],
+      },
     },
   ]);
 
@@ -322,7 +336,9 @@ export default function HomePage() {
             const mappedSeries = trendData.datasets.map((ds: any) => {
               let fillColor: any;
               let color: string;
-              if (ds.label.includes("Xe")) {
+              // check if API label refers to vehicles (supports both VI and EN labels)
+              const isVehicle = /xe|vehicle|car/i.test(ds.label);
+              if (isVehicle) {
                 color = "#00E5FF";
                 fillColor = {
                   linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
@@ -400,12 +416,24 @@ export default function HomePage() {
         if (perfRes && perfRes.ok) {
           const perfData = await perfRes.json().catch(() => null);
           if (perfData?.labels && perfData?.datasets?.[0]?.data) {
-            // Here Highcharts might want labels in xAxis, but HighchartsChart component typically takes series arrays without x value explicit mapping if structured like performanceChartData
-            const mappedPerf = perfData.datasets.map((ds: any) => ({
-              name: ds.label || t("settings.performanceLabel"),
-              data: ds.data,
-              color: ds.borderColor || "#667eea",
-            }));
+            setPerformanceCategories(perfData.labels);
+            const mappedPerf = perfData.datasets.map((ds: any, idx: number) => {
+              const isFirst = idx === 0;
+              const color = isFirst ? "#00FFA3" : "#00E5FF";
+              const rgba = isFirst ? "rgba(0, 255, 163" : "rgba(0, 229, 255";
+              return {
+                name: ds.label || t("settings.performanceLabel"),
+                data: ds.data,
+                color: color,
+                fillColor: {
+                  linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                  stops: [
+                    [0, `${rgba}, 0.3)`],
+                    [1, `${rgba}, 0.05)`],
+                  ],
+                },
+              };
+            });
             setPerformanceChartData(mappedPerf);
           }
         }
@@ -437,76 +465,120 @@ export default function HomePage() {
             initial="hidden"
             animate="visible"
           >
-            {/* Hero Section - Dark Sci-Fi */}
+            {/* Hero Section - Light ADAS Banner */}
             <motion.div
               variants={itemVariants}
-              className="relative overflow-hidden rounded-3xl glass-card scan-lines p-8 lg:p-10"
+              className="relative overflow-hidden rounded-3xl border border-orange-100 bg-linear-to-r from-white via-orange-50/60 to-orange-100/70 p-6 sm:p-8 lg:p-10 shadow-[0_24px_60px_rgba(248,148,40,0.25)]"
             >
-              {/* Animated gradient orbs */}
-              <motion.div
-                className="absolute top-0 right-0 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
-                className="absolute bottom-0 left-0 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -right-20 -top-32 w-80 h-80 rounded-full bg-orange-200/50 blur-3xl" />
+                <div className="absolute -left-10 -bottom-24 w-72 h-72 rounded-full bg-purple-200/40 blur-3xl" />
+              </div>
 
-              <div className="relative z-10">
-                <motion.div
-                  className="flex items-center gap-3 mb-6"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                    <Shield className="w-6 h-6 text-black" />
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="border-neon-cyan/50 text-neon-cyan glass-card"
+              <div className="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center gap-8 lg:gap-12 lg:justify-between">
+                {/* Left content */}
+                <div className="flex-1 max-w-xl">
+                  <motion.div
+                    className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-3 py-1 text-xs sm:text-sm text-orange-500 shadow-sm mb-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    v3.0 Professional
-                  </Badge>
-                </motion.div>
+                    <Shield className="w-4 h-4" />
+                    <span className="font-semibold tracking-wide">
+                      V3.0 PROFESSIONAL
+                    </span>
+                  </motion.div>
 
-                <motion.h1
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold my-7 text-neon-cyan"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  <motion.h1
+                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-slate-900 mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <span className="block">
+                      Advanced <span className="text-orange-500">Driver</span>
+                    </span>
+                    <span className="block">
+                      <span className="text-purple-500">Assistance</span>{" "}
+                      <span>System</span>
+                    </span>
+                  </motion.h1>
+
+                  <motion.p
+                    className="text-sm sm:text-base text-slate-600 mb-6 max-w-md"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    {t("home.heroTagline")}
+                  </motion.p>
+
+                  <motion.div
+                    className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <span className="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs sm:text-sm text-orange-600 border border-orange-100">
+                      {t("home.heroBadgeFaceRecog")}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-purple-50 px-3 py-1 text-xs sm:text-sm text-purple-600 border border-purple-100">
+                      {t("home.heroBadgeEdgeAI")}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-xs sm:text-sm text-sky-600 border border-sky-100">
+                      {t("home.heroBadgeVideoAnalysis")}
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    className="flex flex-wrap items-center gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <Link href="/adas">
+                      <button className="inline-flex items-center justify-center rounded-full bg-orange-500 px-6 py-3 text-sm sm:text-base font-semibold text-white shadow-lg shadow-orange-300/60 hover:bg-orange-600 transition-colors">
+                        <Zap className="w-5 h-5 mr-2" />
+                        {t("home.startDetection")}
+                      </button>
+                    </Link>
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>{t("home.aiAccuracyStat")}</span>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Right radar card */}
+                <motion.div
+                  className="w-full max-w-xs mx-auto lg:mx-0 lg:ml-auto lg:w-80 self-center"
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  {t("home.title")}
-                </motion.h1>
+                  <div className="relative rounded-3xl bg-white/90 border border-orange-100 shadow-[0_18px_45px_rgba(248,148,40,0.25)] p-4 flex flex-col items-center">
+                    <div className="absolute -top-3 right-4">
+                      <div className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-medium text-orange-500 border border-orange-100 shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
+                        {t("home.objectCount")}
+                      </div>
+                    </div>
 
-                <motion.div
-                  className="flex flex-wrap gap-3 sm:gap-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  <Link href="/adas">
-                    <button className="btn-neon w-full sm:w-auto">
-                      <Zap className="w-5 h-5 mr-2 inline" />
-                      {t("home.startDetection")}
-                    </button>
-                  </Link>
+                    <div className="mt-4 mb-4">
+                      <RadarCanvas />
+                    </div>
+
+                    <div className="flex w-full justify-between items-center px-1">
+                      <span className="text-[11px] uppercase tracking-wide text-slate-400">
+                        {t("home.radarTracking")}
+                      </span>
+                      <div className="inline-flex items-center rounded-full bg-slate-900 text-sky-300 px-3 py-1 text-[11px] shadow">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 mr-2" />
+                        {t("home.radarAiAcc")}
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </motion.div>
@@ -696,7 +768,7 @@ export default function HomePage() {
                         ? detectionTrendSeries
                         : [
                             {
-                              name: "Xe cộ",
+                              name: t("home.vehiclesFallback"),
                               data: [45, 52, 48, 61, 58, 65, 72],
                               color: "#00E5FF",
                               fillColor: {
@@ -708,7 +780,7 @@ export default function HomePage() {
                               },
                             },
                             {
-                              name: "Người đi bộ",
+                              name: t("home.pedestriansFallback"),
                               data: [28, 31, 35, 29, 42, 38, 45],
                               color: "#00FFA3",
                               fillColor: {
@@ -824,21 +896,166 @@ export default function HomePage() {
               variants={itemVariants}
               className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6"
             >
-              <HighchartsChart
-                title={t("home.detectionDistribution")}
-                description={t("home.detectionDistributionDesc")}
-                type="pie"
-                data={detectionChartData}
-                height={300}
-                className="sm:pl-8"
-              />
-              <HighchartsChart
-                title={t("home.systemPerformance")}
-                description={t("home.systemPerformanceDesc")}
-                type="line"
-                data={performanceChartData}
-                height={300}
-              />
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={{
+                    chart: {
+                      type: "pie",
+                      backgroundColor: "transparent",
+                      height: 300,
+                    },
+                    title: {
+                      text: t("home.detectionDistribution"),
+                      style: {
+                        color: "#ff7a1a",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      },
+                    },
+                    tooltip: {
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      borderColor: "#00E5FF",
+                      borderRadius: 8,
+                      style: {
+                        color: "#FFFFFF",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                      },
+                      pointFormat:
+                        "<b>{point.name}</b>: {point.percentage:.1f} %<br/>Số lượng: {point.y}",
+                    },
+                    plotOptions: {
+                      pie: {
+                        allowPointSelect: true,
+                        cursor: "pointer",
+                        dataLabels: {
+                          enabled: true,
+                          format:
+                            "<b>{point.name}</b><br>{point.percentage:.1f}%",
+                          style: {
+                            color: "#111827",
+                            textOutline: "none",
+                            fontFamily: "var(--font-inter)",
+                          },
+                        },
+                        showInLegend: true,
+                        borderWidth: 2,
+                        borderColor: "rgba(255, 255, 255, 0.5)",
+                      },
+                    },
+                    series: [
+                      {
+                        type: "pie",
+                        name: "Share",
+                        data: detectionChartData,
+                      },
+                    ],
+                    legend: {
+                      itemStyle: {
+                        color: "#111827",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                      },
+                      itemHoverStyle: { color: "#00E5FF" },
+                    },
+                    credits: { enabled: false },
+                  }}
+                />
+              </GlassCard>
+
+              <GlassCard className="p-6">
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={{
+                    chart: {
+                      type: "area",
+                      backgroundColor: "transparent",
+                      height: 300,
+                    },
+                    title: {
+                      text: t("home.systemPerformance"),
+                      style: {
+                        color: "#ff7a1a",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      },
+                    },
+                    xAxis: {
+                      categories:
+                        performanceCategories.length > 0
+                          ? performanceCategories
+                          : [
+                              "10:00",
+                              "10:05",
+                              "10:10",
+                              "10:15",
+                              "10:20",
+                              "10:25",
+                              "10:30",
+                            ],
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      lineColor: "rgba(255, 255, 255, 0.1)",
+                      tickColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                    yAxis: {
+                      title: {
+                        text: t("settings.detectionCount"),
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "12px",
+                        },
+                      },
+                      labels: {
+                        style: {
+                          color: "#111827",
+                          fontFamily: "var(--font-inter)",
+                          fontSize: "11px",
+                        },
+                      },
+                      gridLineColor: "rgba(255, 255, 255, 0.05)",
+                    },
+                    tooltip: {
+                      shared: true,
+                      backgroundColor: "rgba(10, 22, 40, 0.95)",
+                      borderColor: "#00E5FF",
+                      borderRadius: 8,
+                      style: {
+                        color: "#FFFFFF",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                      },
+                    },
+                    plotOptions: {
+                      area: {
+                        fillOpacity: 0.3,
+                        marker: { radius: 4, lineWidth: 2, symbol: "diamond" },
+                      },
+                    },
+                    series: performanceChartData,
+                    legend: {
+                      itemStyle: {
+                        color: "#111827",
+                        fontFamily: "var(--font-inter)",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                      },
+                      itemHoverStyle: { color: "#000000" },
+                    },
+                    credits: { enabled: false },
+                  }}
+                />
+              </GlassCard>
             </motion.div>
 
             {/* Quick Actions & Features */}
@@ -886,7 +1103,7 @@ export default function HomePage() {
                     >
                       <Link
                         href={action.href}
-                        className="flex items-center justify-between p-4 rounded-xl bg-linear-to-r from-black/5 to-transparent border border-border/50 hover:border-primary/50 hover:from-primary/5 hover:to-transparent transition-all duration-300 group"
+                        className="quick-action-link flex items-center justify-between p-4 rounded-xl bg-linear-to-r from-black/5 to-transparent border border-border/50 hover:border-primary/50 hover:from-primary/5 hover:to-transparent transition-all duration-300 group"
                       >
                         <div className="flex items-center gap-4">
                           <div
@@ -895,15 +1112,15 @@ export default function HomePage() {
                             <action.icon className="w-6 h-6 text-black" />
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            <div className="font-semibold text-primary transition-colors">
                               {action.title}
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-primary/80">
                               {action.description}
                             </div>
                           </div>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-all" />
                       </Link>
                     </motion.div>
                   ))}
@@ -924,12 +1141,6 @@ export default function HomePage() {
                         {t("home.recentActivityDesc")}
                       </CardDescription>
                     </div>
-                    <Link href="/events">
-                      <Button variant="glass" size="sm">
-                        {t("home.viewAll")}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
                   </div>
                 </CardHeader>
                 <CardContent>
