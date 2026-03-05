@@ -59,10 +59,10 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen w-full overflow-y-auto text-white [&_*]:!text-white">
+        <div className="min-h-screen w-full overflow-y-auto text-white">
 
             {/* Animated Gradient Background */}
-            <div className="absolute inset-0 bg-linear-to-br from-slate-950 via-purple-950 to-slate-900">
+            <div className="absolute inset-0 bg-linear-to-br from-slate-950 via-blue-950 to-slate-900">
                 {/* Animated gradient orbs */}
                 <motion.div
                     animate={{
@@ -74,7 +74,7 @@ export default function RegisterPage() {
                         repeat: Infinity,
                         ease: "easeInOut",
                     }}
-                    className="absolute top-0 right-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+                    className="absolute top-0 right-0 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl"
                 />
                 <motion.div
                     animate={{
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                 return (
                     <motion.div
                         key={i}
-                        className="absolute w-1 h-1 bg-purple-400/40 rounded-full"
+                        className="absolute w-1 h-1 bg-cyan-400 rounded-full"
                         initial={{ x: startX, y: startY }}
                         animate={{ y: endY, x: endX }}
                         transition={{
@@ -160,11 +160,11 @@ export default function RegisterPage() {
                                 transition={{ delay: 0.8 }}
                                 className="space-y-2 sm:space-y-4"
                             >
-                                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-purple-500/20 border border-purple-500/30 backdrop-blur-sm">
-                                    <Shield className="w-3 sm:w-4 h-3 sm:h-4 text-purple-400" />
-                                    <span className="text-xs sm:text-sm text-purple-300 font-medium">Secure & Trusted</span>
+                                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-cyan-500/20 border-cyan-500/30 backdrop-blur-sm">
+                                    <Shield className="w-3 sm:w-4 h-3 sm:h-4 text-cyan-400" />
+                                    <span className="text-xs sm:text-sm text-cyan-300 font-medium">Secure & Trusted</span>
                                 </div>
-                                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+                                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold !text-white">
                                     Tham gia ADAS
                                 </h3>
                                 <p className="text-white/80 text-sm sm:text-base lg:text-lg">
@@ -202,13 +202,13 @@ export default function RegisterPage() {
                                     transition={{ delay: 0.4 }}
                                     className="text-center space-y-2"
                                 >
-                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-4">
-                                        <Sparkles className="w-4 h-4 text-purple-400" />
-                                        <span className="text-sm text-purple-400 font-medium">ADAS Platform</span>
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border-cyan-500/20 mb-4">
+                                        <Sparkles className="w-4 h-4 text-cyan-400" />
+                                        <span className="text-sm text-cyan-400 font-medium">ADAS Platform</span>
                                     </div>
-                                    <h1 className="text-4xl font-bold bg-linear-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-                                        Đăng Ký
-                                    </h1>
+                                    <h1 className="text-4xl font-bold !text-white">
+                                            Đăng Ký
+                                        </h1>
                                     <p className="text-white/50">Tạo tài khoản mới</p>
                                 </motion.div>
 
@@ -262,7 +262,10 @@ export default function RegisterPage() {
                                     whileTap={{ scale: 0.98 }}
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full h-14 rounded-xl bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-semibold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full h-14 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 
+hover:from-cyan-400 hover:to-blue-400
+shadow-cyan-500/25
+hover:shadow-cyan-500/40 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -321,10 +324,10 @@ export default function RegisterPage() {
                                     transition={{ delay: 0.9 }}
                                     className="text-center"
                                 >
-                                    <span className="text-white/50">Đã có tài khoản? </span>
+                                    <span className="text-white">Đã có tài khoản? </span>
                                     <Link
                                         href="/login"
-                                        className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                                        className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
                                     >
                                         Đăng nhập
                                     </Link>

@@ -50,7 +50,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen w-full overflow-y-auto text-white [&_*]:!text-white">
+        <div className="min-h-screen w-full overflow-y-auto text-white">
 
 
             {/* Background */}
@@ -97,8 +97,8 @@ export default function LoginPage() {
                             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-black/20" />
                         </div>
 
-                        <div className="relative h-full flex flex-col justify-end p-12 z-20">
-                            <h3 className="text-4xl font-extrabold text-white drop-shadow-lg mb-4">
+                        <div className="relative z-30 h-full flex flex-col justify-end p-12">
+                            <h3 className="text-4xl font-extrabold !text-white drop-shadow-2xl mb-4">
                                 Welcome to ADAS
                             </h3>
                             <p className="text-lg font-semibold text-white drop-shadow-md">
@@ -133,7 +133,7 @@ export default function LoginPage() {
                                         </span>
                                     </div>
 
-                                    <h1 className="text-4xl font-extrabold text-white drop-shadow-lg">
+                                    <h1 className="text-4xl font-extrabold !text-white drop-shadow-lg">
                                         Đăng Nhập
                                     </h1>
 

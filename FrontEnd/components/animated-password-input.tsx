@@ -93,7 +93,7 @@ export function AnimatedPasswordInput({
                         transition={{ duration: 0.3 }}
                         className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
                     >
-                        <Mail className={`w-5 h-5 transition-colors duration-300 ${emailFocused ? 'text-cyan-400' : 'text-white/40'}`} />
+                        <Mail className={'w-5 h-5 text-black'} />
                     </motion.div>
 
                     {/* Input */}
@@ -134,7 +134,7 @@ export function AnimatedPasswordInput({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
-                            className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-cyan-400 bg-black/80 backdrop-blur-sm rounded-full"
+                            className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-white bg-black/80 backdrop-blur-sm rounded-full"
                         >
                             Email
                         </motion.span>
@@ -172,7 +172,7 @@ export function AnimatedPasswordInput({
                         transition={{ duration: 0.3 }}
                         className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
                     >
-                        <Lock className={`w-5 h-5 transition-colors duration-300 ${passwordFocused ? 'text-cyan-400' : 'text-white/40'}`} />
+                        <Lock className="w-5 h-5 text-black" />
                     </motion.div>
 
                     {/* Input */}
@@ -193,7 +193,7 @@ export function AnimatedPasswordInput({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/60 hover:text-cyan-400 hover:bg-white/10 transition-all duration-200 z-10"
+                        className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-black hover:text-black hover:bg-white/10 transition-all duration-200 z-10"
                     >
                         {showPassword ? (
                             <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -210,7 +210,7 @@ export function AnimatedPasswordInput({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
-                            className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-cyan-400 bg-black/80 backdrop-blur-sm rounded-full"
+                            className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-white bg-black/80 backdrop-blur-sm rounded-full"
                         >
                             Password
                         </motion.span>
@@ -296,7 +296,7 @@ export function AnimatedPasswordInput({
                             transition={{ duration: 0.3 }}
                             className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none z-10"
                         >
-                            <Lock className={`w-5 h-5 transition-colors duration-300 ${confirmPasswordFocused ? 'text-cyan-400' : 'text-white/40'}`} />
+                            <Lock className="w-5 h-5 text-black" />
                         </motion.div>
 
                         {/* Input */}
@@ -317,7 +317,7 @@ export function AnimatedPasswordInput({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/60 hover:text-cyan-400 hover:bg-white/10 transition-all duration-200 z-10"
+                            className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-black hover:text-black hover:bg-white/10 transition-all duration-200 z-10"
                         >
                             {showConfirmPassword ? (
                                 <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -352,7 +352,7 @@ export function AnimatedPasswordInput({
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 10 }}
-                                className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-cyan-400 bg-black/80 backdrop-blur-sm rounded-full"
+                                className="absolute -top-2.5 left-10 px-2 text-xs font-medium text-white bg-black/80 backdrop-blur-sm rounded-full"
                             >
                                 Confirm Password
                             </motion.span>
