@@ -593,6 +593,25 @@ a:hover {
   text-shadow: 0 0 10px var(--neon-cyan);
 }
 
+/* ===== SIDEBAR NAV LINKS - override global a:hover ===== */
+a.sidebar-nav-link,
+a.sidebar-nav-link:hover {
+  color: var(--text-main) !important;
+  text-shadow: none !important;
+}
+
+/* Header logo link - default cam, hover đen, không text-shadow */
+a.header-logo-link,
+a.header-logo-link:hover {
+  text-shadow: none !important;
+}
+
+/* Quick action links in dashboard - no text shadow */
+a.quick-action-link,
+a.quick-action-link:hover {
+  text-shadow: none !important;
+}
+
 /* Khung lớn: bo tròn, viền, neon khi focus */
 .login-input-wrapper {
   display: flex;

@@ -363,7 +363,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div>
-                        <p className="text-lg font-semibold text-white">
+                        <p className="text-lg font-semibold text-gray-900">
                           {savedProfile.username || "Chưa có username"}
                         </p>
                         <p className="text-sm text-gray-400">

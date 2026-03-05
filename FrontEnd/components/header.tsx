@@ -3,7 +3,14 @@
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
-import { LogIn, LogOut, UserCircle, CarFront, User, ChevronDown } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  UserCircle,
+  CarFront,
+  User,
+  ChevronDown,
+} from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -42,13 +49,28 @@ export function Header() {
     >
       <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
         {/* Left side - Logo/Title */}
-        <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+        <Link
+          href="/dashboard"
+          className="header-logo-link flex items-center gap-3"
+          onMouseEnter={(e) => {
+            const h2 = e.currentTarget.querySelector(
+              "h2",
+            ) as HTMLElement | null;
+            if (h2) h2.style.color = "var(--fg-primary)";
+          }}
+          onMouseLeave={(e) => {
+            const h2 = e.currentTarget.querySelector(
+              "h2",
+            ) as HTMLElement | null;
+            if (h2) h2.style.color = "var(--primary)";
+          }}
+        >
+          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 transition-shadow">
             <CarFront className="w-5 h-5 text-black" />
           </div>
           <div className="hidden sm:block">
             <h2
-              className="text-sm font-semibold tracking-wide group-hover:text-primary transition-colors"
+              className="text-sm font-semibold tracking-wide transition-colors"
               style={{ color: "var(--primary)" }}
             >
               {t("header.platformName")}
