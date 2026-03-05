@@ -69,7 +69,7 @@ export default function VideoDemo() {
 
                 <div className={styles.videoStatsBar}>
                     <div className={styles.vStat}>
-                        MODEL: <strong>YOLOv11-Nano</strong>
+                        MODEL: <strong>Ultra Fast Lane Detection (UFLD)</strong>
                     </div>
                     <div className={styles.vStat}>
                         RESOLUTION: <strong>1920x1080</strong>
