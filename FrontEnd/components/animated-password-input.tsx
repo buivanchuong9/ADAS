@@ -78,7 +78,7 @@ export function AnimatedPasswordInput({
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
+                            className="absolute -inset-1 bg-linear-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
                         />
                     )}
                 </AnimatePresence>
@@ -156,7 +156,7 @@ export function AnimatedPasswordInput({
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
+                            className="absolute -inset-1 bg-linear-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
                         />
                     )}
                 </AnimatePresence>
@@ -241,7 +241,7 @@ export function AnimatedPasswordInput({
                                         initial={{ width: 0 }}
                                         animate={{ width: passwordStrength >= level ? "100%" : "0%" }}
                                         transition={{ duration: 0.3 }}
-                                        className={`h-full bg-gradient-to-r ${getStrengthColor()}`}
+                                        className={`h-full bg-linear-to-r ${getStrengthColor()}`}
                                     />
                                 </motion.div>
                             ))}
@@ -280,7 +280,7 @@ export function AnimatedPasswordInput({
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="absolute -inset-1 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
+                                className="absolute -inset-1 bg-linear-to-r from-cyan-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-xl"
                             />
                         )}
                     </AnimatePresence>

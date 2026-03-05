@@ -1,9 +1,9 @@
-import type React from "react"
-import type { Metadata, Viewport } from "next"
-import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { Providers } from "./providers"
-import "./globals.css"
+import type React from "react";
+import type { Metadata, Viewport } from "next";
+import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { Providers } from "./providers";
+import "./globals.css";
 
 const shareTechMono = Share_Tech_Mono({
   subsets: ["latin"],
@@ -82,6 +82,7 @@ export default function RootLayout({
     <html
       lang="vi"
       className={`h-full ${orbitron.variable} ${rajdhani.variable} ${inter.variable} ${shareTechMono.variable}`}
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
       <body

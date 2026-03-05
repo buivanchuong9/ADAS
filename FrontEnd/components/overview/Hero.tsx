@@ -17,7 +17,7 @@ export default function Hero() {
                 <p>
                     Nền tảng tích hợp AI Vision nhận diện vật thể thời gian thực,
                     cảnh báo sớm va chạm và giám sát hành vi tài xế với độ chính
-                    xác cao. Được xây dựng trên YOLOv11 và tối ưu cho edge computing.
+                    xác cao. Được xây dựng trên Ultra Fast Lane Detection (UFLD) và tối ưu cho edge computing.
                 </p>
                 <div className={styles.btnGroup}>
                     <motion.a

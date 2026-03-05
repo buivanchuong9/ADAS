@@ -20,10 +20,10 @@ const Card = React.forwardRef<
       className={cn(
         "relative flex flex-col gap-6 rounded-2xl border py-6 overflow-hidden",
         glass
-          ? "bg-white/5 backdrop-blur-xl border-white/10 shadow-xl"
+          ? "bg-white border-border/60 shadow-md backdrop-blur-sm"
           : "bg-card text-card-foreground border-border/50 shadow-lg",
         hover && "hover:shadow-2xl transition-all duration-300",
-        className
+        className,
       )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -58,8 +58,8 @@ const CardHeader = React.forwardRef<
     ref={ref}
     data-slot="card-header"
     className={cn(
-      "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 text-white",
-      className
+      "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+      className,
     )}
     {...props}
   />
@@ -73,10 +73,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     data-slot="card-title"
-    className={cn(
-      "leading-none font-bold text-lg bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent text-white",
-      className
-    )}
+    className={cn("leading-none font-bold text-lg text-foreground", className)}
     {...props}
   />
 ));
@@ -104,7 +101,7 @@ const CardAction = React.forwardRef<
     data-slot="card-action"
     className={cn(
       "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-      className
+      className,
     )}
     {...props}
   />

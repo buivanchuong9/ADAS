@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/contexts/language-context";
 import { Sidebar } from "@/components/sidebar";
 import { MobileNav } from "@/components/mobile-nav";
+import { Header } from "@/components/header";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Brain, Send, Sparkles, Loader2 } from "lucide-react";
 
@@ -112,11 +113,13 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="flex h-screen bg-bg-primary">
-      <MobileNav />
-      <Sidebar />
+    <div className="flex flex-col h-screen bg-bg-primary overflow-hidden">
+      <Header />
+      <div className="flex flex-1 overflow-hidden">
+        <MobileNav />
+        <Sidebar />
 
-      <main className="flex-1 overflow-hidden flex flex-col">
+      <main className="flex-1 overflow-auto flex flex-col">
         {/* Header */}
         <div className="p-4 sm:p-6 lg:p-8 border-b border-white/10">
           <div className="flex items-center gap-4">
@@ -260,6 +263,7 @@ export default function AIAssistant() {
           {/* Info Note */}
         </div>
       </main>
+      </div>
     </div>
   );
 }
