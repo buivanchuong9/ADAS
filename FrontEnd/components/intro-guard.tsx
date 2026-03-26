@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 
-const INTRO_KEY = 'adas_intro_completed';
-const INTRO_ALLOWED_PATHS = ['/intro', '/login', '/register'];
-const AUTH_PUBLIC_PATHS = ['/intro', '/overview', '/login', '/register'];
+const AUTH_PUBLIC_PATHS = ['/', '/intro', '/overview', '/login', '/register'];
+const AUTH_PAGES_WHEN_LOGGED_IN = ['/login', '/register'];
 
 /**
- * IntroGuard ensures users thấy intro trước
- * và đồng thời chặn truy cập các tab khi chưa đăng nhập
+ * Auth guard + intro/public route whitelist:
+ * - Logged-in users can access all pages (except /login & /register -> redirect /dashboard).
+ * - Not logged in users can access only /intro, /overview, /login, /register.
  */
 export function IntroGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -23,22 +23,23 @@ export function IntroGuard({ children }: { children: React.ReactNode }) {
         // Chờ auth context khởi tạo xong
         if (loading) return;
 
-        // 1. Kiểm tra Intro trước
-        if (!INTRO_ALLOWED_PATHS.includes(pathname)) {
-            const introCompleted = sessionStorage.getItem(INTRO_KEY);
-
-            if (!introCompleted) {
-                console.log('🔵 [IntroGuard] Redirecting to /intro - intro not completed');
-                router.replace('/intro');
+        // Logged-in user: never redirect them to /intro based on introCompleted.
+        if (isAuthenticated) {
+            // Auth pages should bounce to dashboard when already logged in.
+            if (AUTH_PAGES_WHEN_LOGGED_IN.includes(pathname)) {
+                router.replace('/dashboard');
                 setShouldRender(false);
                 setIsChecking(false);
                 return;
             }
+
+            setShouldRender(true);
+            setIsChecking(false);
+            return;
         }
 
-        // 2. Kiểm tra đăng nhập
-        if (!isAuthenticated && !AUTH_PUBLIC_PATHS.includes(pathname)) {
-            console.log('🔵 [IntroGuard] Redirecting to /login - not authenticated');
+        // Not authenticated: only allow whitelisted public routes.
+        if (!AUTH_PUBLIC_PATHS.includes(pathname)) {
             router.replace('/login');
             setShouldRender(false);
             setIsChecking(false);

@@ -315,18 +315,18 @@ export default function DriverMonitorPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-fg-secondary hover:text-neon-cyan"
+              className="text-fg-secondary hover:text-[rgb(var(--primary))]"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider uppercase">
-              <Eye className="w-8 h-8 text-neon-cyan" />
-              <span className="hidden sm:inline text-neon-cyan">
+            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-[rgb(var(--primary))] tracking-wider uppercase">
+              <Eye className="w-8 h-8 text-[rgb(var(--primary))]" />
+              <span className="hidden sm:inline text-[rgb(var(--primary))]">
                 {t("driverMonitor.title")}
               </span>
-              <span className="sm:hidden text-neon-cyan">
+              <span className="sm:hidden text-[rgb(var(--primary))]">
                 {t("driverMonitor.titleShort")}
               </span>
             </h1>
@@ -344,7 +344,7 @@ export default function DriverMonitorPage() {
           <div className="space-y-4 xl:col-span-1">
             <GlassCard glow="cyan" className="p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
+                <h3 className="text-lg font-bold text-[rgb(var(--primary))] flex items-center gap-2 tracking-wide">
                   <Upload className="w-4 h-4" />
                   {t("adas.step1Title")}
                 </h3>
@@ -360,7 +360,7 @@ export default function DriverMonitorPage() {
                   disabled={isMonitoring}
                   className="
                     cursor-pointer glass-card border-neon-cyan/30
-                    text-fg-primary file:text-neon-cyan
+                    text-fg-primary file:text-fg-primary
                     video-file-input
                   "
                 />
@@ -408,11 +408,15 @@ export default function DriverMonitorPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
+                  <div className="rounded-lg glass-card border-2 border-[rgb(var(--primary))]/25 p-3">
                     <div className="text-xs text-fg-secondary font-medium">
                       {t("adas.videoSource")}
                     </div>
-                    <div className="font-semibold text-neon-green">
+                    <div
+                      className={`font-semibold ${
+                        file ? "text-[rgb(var(--primary))]" : "text-fg-primary"
+                      }`}
+                    >
                       {file ? t("adas.newUpload") : t("adas.notSelected")}
                     </div>
                   </div>
@@ -434,7 +438,7 @@ export default function DriverMonitorPage() {
                   <Button
                     onClick={startMonitoring}
                     disabled={!file || isUploading}
-                    className="w-full glass-card border-2 border-neon-green/50 bg-neon-green/10 text-neon-green hover:bg-neon-green/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full glass-card border-2 border-[rgb(var(--primary))]/40 bg-[rgb(var(--primary))]/10 text-[var(--primary-strong)] hover:bg-[rgb(var(--primary))]/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploading ? (
                       <>
@@ -462,7 +466,7 @@ export default function DriverMonitorPage() {
 
             <GlassCard className="p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
+                <h3 className="text-lg font-bold text-[rgb(var(--primary))] flex items-center gap-2 tracking-wide">
                   <ShieldCheck className="w-4 h-4" />
                   {t("driverMonitor.monitoringInfoTitle")}
                 </h3>
@@ -472,14 +476,14 @@ export default function DriverMonitorPage() {
               </div>
               <div className="text-sm text-fg-secondary space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                  <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[rgb(var(--primary))]/40">
                     <Eye className="w-3 h-3" />
                     Fatigue
                   </Badge>
                   <span>{t("driverMonitor.fatigueDetection")}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50">
+                  <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[rgb(var(--primary))]/40">
                     <AlertTriangle className="w-3 h-3" />
                     Distraction
                   </Badge>
@@ -493,7 +497,7 @@ export default function DriverMonitorPage() {
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-neon-green tracking-wide">
+                <h3 className="text-xl font-bold text-[rgb(var(--primary))] tracking-wide">
                   {t("driverMonitor.step2Title")}
                 </h3>
                 {isMonitoring && (
@@ -601,22 +605,13 @@ export default function DriverMonitorPage() {
                   <source src={videoUrl} type="video/mp4" />
                 </video>
               ) : (
-                <video
-                  controls
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-contain"
+                <img
+                  src="/images/preview/driver-monitor-preview.webp"
+                  alt="Driver monitor preview"
+                  className="w-full h-full object-cover"
                   style={{ maxHeight: "600px" }}
-                  onError={(e) => {
-                    const err = e.currentTarget.error;
-                    console.log("PREVIEW VIDEO ERROR CODE:", err?.code);
-                    console.log("PREVIEW VIDEO ERROR MSG:", err?.message);
-                  }}
-                >
-                  <source src="/driver-monitor-preview.mp4" type="video/mp4" />
-                </video>
+                  loading="lazy"
+                />
               )}
             </div>
             {isUploading || isMonitoring ? (
