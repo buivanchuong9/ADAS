@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import IntroSlider from '@/components/onboarding/IntroSlider';
+import { useAuth } from '@/contexts/auth-context';
 
 const INTRO_KEY = 'adas_intro_completed';
 
 export default function IntroPage() {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const router = useRouter();
+    const { isAuthenticated } = useAuth();
 
     const handleComplete = () => {
         setIsTransitioning(true);
@@ -18,7 +20,12 @@ export default function IntroPage() {
 
         // Wait for fade out animation before navigating
         setTimeout(() => {
-            router.push('/overview');
+            // Logged-in users go to dashboard, guests go to overview
+            if (isAuthenticated) {
+                router.push('/dashboard');
+            } else {
+                router.push('/overview');
+            }
         }, 300);
     };
 

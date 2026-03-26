@@ -27,7 +27,7 @@ export default function IntroSlider({ onComplete }: IntroSliderProps) {
   const [phase, setPhase] = useState<Phase>("hero");
   const [currentSlide, setCurrentSlide] = useState<number>(0);
 
-  const heroBgSrc = "/images/intro/slide-1.png";
+  const heroBgSrc = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=2000&auto=format&fit=crop";
 
   const redStartIndex = useMemo(() => {
     const byId = introSlides.findIndex((s: any) => s?.id === 1);
@@ -238,7 +238,18 @@ export default function IntroSlider({ onComplete }: IntroSliderProps) {
       }
     >
       <div className={styles.onboardBg}>
-        <Image src={onboardBgSrc} alt="" fill priority className={styles.onboardBgImg} />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={{ position: "absolute", inset: 0 }}
+          >
+            <Image src={onboardBgSrc} alt="" fill priority className={styles.onboardBgImg} style={{ objectFit: 'cover' }} />
+          </motion.div>
+        </AnimatePresence>
         <div className={styles.onboardVignette} />
 
         {slide?.id === 1 && (

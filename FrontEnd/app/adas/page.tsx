@@ -478,18 +478,18 @@ export default function ADASPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-fg-secondary hover:text-neon-cyan"
+              className="text-fg-secondary hover:text-[rgb(var(--primary))]"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-neon-cyan tracking-wider uppercase">
-              <Film className="w-8 h-8 text-neon-cyan" />
-              <span className="hidden sm:inline text-neon-cyan">
+            <h1 className="text-3xl font-bold flex items-center gap-2 mt-1 sm:mt-2 text-[rgb(var(--primary))] tracking-wider uppercase">
+              <Film className="w-8 h-8 text-[rgb(var(--primary))]" />
+              <span className="hidden sm:inline text-[rgb(var(--primary))]">
                 {t("adas.title")}
               </span>
-              <span className="sm:hidden text-neon-cyan">
+              <span className="sm:hidden text-[rgb(var(--primary))]">
                 {t("adas.titleShort")}
               </span>
             </h1>
@@ -506,7 +506,7 @@ export default function ADASPage() {
           <div className="space-y-4 xl:col-span-1">
               <GlassCard glow="cyan" className="p-6">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-neon-cyan flex items-center gap-2 tracking-wide">
+                  <h3 className="text-lg font-bold text-[rgb(var(--primary))] flex items-center gap-2 tracking-wide">
                     <Upload className="w-4 h-4" />
                     1) CHỌN VIDEO
                   </h3>
@@ -521,8 +521,8 @@ export default function ADASPage() {
                     onChange={(e) => handleFile(e.target.files?.[0] || null)}
                     disabled={uploading}
                     className="
-                    cursor-pointer glass-card border-neon-cyan/30
-                    text-fg-primary file:text-neon-cyan
+                    cursor-pointer glass-card border-[color:rgb(var(--primary))]/30
+                    text-fg-primary file:text-fg-primary
                     video-file-input
                   "
                   />
@@ -570,11 +570,17 @@ export default function ADASPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="rounded-lg glass-card border-2 border-neon-green/30 p-3">
+                    <div className="rounded-lg glass-card border-2 border-[color:rgb(var(--primary))]/25 p-3">
                       <div className="text-xs text-fg-secondary font-medium">
                         {t("adas.videoSource")}
                       </div>
-                      <div className="font-semibold text-neon-green">
+                      <div
+                        className={`font-semibold ${
+                          file
+                            ? "text-[rgb(var(--primary))]"
+                            : "text-fg-primary"
+                        }`}
+                      >
                         {file ? t("adas.newUpload") : t("adas.notSelected")}
                       </div>
                     </div>
@@ -595,7 +601,7 @@ export default function ADASPage() {
                   <Button
                     onClick={uploadAndAnalyze}
                     disabled={!file || uploading || isProcessing}
-                    className="w-full glass-card border-2 border-neon-green/50 bg-neon-green/10 text-neon-green hover:bg-neon-green/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full glass-card border-2 border-[color:rgb(var(--primary))]/40 bg-[color:rgb(var(--primary))]/10 text-[var(--primary-strong)] hover:bg-[color:rgb(var(--primary))]/20 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {uploading || isProcessing ? (
                       <>
@@ -614,7 +620,7 @@ export default function ADASPage() {
 
               <GlassCard className="p-6">
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-neon-green flex items-center gap-2 tracking-wide">
+                  <h3 className="text-lg font-bold text-[rgb(var(--primary))] flex items-center gap-2 tracking-wide">
                     <ShieldCheck className="w-4 h-4" />
                     {t("adas.storageProcessTitle")}
                   </h3>
@@ -624,21 +630,21 @@ export default function ADASPage() {
                 </div>
                 <div className="text-sm text-fg-secondary space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                    <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[color:rgb(var(--primary))]/40">
                       <Upload className="w-3 h-3" />
                       Upload
                     </Badge>
                     <span>{t("adas.step1Process")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-yellow/20 text-neon-yellow border-neon-yellow/50">
+                    <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[color:rgb(var(--primary))]/40">
                       <Sparkles className="w-3 h-3" />
                       AI
                     </Badge>
                     <span>{t("adas.step2Process")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50">
+                    <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[color:rgb(var(--primary))]/40">
                       <Database className="w-3 h-3" />
                       System
                     </Badge>
@@ -650,17 +656,17 @@ export default function ADASPage() {
 
           <GlassCard glow="green" className="xl:col-span-2 h-full p-6">
             <div className="mb-4">
-              <h3 className="text-xl font-bold text-neon-green tracking-wide">
+              <h3 className="text-xl font-bold text-[rgb(var(--primary))] tracking-wide">
                 {t("adas.step2Title")}
               </h3>
               <p className="text-xs text-fg-secondary mt-1">
                 {t("adas.step2Desc")}
               </p>
             </div>
-            <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-neon-green/50 shadow-lg">
+            <div className="relative aspect-video bg-black/30 rounded-lg overflow-hidden border-2 border-[color:rgb(var(--primary))]/40 shadow-lg">
               {isProcessing ? (
-                <div className="absolute inset-0 glass-card flex flex-col items-center justify-center text-neon-cyan gap-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-neon-cyan" />
+                <div className="absolute inset-0 glass-card flex flex-col items-center justify-center text-[rgb(var(--primary))] gap-4">
+                  <Loader2 className="h-12 w-12 animate-spin text-[rgb(var(--primary))]" />
                   <div className="text-center space-y-2">
                     {/* Show different message based on upload vs processing state */}
                     {uploading ? (
@@ -685,15 +691,15 @@ export default function ADASPage() {
 
                     {/* WebSocket Connection Status - only show when not uploading */}
                     {!uploading && wsIsConnected && (
-                      <Badge className="gap-1 bg-neon-green/20 text-neon-green border-neon-green/50">
-                        <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
+                      <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[color:rgb(var(--primary))]/40">
+                        <div className="w-2 h-2 bg-[rgb(var(--primary))] rounded-full animate-pulse" />
                         WebSocket Connected
                       </Badge>
                     )}
 
                     {/* Upload status badge */}
                     {uploading && (
-                      <Badge className="gap-1 bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50">
+                      <Badge className="gap-1 bg-[var(--primary-soft)] text-[var(--primary-strong)] border-[color:rgb(var(--primary))]/40">
                         <Upload className="w-3 h-3 animate-pulse" />
                         Đang upload...
                       </Badge>
@@ -702,9 +708,9 @@ export default function ADASPage() {
 
                   {/* Progress Bar */}
                   <div className="w-full max-w-md px-8 space-y-2">
-                    <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-neon-cyan/50">
+                    <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-[color:rgb(var(--primary))]/40">
                       <div
-                        className="h-full bg-linear-to-r from-neon-cyan to-neon-green transition-all duration-500 ease-out"
+                        className="h-full bg-linear-to-r from-[rgb(var(--primary))] to-[var(--primary-strong)] transition-all duration-500 ease-out"
                         style={{ width: `${processingProgress}%` }}
                       />
                     </div>
@@ -742,29 +748,20 @@ export default function ADASPage() {
                   <source src={previewUrl} type="video/mp4" />
                 </video>
               ) : (
-                <video
-                  controls
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-contain"
+                <img
+                  src="/images/preview/driving-monitor-preview.webp"
+                  alt="Driving monitor preview"
+                  className="w-full h-full object-cover"
                   style={{ maxHeight: "600px" }}
-                  onError={(e) => {
-                    const err = e.currentTarget.error;
-                    console.log("PREVIEW VIDEO ERROR CODE:", err?.code);
-                    console.log("PREVIEW VIDEO ERROR MSG:", err?.message);
-                  }}
-                >
-                  <source src="/driving-monitor-preview.mp4" type="video/mp4" />
-                </video>
+                  loading="lazy"
+                />
               )}
             </div>
             {processedVideoUrl && !isProcessing ? (
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
                   onClick={resetAnalysis}
-                  className="gap-2 bg-linear-to-r from-neon-cyan to-neon-green text-black font-bold hover:from-neon-cyan/80 hover:to-neon-green/80"
+                  className="gap-2 bg-linear-to-r from-[rgb(var(--primary))] to-[var(--primary-strong)] text-white font-bold hover:opacity-95"
                 >
                   <RefreshCw className="w-4 h-4" />
                   {t("adas.analyzeAnotherVideo")}
@@ -772,7 +769,7 @@ export default function ADASPage() {
                 <Button
                   variant="outline"
                   onClick={() => window.history.back()}
-                  className="gap-2 glass-card border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
+                  className="gap-2 glass-card border-[color:rgb(var(--primary))]/40 text-[var(--primary-strong)] hover:bg-[var(--primary-soft)]"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   {t("common.back")}

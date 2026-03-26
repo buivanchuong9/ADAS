@@ -3,7 +3,9 @@ import type { Metadata, Viewport } from "next";
 import { Orbitron, Rajdhani, Inter, Share_Tech_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
+import { ScrollCarTrack } from "@/components/scroll-car-track";
 import "./globals.css";
+
 
 const shareTechMono = Share_Tech_Mono({
   subsets: ["latin"],
@@ -91,6 +93,7 @@ export default function RootLayout({
       >
         <Providers>
           <div className="min-h-screen h-full w-full">{children}</div>
+          <ScrollCarTrack />
         </Providers>
 
         <Analytics />
